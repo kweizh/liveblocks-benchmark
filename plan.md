@@ -59,7 +59,8 @@ function Scene() {
 *   **Authentication Complexity**: Setting up the `api/liveblocks-auth` endpoint correctly with `identifyUser` (ID tokens) vs `prepareSession` (Access tokens) is a common hurdle for beginners. [Auth Docs](https://liveblocks.io/docs/authentication)
 *   **React 18 vs 17 Batching**: In React 17, developers must manually pass `unstable_batchedUpdates` to `RoomProvider` to avoid sync issues. [Troubleshooting](https://liveblocks.io/docs/api-reference/troubleshooting)
 *   **TypeScript Declarations**: Liveblocks relies on global type declarations in `liveblocks.config.ts`. If these are defined as `interface` instead of `type`, it can lead to confusing merge errors. [Docs](https://liveblocks.io/docs/api-reference/liveblocks-react#liveblocks-config-ts)
-*.  **SDK/API Version**: The liveblocks API has rewrite and use v2 version, please make sure to use the latest version of the SDK/API.
+*  **SDK/API Version**: The liveblocks API has rewrite and use v2 version, please make sure to use the latest version of the SDK/API.
+*  **Frontend env**: When building the frontend, if any environment variables are requested, should export the env with `NEXT_PUBLIC_` prefix, for example, `NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY`.
 
 ### 5. Evaluation Ideas
 
