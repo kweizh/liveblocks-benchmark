@@ -1,0 +1,84 @@
+{
+    "results": {
+        "tool": {
+            "name": "pytest",
+            "version": "7.4.4"
+        },
+        "summary": {
+            "tests": 6,
+            "passed": 1,
+            "failed": 5,
+            "skipped": 0,
+            "pending": 0,
+            "other": 0,
+            "start": 1780695643278,
+            "stop": 1780695944017
+        },
+        "environment": {
+            "buildName": "Pytest JSON CTRF Report",
+            "buildNumber": "000",
+            "buildUrl": "https://ctrf.io"
+        },
+        "tests": [
+            {
+                "name": "test_final_state.py::test_auth_endpoint_returns_token",
+                "status": "failed",
+                "duration": 300122,
+                "start": 1780695643778,
+                "stop": 1780695943900,
+                "retries": 0,
+                "file_path": "test_final_state.py",
+                "trace": "xprocess = <xprocess.xprocess.XProcess object at 0x7f5c64a60800>\n\n    @pytest.fixture(scope=\"session\")\n    def start_app(xprocess):\n        \"\"\"Start the Next.js dev server (long-running) via xprocess.\"\"\"\n    \n        class Starter(ProcessStarter):\n            name = \"next_dev\"\n            args = [\"npm\", \"run\", \"dev\"]\n            env = os.environ.copy()\n            popen_kwargs = {\"cwd\": PROJECT_DIR, \"text\": True}\n            timeout = 300\n            terminate_on_interrupt = True\n    \n            def startup_check(self):\n                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:\n                    if s.connect_ex((\"localhost\", PORT)) != 0:\n                        return False\n                try:\n                    r = requests.get(BASE_URL, timeout=5)\n                    return r.status_code < 500\n                except Exception:\n                    return False\n    \n>       xprocess.ensure(Starter.name, Starter)\n\n/tests/test_final_state.py:46: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n/usr/local/lib/python3.12/dist-packages/xprocess/xprocess.py:284: in ensure\n    if not starter.wait(log_file_handle):\n/usr/local/lib/python3.12/dist-packages/xprocess/xprocess.py:413: in wait\n    callback_ok = self.wait_callback()\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = <test_final_state.start_app.<locals>.Starter object at 0x7f5c6489f2f0>\n\n    def wait_callback(self):\n        \"\"\"Assert that process is ready to answer queries using provided\n        callback funtion. Will raise TimeoutError if self.callback does not\n        return True before self.timeout seconds\"\"\"\n        while True:\n            sleep(0.1)\n            if self.startup_check():\n                return True\n            if datetime.now() > self._max_time:\n>               raise TimeoutError(\n                    \"The provided startup callback could not assert process\\\n                    responsiveness within the specified time interval of {} \\\n                    seconds\".format(\n                        self.timeout\n                    )\n                )\nE               TimeoutError: The provided startup callback could not assert process                    responsiveness within the specified time interval of 300                     seconds\n\n/usr/local/lib/python3.12/dist-packages/xprocess/xprocess.py:391: TimeoutError"
+            },
+            {
+                "name": "test_final_state.py::test_auth_route_uses_identify_user_with_user_info",
+                "status": "passed",
+                "duration": 2,
+                "start": 1780695943900,
+                "stop": 1780695943902,
+                "retries": 0,
+                "file_path": "test_final_state.py"
+            },
+            {
+                "name": "test_final_state.py::test_avatar_stack_overflow_with_six_users",
+                "status": "failed",
+                "duration": 22,
+                "start": 1780695943902,
+                "stop": 1780695943924,
+                "retries": 0,
+                "file_path": "test_final_state.py",
+                "trace": "xprocess = <xprocess.xprocess.XProcess object at 0x7f5c64a60800>\n\n    @pytest.fixture(scope=\"session\")\n    def start_app(xprocess):\n        \"\"\"Start the Next.js dev server (long-running) via xprocess.\"\"\"\n    \n        class Starter(ProcessStarter):\n            name = \"next_dev\"\n            args = [\"npm\", \"run\", \"dev\"]\n            env = os.environ.copy()\n            popen_kwargs = {\"cwd\": PROJECT_DIR, \"text\": True}\n            timeout = 300\n            terminate_on_interrupt = True\n    \n            def startup_check(self):\n                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:\n                    if s.connect_ex((\"localhost\", PORT)) != 0:\n                        return False\n                try:\n                    r = requests.get(BASE_URL, timeout=5)\n                    return r.status_code < 500\n                except Exception:\n                    return False\n    \n>       xprocess.ensure(Starter.name, Starter)\n\n/tests/test_final_state.py:46: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n/usr/local/lib/python3.12/dist-packages/xprocess/xprocess.py:284: in ensure\n    if not starter.wait(log_file_handle):\n/usr/local/lib/python3.12/dist-packages/xprocess/xprocess.py:413: in wait\n    callback_ok = self.wait_callback()\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = <test_final_state.start_app.<locals>.Starter object at 0x7f5c6489f2f0>\n\n    def wait_callback(self):\n        \"\"\"Assert that process is ready to answer queries using provided\n        callback funtion. Will raise TimeoutError if self.callback does not\n        return True before self.timeout seconds\"\"\"\n        while True:\n            sleep(0.1)\n            if self.startup_check():\n                return True\n            if datetime.now() > self._max_time:\n>               raise TimeoutError(\n                    \"The provided startup callback could not assert process\\\n                    responsiveness within the specified time interval of {} \\\n                    seconds\".format(\n                        self.timeout\n                    )\n                )\nE               TimeoutError: The provided startup callback could not assert process                    responsiveness within the specified time interval of 300                     seconds\n\n/usr/local/lib/python3.12/dist-packages/xprocess/xprocess.py:391: TimeoutError"
+            },
+            {
+                "name": "test_final_state.py::test_tooltip_shows_user_name_with_you_suffix",
+                "status": "failed",
+                "duration": 24,
+                "start": 1780695943924,
+                "stop": 1780695943948,
+                "retries": 0,
+                "file_path": "test_final_state.py",
+                "trace": "xprocess = <xprocess.xprocess.XProcess object at 0x7f5c64a60800>\n\n    @pytest.fixture(scope=\"session\")\n    def start_app(xprocess):\n        \"\"\"Start the Next.js dev server (long-running) via xprocess.\"\"\"\n    \n        class Starter(ProcessStarter):\n            name = \"next_dev\"\n            args = [\"npm\", \"run\", \"dev\"]\n            env = os.environ.copy()\n            popen_kwargs = {\"cwd\": PROJECT_DIR, \"text\": True}\n            timeout = 300\n            terminate_on_interrupt = True\n    \n            def startup_check(self):\n                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:\n                    if s.connect_ex((\"localhost\", PORT)) != 0:\n                        return False\n                try:\n                    r = requests.get(BASE_URL, timeout=5)\n                    return r.status_code < 500\n                except Exception:\n                    return False\n    \n>       xprocess.ensure(Starter.name, Starter)\n\n/tests/test_final_state.py:46: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n/usr/local/lib/python3.12/dist-packages/xprocess/xprocess.py:284: in ensure\n    if not starter.wait(log_file_handle):\n/usr/local/lib/python3.12/dist-packages/xprocess/xprocess.py:413: in wait\n    callback_ok = self.wait_callback()\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = <test_final_state.start_app.<locals>.Starter object at 0x7f5c6489f2f0>\n\n    def wait_callback(self):\n        \"\"\"Assert that process is ready to answer queries using provided\n        callback funtion. Will raise TimeoutError if self.callback does not\n        return True before self.timeout seconds\"\"\"\n        while True:\n            sleep(0.1)\n            if self.startup_check():\n                return True\n            if datetime.now() > self._max_time:\n>               raise TimeoutError(\n                    \"The provided startup callback could not assert process\\\n                    responsiveness within the specified time interval of {} \\\n                    seconds\".format(\n                        self.timeout\n                    )\n                )\nE               TimeoutError: The provided startup callback could not assert process                    responsiveness within the specified time interval of 300                     seconds\n\n/usr/local/lib/python3.12/dist-packages/xprocess/xprocess.py:391: TimeoutError"
+            },
+            {
+                "name": "test_final_state.py::test_closing_contexts_reduces_avatars",
+                "status": "failed",
+                "duration": 31,
+                "start": 1780695943949,
+                "stop": 1780695943980,
+                "retries": 0,
+                "file_path": "test_final_state.py",
+                "trace": "xprocess = <xprocess.xprocess.XProcess object at 0x7f5c64a60800>\n\n    @pytest.fixture(scope=\"session\")\n    def start_app(xprocess):\n        \"\"\"Start the Next.js dev server (long-running) via xprocess.\"\"\"\n    \n        class Starter(ProcessStarter):\n            name = \"next_dev\"\n            args = [\"npm\", \"run\", \"dev\"]\n            env = os.environ.copy()\n            popen_kwargs = {\"cwd\": PROJECT_DIR, \"text\": True}\n            timeout = 300\n            terminate_on_interrupt = True\n    \n            def startup_check(self):\n                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:\n                    if s.connect_ex((\"localhost\", PORT)) != 0:\n                        return False\n                try:\n                    r = requests.get(BASE_URL, timeout=5)\n                    return r.status_code < 500\n                except Exception:\n                    return False\n    \n>       xprocess.ensure(Starter.name, Starter)\n\n/tests/test_final_state.py:46: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n/usr/local/lib/python3.12/dist-packages/xprocess/xprocess.py:284: in ensure\n    if not starter.wait(log_file_handle):\n/usr/local/lib/python3.12/dist-packages/xprocess/xprocess.py:413: in wait\n    callback_ok = self.wait_callback()\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = <test_final_state.start_app.<locals>.Starter object at 0x7f5c6489f2f0>\n\n    def wait_callback(self):\n        \"\"\"Assert that process is ready to answer queries using provided\n        callback funtion. Will raise TimeoutError if self.callback does not\n        return True before self.timeout seconds\"\"\"\n        while True:\n            sleep(0.1)\n            if self.startup_check():\n                return True\n            if datetime.now() > self._max_time:\n>               raise TimeoutError(\n                    \"The provided startup callback could not assert process\\\n                    responsiveness within the specified time interval of {} \\\n                    seconds\".format(\n                        self.timeout\n                    )\n                )\nE               TimeoutError: The provided startup callback could not assert process                    responsiveness within the specified time interval of 300                     seconds\n\n/usr/local/lib/python3.12/dist-packages/xprocess/xprocess.py:391: TimeoutError"
+            },
+            {
+                "name": "test_final_state.py::test_single_user_case",
+                "status": "failed",
+                "duration": 37,
+                "start": 1780695943980,
+                "stop": 1780695944017,
+                "retries": 0,
+                "file_path": "test_final_state.py",
+                "trace": "xprocess = <xprocess.xprocess.XProcess object at 0x7f5c64a60800>\n\n    @pytest.fixture(scope=\"session\")\n    def start_app(xprocess):\n        \"\"\"Start the Next.js dev server (long-running) via xprocess.\"\"\"\n    \n        class Starter(ProcessStarter):\n            name = \"next_dev\"\n            args = [\"npm\", \"run\", \"dev\"]\n            env = os.environ.copy()\n            popen_kwargs = {\"cwd\": PROJECT_DIR, \"text\": True}\n            timeout = 300\n            terminate_on_interrupt = True\n    \n            def startup_check(self):\n                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:\n                    if s.connect_ex((\"localhost\", PORT)) != 0:\n                        return False\n                try:\n                    r = requests.get(BASE_URL, timeout=5)\n                    return r.status_code < 500\n                except Exception:\n                    return False\n    \n>       xprocess.ensure(Starter.name, Starter)\n\n/tests/test_final_state.py:46: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n/usr/local/lib/python3.12/dist-packages/xprocess/xprocess.py:284: in ensure\n    if not starter.wait(log_file_handle):\n/usr/local/lib/python3.12/dist-packages/xprocess/xprocess.py:413: in wait\n    callback_ok = self.wait_callback()\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = <test_final_state.start_app.<locals>.Starter object at 0x7f5c6489f2f0>\n\n    def wait_callback(self):\n        \"\"\"Assert that process is ready to answer queries using provided\n        callback funtion. Will raise TimeoutError if self.callback does not\n        return True before self.timeout seconds\"\"\"\n        while True:\n            sleep(0.1)\n            if self.startup_check():\n                return True\n            if datetime.now() > self._max_time:\n>               raise TimeoutError(\n                    \"The provided startup callback could not assert process\\\n                    responsiveness within the specified time interval of {} \\\n                    seconds\".format(\n                        self.timeout\n                    )\n                )\nE               TimeoutError: The provided startup callback could not assert process                    responsiveness within the specified time interval of 300                     seconds\n\n/usr/local/lib/python3.12/dist-packages/xprocess/xprocess.py:391: TimeoutError"
+            }
+        ]
+    }
+}

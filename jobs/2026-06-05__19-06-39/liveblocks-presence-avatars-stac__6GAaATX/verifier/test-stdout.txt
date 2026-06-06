@@ -1,0 +1,217 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0
+rootdir: /tests
+plugins: xprocess-1.0.2, json-ctrf-0.5.0
+collected 6 items
+
+../../../tests/test_final_state.py ..FFFF                                [100%]
+
+=================================== FAILURES ===================================
+__________________ test_avatar_stack_overflow_with_six_users ___________________
+
+start_app = None
+
+    def test_avatar_stack_overflow_with_six_users(start_app):
+        """Open 6 contexts; the first one must show 4 avatars + a "+2" overflow badge."""
+        from playwright.sync_api import sync_playwright
+    
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            contexts = []
+            try:
+                # Open context 0 (the observer) first.
+                ctx0, page0 = _open_context_for_user(browser, 0)
+                contexts.append(ctx0)
+                # Wait until at least the self avatar shows up.
+>               page0.wait_for_selector('[data-testid="avatar-item"]', timeout=30_000)
+
+/tests/test_final_state.py:126: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.12/dist-packages/playwright/sync_api/_generated.py:8770: in wait_for_selector
+    self._sync(
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_page.py:424: in wait_for_selector
+    return await self._main_frame.wait_for_selector(**locals_to_params(locals()))
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_frame.py:372: in wait_for_selector
+    await self._channel.send(
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_connection.py:69: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <playwright._impl._connection.Connection object at 0x7f9954dc12b0>
+cb = <function Channel.send.<locals>.<lambda> at 0x7f9953a24220>
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -> Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        st: List[inspect.FrameInfo] = getattr(
+            task, "__pw_stack__", None
+        ) or inspect.stack(0)
+    
+        parsed_st = _extract_stack_trace_information_from_stack(st, is_internal, title)
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+>           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 30000ms exceeded.
+E           Call log:
+E             - waiting for locator("[data-testid=\"avatar-item\"]") to be visible
+
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_connection.py:559: TimeoutError
+_________________ test_tooltip_shows_user_name_with_you_suffix _________________
+
+start_app = None
+
+    def test_tooltip_shows_user_name_with_you_suffix(start_app):
+        """Hovering the self avatar shows '<name> (You)'; hovering another shows that user's name."""
+        from playwright.sync_api import sync_playwright
+    
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            contexts = []
+            try:
+                # Two contexts is enough for this check.
+                ctx0, page0 = _open_context_for_user(browser, 0)
+                contexts.append(ctx0)
+                ctx1, page1 = _open_context_for_user(browser, 1)
+                contexts.append(ctx1)
+    
+                # Wait until context 0 sees at least 2 avatars.
+                deadline = time.time() + 30
+                while time.time() < deadline and _visible_avatar_count(page0) < 2:
+                    time.sleep(0.5)
+>               assert _visible_avatar_count(page0) >= 2, (
+                    "Context 0 should see at least 2 avatars (self + one other)."
+                )
+E               AssertionError: Context 0 should see at least 2 avatars (self + one other).
+E               assert 0 >= 2
+E                +  where 0 = _visible_avatar_count(<Page url='http://localhost:3000/'>)
+
+/tests/test_final_state.py:199: AssertionError
+____________________ test_closing_contexts_reduces_avatars _____________________
+
+start_app = None
+
+    def test_closing_contexts_reduces_avatars(start_app):
+        """After closing 3 of 6 contexts, the observer should see exactly 3 avatars (no overflow)."""
+        from playwright.sync_api import sync_playwright
+    
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            contexts = []
+            try:
+                ctx0, page0 = _open_context_for_user(browser, 0)
+                contexts.append(ctx0)
+                for i in range(1, 6):
+                    ctx, page = _open_context_for_user(browser, i)
+                    contexts.append(ctx)
+>                   page.wait_for_selector('[data-testid="avatar-item"]', timeout=30_000)
+
+/tests/test_final_state.py:246: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.12/dist-packages/playwright/sync_api/_generated.py:8770: in wait_for_selector
+    self._sync(
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_page.py:424: in wait_for_selector
+    return await self._main_frame.wait_for_selector(**locals_to_params(locals()))
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_frame.py:372: in wait_for_selector
+    await self._channel.send(
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_connection.py:69: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <playwright._impl._connection.Connection object at 0x7f995410d490>
+cb = <function Channel.send.<locals>.<lambda> at 0x7f99539e5c60>
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -> Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        st: List[inspect.FrameInfo] = getattr(
+            task, "__pw_stack__", None
+        ) or inspect.stack(0)
+    
+        parsed_st = _extract_stack_trace_information_from_stack(st, is_internal, title)
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+>           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 30000ms exceeded.
+E           Call log:
+E             - waiting for locator("[data-testid=\"avatar-item\"]") to be visible
+
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_connection.py:559: TimeoutError
+____________________________ test_single_user_case _____________________________
+
+start_app = None
+
+    def test_single_user_case(start_app):
+        """With only the observer connected, exactly 1 avatar is visible, no overflow."""
+        from playwright.sync_api import sync_playwright
+    
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            contexts = []
+            try:
+                ctx0, page0 = _open_context_for_user(browser, 0)
+                contexts.append(ctx0)
+>               page0.wait_for_selector('[data-testid="avatar-item"]', timeout=30_000)
+
+/tests/test_final_state.py:300: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.12/dist-packages/playwright/sync_api/_generated.py:8770: in wait_for_selector
+    self._sync(
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_page.py:424: in wait_for_selector
+    return await self._main_frame.wait_for_selector(**locals_to_params(locals()))
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_frame.py:372: in wait_for_selector
+    await self._channel.send(
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_connection.py:69: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <playwright._impl._connection.Connection object at 0x7f9953913470>
+cb = <function Channel.send.<locals>.<lambda> at 0x7f9952495080>
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -> Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        st: List[inspect.FrameInfo] = getattr(
+            task, "__pw_stack__", None
+        ) or inspect.stack(0)
+    
+        parsed_st = _extract_stack_trace_information_from_stack(st, is_internal, title)
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+>           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 30000ms exceeded.
+E           Call log:
+E             - waiting for locator("[data-testid=\"avatar-item\"]") to be visible
+
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_connection.py:559: TimeoutError
+==================================== PASSES ====================================
+_______________________ test_auth_endpoint_returns_token _______________________
+---------------------------- Captured stdout setup -----------------------------
+/tests/.pytest_cache/d/.xprocess/next_dev$ npm run dev
+process 'next_dev' started pid=1945
+next_dev process startup detected
+=========================== short test summary info ============================
+PASSED ../../../tests/test_final_state.py::test_auth_endpoint_returns_token
+PASSED ../../../tests/test_final_state.py::test_auth_route_uses_identify_user_with_user_info
+FAILED ../../../tests/test_final_state.py::test_avatar_stack_overflow_with_six_users
+FAILED ../../../tests/test_final_state.py::test_tooltip_shows_user_name_with_you_suffix
+FAILED ../../../tests/test_final_state.py::test_closing_contexts_reduces_avatars
+FAILED ../../../tests/test_final_state.py::test_single_user_case - playwright...
+=================== 4 failed, 2 passed in 137.70s (0:02:17) ====================

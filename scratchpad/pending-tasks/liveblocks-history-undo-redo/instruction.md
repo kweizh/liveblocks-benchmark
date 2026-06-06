@@ -1,0 +1,51 @@
+# Liveblocks Collaborative Color Palette with History (Undo/Redo + Drag Batching)
+
+## Background
+You are extending a Next.js (App Router) starter that already wires up a Liveblocks `RoomProvider` and exposes a `LiveList<string>` of color labels in `Storage.palette`. The starter renders the list, an `Add color` form, and per-row `Delete` and `Edit` controls — but **none of the Liveblocks history hooks are wired up yet**. Your job is to add full single-client undo/redo support on top of the existing storage mutations, including a special "drag-edit" interaction that bundles many rapid edits into a single history entry using `useHistory().pause()` / `resume()`.
+
+The app must remain wired to real Liveblocks cloud — no mocks, no fake WebSocket, no stubbed storage.
+
+## Requirements
+- The palette page lives at the dynamic route `/palette/[room]` (App Router). Visiting `/palette/foo` joins a Liveblocks room named `foo`. The room name during verification MUST be derived from `ZEALT_RUN_ID` (e.g., `palette-room-${ZEALT_RUN_ID}`).
+- Storage layout (must match exactly): `Storage.palette: LiveList<string>` where each entry is a CSS-color string (e.g., `"red"`, `"#00ff00"`).
+- The page MUST be a Client Component (or wrap one) since Liveblocks hooks require the client runtime.
+- The `RoomProvider` is declared with `initialStorage={{ palette: new LiveList([]) }}` so first-visit rooms start with an empty list.
+- All storage mutations (add, delete, edit, drag-edit) MUST go through `useMutation` so they participate in the room's history stack.
+- Wire up `useUndo()`, `useRedo()`, `useCanUndo()`, `useCanRedo()` to render two buttons:
+  - `Undo (Ctrl+Z)` — disabled iff `useCanUndo()` returns `false`.
+  - `Redo (Ctrl+Y)` — disabled iff `useCanRedo()` returns `false`.
+  - Pressing the buttons must call the `useUndo()` / `useRedo()` callbacks. (Keyboard shortcut binding is optional; only the button click is required for verification.)
+- The label on the Undo/Redo buttons MUST literally include the parenthesised shortcut text exactly as `Undo (Ctrl+Z)` and `Redo (Ctrl+Y)`.
+- The `Drag-edit` simulation MUST use `useHistory()` to call `pause()` at drag start and `resume()` at drag end. Any number of color writes performed between pause and resume must collapse into a **single** undo step.
+- All Liveblocks access goes through the official `@liveblocks/react` provider configured to use a server-side authentication endpoint at `/api/liveblocks-auth` that uses `LIVEBLOCKS_SECRET_KEY` and `@liveblocks/node`. `NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY` may be referenced as a fallback `publicApiKey`, but the auth endpoint route MUST be present and functional.
+
+## Implementation Hints
+- Read the room name from the `[room]` route segment and pass it to `RoomProvider`.
+- Type Storage globally so `useStorage((root) => root.palette)` returns a typed `readonly string[]`.
+- Inside `useMutation`, access the `LiveList` via `storage.get("palette")` and call `.push(value)`, `.delete(index)`, or `.set(index, value)` to mutate entries.
+- `useUndo`, `useRedo`, `useCanUndo`, and `useCanRedo` are pulled directly from your generated room context (e.g., `@liveblocks/react`).
+- `useHistory()` returns an object with `pause()` and `resume()` (see the Liveblocks docs for `Room.history`). All mutations between `pause()` and `resume()` are merged into one history entry.
+- The drag-edit button must perform several `LiveList.set(...)` calls (at minimum 3) on the first item between a single `pause()`/`resume()` pair so one undo reverses all of them.
+- Persist no state in `localStorage` for this task — every visible piece of state is read from Liveblocks Storage.
+
+## Acceptance Criteria
+- Project path: `/home/user/project`
+- Start command: `npm run start` (after `npm run build`)
+- Port: `3000`
+- Route: `/palette/[room]` renders the palette page for the given `room` segment.
+- Auth endpoint: `POST /api/liveblocks-auth` returns a non-empty JSON body (HTTP 200) containing a `token` field. The response MUST be produced by `@liveblocks/node` against the real Liveblocks API — it must NOT be a static fixture.
+- Storage schema observable from any connected client: `root.palette` is a `LiveList` of `string` entries.
+- DOM contract (test ids — these are the only stable selectors used by verification):
+  - The new-color text input has `data-testid="new-color-input"`.
+  - The submit button for the form has `data-testid="add-color"` and visible text `Add color`.
+  - Each rendered row has `data-testid="palette-row"` and `data-index="<zero-based index>"`.
+  - Inside each row: the color label has `data-testid="color-label"`; the inline editor input has `data-testid="color-edit-input"`; the `Save` button has `data-testid="color-save"`; the `Delete` button has `data-testid="color-delete"`.
+  - The Undo button has `data-testid="undo-btn"` and visible text `Undo (Ctrl+Z)`.
+  - The Redo button has `data-testid="redo-btn"` and visible text `Redo (Ctrl+Y)`.
+  - A `Drag-edit first` button has `data-testid="drag-edit"`. Clicking it MUST: (1) call `history.pause()`, (2) perform exactly 3 sequential `LiveList.set(0, ...)` writes on index 0 (e.g., cycling through `"purple"`, `"orange"`, `"teal"`), (3) call `history.resume()`, and (4) leave the row visible with the final color.
+  - When the palette is empty, the `drag-edit` button MUST still be present in the DOM but MAY be disabled.
+- The Undo/Redo buttons' `disabled` attribute MUST reflect `useCanUndo()` / `useCanRedo()` at all times.
+- All mutations (add, delete, edit, drag-edit) must be undoable and redoable via the buttons. A drag-edit (3 writes) MUST collapse to one undo step.
+- Real Liveblocks cloud only — do not stub the Liveblocks client, do not write a fake WebSocket server, do not shadow `@liveblocks/react` or `@liveblocks/client` with mocks.
+- The room name used during verification MUST be derived from the `ZEALT_RUN_ID` environment variable (e.g., `palette-room-${ZEALT_RUN_ID}`).
+

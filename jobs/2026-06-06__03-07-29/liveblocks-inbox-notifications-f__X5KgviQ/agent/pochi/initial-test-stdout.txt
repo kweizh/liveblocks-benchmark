@@ -1,0 +1,22 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0
+rootdir: /bootstrap
+plugins: xprocess-1.0.2, json-ctrf-0.5.0
+collected 13 items
+
+../../../bootstrap/test_initial_state.py::test_node_binary_available PASSED
+../../../bootstrap/test_initial_state.py::test_npm_binary_available PASSED
+../../../bootstrap/test_initial_state.py::test_project_dir_exists PASSED
+../../../bootstrap/test_initial_state.py::test_package_json_exists PASSED
+../../../bootstrap/test_initial_state.py::test_package_json_declares_liveblocks_deps PASSED
+../../../bootstrap/test_initial_state.py::test_node_modules_preinstalled PASSED
+../../../bootstrap/test_initial_state.py::test_inbox_page_skeleton_exists PASSED
+../../../bootstrap/test_initial_state.py::test_auth_route_exists PASSED
+../../../bootstrap/test_initial_state.py::test_auth_route_identifies_user_1 PASSED
+../../../bootstrap/test_initial_state.py::test_providers_stub_exists PASSED
+../../../bootstrap/test_initial_state.py::test_inbox_page_not_yet_wired PASSED
+../../../bootstrap/test_initial_state.py::test_npx_can_invoke_next PASSED
+../../../bootstrap/test_initial_state.py::test_required_env_vars_present_in_dotenv_or_env PASSED
+
+============================== 13 passed in 0.13s ==============================
+pytest-xprocess reminder::Be sure to terminate the started process by running 'pytest --xkill' if you have not explicitly done so in your fixture with 'xprocess.getinfo(<process_name>).terminate()'.

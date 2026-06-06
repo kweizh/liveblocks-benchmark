@@ -1,0 +1,60 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0
+rootdir: /tests
+plugins: xprocess-1.0.2, json-ctrf-0.5.0
+collected 9 items
+
+tests/test_final_state.py ......F..                                      [100%]
+
+=================================== FAILURES ===================================
+____ test_room_page_renders_required_test_ids_and_connects_for_allowed_org _____
+
+next_server = None
+
+    def test_room_page_renders_required_test_ids_and_connects_for_allowed_org(next_server):
+        url = f"{BASE_URL}/rooms/{ROOM_OK_A}?userId={USER_A}&orgId=org-a"
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True, args=["--no-sandbox"])
+            try:
+                context = browser.new_context()
+                page = context.new_page()
+                response = page.goto(url, wait_until="domcontentloaded", timeout=60000)
+                assert response is not None, "Playwright returned no response for the room page."
+                assert response.status < 400, (
+                    f"Expected HTTP 2xx/3xx for the room page, got {response.status}."
+                )
+    
+                # The required DOM test-ids must be present.
+                assert page.get_by_test_id("connection-status").count() > 0, (
+                    "Room page must render an element with data-testid='connection-status'."
+                )
+                assert page.get_by_test_id("counter-value").count() > 0, (
+                    "Room page must render an element with data-testid='counter-value'."
+                )
+    
+                final_status = _wait_for_test_id_text(page, "connection-status", "connected", timeout_ms=45000)
+>               assert final_status is not None and "connected" in final_status, (
+                    f"Expected the connection-status element to display 'connected'. "
+                    f"Last value seen: {final_status!r}"
+                )
+E               AssertionError: Expected the connection-status element to display 'connected'. Last value seen: 'connecting'
+E               assert ('connecting' is not None and 'connected' in 'connecting')
+
+tests/test_final_state.py:211: AssertionError
+==================================== PASSES ====================================
+____________________ test_auth_allows_org_a_in_its_own_room ____________________
+---------------------------- Captured stdout setup -----------------------------
+/tests/.pytest_cache/d/.xprocess/next_dev$ npm run dev -- -p 3000
+process 'next_dev' started pid=670
+next_dev process startup detected
+=========================== short test summary info ============================
+PASSED tests/test_final_state.py::test_auth_allows_org_a_in_its_own_room
+PASSED tests/test_final_state.py::test_auth_allows_org_b_in_its_own_room
+PASSED tests/test_final_state.py::test_auth_rejects_cross_org_access
+PASSED tests/test_final_state.py::test_auth_rejects_room_without_org_prefix
+PASSED tests/test_final_state.py::test_auth_rejects_unknown_org
+PASSED tests/test_final_state.py::test_auth_rejects_missing_fields
+PASSED tests/test_final_state.py::test_room_page_does_not_connect_for_cross_org_access
+PASSED tests/test_final_state.py::test_no_hardcoded_liveblocks_secret_in_source_tree
+FAILED tests/test_final_state.py::test_room_page_renders_required_test_ids_and_connects_for_allowed_org
+=================== 1 failed, 8 passed in 105.87s (0:01:45) ====================

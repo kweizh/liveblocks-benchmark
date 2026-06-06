@@ -1,0 +1,55 @@
+{
+    "results": {
+        "tool": {
+            "name": "pytest",
+            "version": "7.4.4"
+        },
+        "summary": {
+            "tests": 3,
+            "passed": 2,
+            "failed": 1,
+            "skipped": 0,
+            "pending": 0,
+            "other": 0,
+            "start": 1780689540899,
+            "stop": 1780689618849
+        },
+        "environment": {
+            "buildName": "Pytest JSON CTRF Report",
+            "buildNumber": "000",
+            "buildUrl": "https://ctrf.io"
+        },
+        "tests": [
+            {
+                "name": "test_final_state.py::test_auth_endpoint_owner",
+                "status": "passed",
+                "duration": 29200,
+                "start": 1780689541516,
+                "stop": 1780689570716,
+                "retries": 0,
+                "file_path": "test_final_state.py"
+            },
+            {
+                "name": "test_final_state.py::test_auth_endpoint_voter",
+                "status": "passed",
+                "duration": 69,
+                "start": 1780689570717,
+                "stop": 1780689570786,
+                "retries": 0,
+                "file_path": "test_final_state.py"
+            },
+            {
+                "name": "test_final_state.py::test_poll_two_context_realtime",
+                "status": "failed",
+                "raw_status": "call_failed",
+                "duration": 48060,
+                "start": 1780689570787,
+                "stop": 1780689618847,
+                "retries": 0,
+                "file_path": "test_final_state.py",
+                "trace": "app_server = 'http://localhost:3000'\n\n    def test_poll_two_context_realtime(app_server):\n        \"\"\"Drive two real browser contexts through the full poll workflow against\n        the real Liveblocks cloud and validate cross-context synchronisation.\"\"\"\n    \n        with sync_playwright() as p:\n            browser = p.chromium.launch(headless=True)\n            try:\n                ctx_a = browser.new_context()\n                ctx_b = browser.new_context()\n                try:\n                    page_a = ctx_a.new_page()\n                    page_b = ctx_b.new_page()\n    \n                    # Step 1: Alice (owner) joins the room.\n                    page_a.goto(f\"{app_server}/?userId=alice&name=Alice\", timeout=60000)\n>                   expect(page_a.locator(\"[data-testid='question-input']\")).to_be_visible(\n                        timeout=45000\n                    )\nE                   AssertionError: Locator expected to be visible\nE                   Actual value: - alert\nE                   - text: Loading...\nE                   Error: element(s) not found \nE                   Call log:\nE                     - Expect \"to_be_visible\" with timeout 45000ms\nE                     - waiting for locator(\"[data-testid='question-input']\")\n\ntests/test_final_state.py:131: AssertionError",
+                "message": "The test failed in the call phase due to an assertion error"
+            }
+        ]
+    }
+}

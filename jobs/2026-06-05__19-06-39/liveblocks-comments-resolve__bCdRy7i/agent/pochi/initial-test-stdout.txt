@@ -1,0 +1,73 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0
+rootdir: /bootstrap
+plugins: xprocess-1.0.2, json-ctrf-0.5.0
+collected 11 items
+
+bootstrap/test_initial_state.py::test_node_binary_available PASSED
+bootstrap/test_initial_state.py::test_npm_binary_available PASSED
+bootstrap/test_initial_state.py::test_project_dir_exists PASSED
+bootstrap/test_initial_state.py::test_package_json_exists_and_has_liveblocks_deps PASSED
+bootstrap/test_initial_state.py::test_node_modules_installed PASSED
+bootstrap/test_initial_state.py::test_liveblocks_auth_route_exists PASSED
+bootstrap/test_initial_state.py::test_liveblocks_config_exists PASSED
+bootstrap/test_initial_state.py::test_composer_is_rendered_in_scaffold PASSED
+bootstrap/test_initial_state.py::test_resolve_logic_not_yet_implemented FAILED
+bootstrap/test_initial_state.py::test_thread_metadata_type_not_yet_declared FAILED
+bootstrap/test_initial_state.py::test_env_file_present PASSED
+
+=================================== FAILURES ===================================
+____________________ test_resolve_logic_not_yet_implemented ____________________
+
+    def test_resolve_logic_not_yet_implemented():
+        sources = _collect_source_files()
+        for path in sources:
+            content = _read(path)
+>           assert "useEditThreadMetadata" not in content, (
+                f"Initial scaffold must NOT yet use useEditThreadMetadata, found in {path}."
+            )
+E           AssertionError: Initial scaffold must NOT yet use useEditThreadMetadata, found in /home/user/myproject/app/CommentsSidebar.tsx.
+E           assert 'useEditThreadMetadata' not in '"use client...>\n  );\n}\n'
+E             'useEditThreadMetadata' is contained here:
+E               "use client";
+E               
+E               import { Composer } from "@liveblocks/react-ui";
+E               
+E               // TODO (executor): Extend this sidebar to show two tabs ("Active" / "Resolved"),
+E               // list threads from useThreads() filtered by metadata.resolved, and add a...
+E             
+E             ...Full output truncated (11 lines hidden), use '-vv' to show
+
+bootstrap/test_initial_state.py:121: AssertionError
+__________________ test_thread_metadata_type_not_yet_declared __________________
+
+    def test_thread_metadata_type_not_yet_declared():
+        candidates = [
+            os.path.join(PROJECT_DIR, "liveblocks.config.ts"),
+            os.path.join(PROJECT_DIR, "liveblocks.config.tsx"),
+        ]
+        config_path = next((p for p in candidates if os.path.isfile(p)), None)
+        assert config_path is not None, "liveblocks.config.ts missing."
+        content = _read(config_path)
+        # In the initial scaffold the ThreadMetadata field must not yet contain `resolved`.
+>       assert "resolved" not in content, (
+            "Initial liveblocks.config.ts must NOT yet declare a `resolved` ThreadMetadata field."
+        )
+E       AssertionError: Initial liveblocks.config.ts must NOT yet declare a `resolved` ThreadMetadata field.
+E       assert 'resolved' not in '// Livebloc...export {};\n'
+E         'resolved' is contained here:
+E           // Liveblocks global type augmentation.
+E           // The executor is expected to extend `ThreadMetadata` so that threads
+E           // can be marked as resolved via custom metadata.
+E         ?                     ++++++++
+E           declare global {
+E             interface Liveblocks {...
+E         
+E         ...Full output truncated (13 lines hidden), use '-vv' to show
+
+bootstrap/test_initial_state.py:141: AssertionError
+=========================== short test summary info ============================
+FAILED bootstrap/test_initial_state.py::test_resolve_logic_not_yet_implemented
+FAILED bootstrap/test_initial_state.py::test_thread_metadata_type_not_yet_declared
+========================= 2 failed, 9 passed in 0.08s ==========================
+pytest-xprocess reminder::Be sure to terminate the started process by running 'pytest --xkill' if you have not explicitly done so in your fixture with 'xprocess.getinfo(<process_name>).terminate()'.

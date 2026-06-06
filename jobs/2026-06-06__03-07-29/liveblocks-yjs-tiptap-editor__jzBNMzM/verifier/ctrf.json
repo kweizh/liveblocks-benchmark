@@ -1,0 +1,103 @@
+{
+    "results": {
+        "tool": {
+            "name": "pytest",
+            "version": "7.4.4"
+        },
+        "summary": {
+            "tests": 8,
+            "passed": 6,
+            "failed": 2,
+            "skipped": 0,
+            "pending": 0,
+            "other": 0,
+            "start": 1780715986684,
+            "stop": 1780716047255
+        },
+        "environment": {
+            "buildName": "Pytest JSON CTRF Report",
+            "buildNumber": "000",
+            "buildUrl": "https://ctrf.io"
+        },
+        "tests": [
+            {
+                "name": "test_final_state.py::test_liveblocks_auth_returns_token",
+                "status": "passed",
+                "duration": 640,
+                "start": 1780715987041,
+                "stop": 1780715987681,
+                "retries": 0,
+                "file_path": "test_final_state.py"
+            },
+            {
+                "name": "test_final_state.py::test_single_client_connected_count_is_one",
+                "status": "passed",
+                "duration": 59518,
+                "start": 1780715987682,
+                "stop": 1780716047200,
+                "retries": 0,
+                "file_path": "test_final_state.py"
+            },
+            {
+                "name": "test_final_state.py::test_single_client_shows_alice_user",
+                "status": "failed",
+                "raw_status": "call_failed",
+                "duration": 38,
+                "start": 1780716047200,
+                "stop": 1780716047238,
+                "retries": 0,
+                "file_path": "test_final_state.py",
+                "trace": "playwright_results = {'alice_connected_user_visible_a': False, 'alice_visible_b': False, 'bob_visible_a': False, 'bold_synced_a': True, ...}\n\n    def test_single_client_shows_alice_user(playwright_results):\n>       assert playwright_results[\"alice_connected_user_visible_a\"], (\n            f\"Expected a .connected-user element containing '{ALICE}' for context A. \"\n            f\"Errors: {playwright_results['errors']}\"\n        )\nE       AssertionError: Expected a .connected-user element containing 'alice-zr-jzbnmzm' for context A. Errors: ['alice label not visible in context A', 'alice label not visible in context B', 'bob label not visible in context A']\nE       assert False\n\n/tests/test_final_state.py:297: AssertionError",
+                "message": "The test failed in the call phase due to an assertion error"
+            },
+            {
+                "name": "test_final_state.py::test_two_clients_connected_count_is_two_in_both",
+                "status": "passed",
+                "duration": 1,
+                "start": 1780716047239,
+                "stop": 1780716047240,
+                "retries": 0,
+                "file_path": "test_final_state.py"
+            },
+            {
+                "name": "test_final_state.py::test_two_clients_show_each_others_names",
+                "status": "failed",
+                "raw_status": "call_failed",
+                "duration": 7,
+                "start": 1780716047241,
+                "stop": 1780716047248,
+                "retries": 0,
+                "file_path": "test_final_state.py",
+                "trace": "playwright_results = {'alice_connected_user_visible_a': False, 'alice_visible_b': False, 'bob_visible_a': False, 'bold_synced_a': True, ...}\n\n    def test_two_clients_show_each_others_names(playwright_results):\n>       assert playwright_results[\"alice_visible_b\"], (\n            f\"Expected '{ALICE}' to appear as a .connected-user in context B. \"\n            f\"Errors: {playwright_results['errors']}\"\n        )\nE       AssertionError: Expected 'alice-zr-jzbnmzm' to appear as a .connected-user in context B. Errors: ['alice label not visible in context A', 'alice label not visible in context B', 'bob label not visible in context A']\nE       assert False\n\n/tests/test_final_state.py:311: AssertionError",
+                "message": "The test failed in the call phase due to an assertion error"
+            },
+            {
+                "name": "test_final_state.py::test_text_syncs_between_clients",
+                "status": "passed",
+                "duration": 1,
+                "start": 1780716047249,
+                "stop": 1780716047250,
+                "retries": 0,
+                "file_path": "test_final_state.py"
+            },
+            {
+                "name": "test_final_state.py::test_bold_formatting_syncs",
+                "status": "passed",
+                "duration": 2,
+                "start": 1780716047250,
+                "stop": 1780716047252,
+                "retries": 0,
+                "file_path": "test_final_state.py"
+            },
+            {
+                "name": "test_final_state.py::test_italic_formatting_syncs",
+                "status": "passed",
+                "duration": 3,
+                "start": 1780716047252,
+                "stop": 1780716047255,
+                "retries": 0,
+                "file_path": "test_final_state.py"
+            }
+        ]
+    }
+}

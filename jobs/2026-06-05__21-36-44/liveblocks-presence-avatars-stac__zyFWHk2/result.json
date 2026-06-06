@@ -1,0 +1,117 @@
+{
+    "id": "dd614600-f743-4cab-acc5-b87f32cac9cf",
+    "task_name": "liveblocks-presence-avatars-stack",
+    "trial_name": "liveblocks-presence-avatars-stac__zyFWHk2",
+    "trial_uri": "file:///home/kweizh/zealt/zealt-agent/jobs/2026-06-05__21-36-44/liveblocks-presence-avatars-stac__zyFWHk2",
+    "task_id": {
+        "path": "/home/kweizh/zealt/liveblocks-benchmark/scratchpad/pending-tasks/liveblocks-presence-avatars-stack"
+    },
+    "source": "pending-tasks",
+    "task_checksum": "3e1818fb42e270f43ab4586a8edd30e11096a05477c537c35005a669b18e8db1",
+    "config": {
+        "task": {
+            "path": "/home/kweizh/zealt/liveblocks-benchmark/scratchpad/pending-tasks/liveblocks-presence-avatars-stack",
+            "git_url": null,
+            "git_commit_id": null,
+            "name": null,
+            "ref": null,
+            "overwrite": false,
+            "download_dir": null,
+            "source": "pending-tasks"
+        },
+        "trial_name": "liveblocks-presence-avatars-stac__zyFWHk2",
+        "trials_dir": "jobs/2026-06-05__21-36-44",
+        "timeout_multiplier": 1.0,
+        "agent_timeout_multiplier": null,
+        "verifier_timeout_multiplier": null,
+        "agent_setup_timeout_multiplier": null,
+        "environment_build_timeout_multiplier": null,
+        "agent": {
+            "name": null,
+            "import_path": "agents.pochi:Pochi",
+            "model_name": "anthropic/claude-4-6-sonnet",
+            "skills": [],
+            "override_timeout_sec": null,
+            "override_setup_timeout_sec": null,
+            "max_timeout_sec": null,
+            "kwargs": {},
+            "env": {},
+            "mcp_servers": []
+        },
+        "environment": {
+            "type": "docker",
+            "import_path": null,
+            "force_build": false,
+            "delete": true,
+            "cpu_enforcement_policy": "auto",
+            "memory_enforcement_policy": "auto",
+            "override_cpus": null,
+            "override_memory_mb": null,
+            "override_storage_mb": null,
+            "override_gpus": null,
+            "suppress_override_warnings": false,
+            "mounts": [
+                {
+                    "type": "bind",
+                    "source": "test_initial_state.py",
+                    "target": "/bootstrap/test_initial_state.py"
+                }
+            ],
+            "extra_docker_compose": [],
+            "env": {},
+            "kwargs": {}
+        },
+        "verifier": {
+            "override_timeout_sec": null,
+            "max_timeout_sec": null,
+            "env": {},
+            "disable": false
+        },
+        "artifacts": [
+            "/home/user"
+        ],
+        "extra_instruction_paths": [],
+        "job_id": "a240d293-e291-4c8b-bf35-70c6aabbd490"
+    },
+    "agent_info": {
+        "name": "pochi",
+        "version": "0.6.12",
+        "model_info": {
+            "name": "claude-4-6-sonnet",
+            "provider": "anthropic"
+        }
+    },
+    "agent_result": {
+        "n_input_tokens": 0,
+        "n_cache_tokens": 0,
+        "n_output_tokens": 58900,
+        "cost_usd": null,
+        "rollout_details": null,
+        "metadata": null
+    },
+    "verifier_result": {
+        "rewards": {
+            "reward": 0.0
+        }
+    },
+    "exception_info": null,
+    "started_at": "2026-06-05T22:00:39.059511Z",
+    "finished_at": "2026-06-05T22:09:02.528590Z",
+    "environment_setup": {
+        "started_at": "2026-06-05T22:00:39.083843Z",
+        "finished_at": "2026-06-05T22:00:43.414728Z"
+    },
+    "agent_setup": {
+        "started_at": "2026-06-05T22:00:43.414781Z",
+        "finished_at": "2026-06-05T22:01:00.717705Z"
+    },
+    "agent_execution": {
+        "started_at": "2026-06-05T22:01:00.717880Z",
+        "finished_at": "2026-06-05T22:05:59.584887Z"
+    },
+    "verifier": {
+        "started_at": "2026-06-05T22:06:32.353331Z",
+        "finished_at": "2026-06-05T22:08:50.398114Z"
+    },
+    "step_results": null
+}

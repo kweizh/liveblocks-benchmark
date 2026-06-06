@@ -1,0 +1,21 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0
+rootdir: /bootstrap
+plugins: xprocess-1.0.2, json-ctrf-0.5.0
+collected 12 items
+
+../../../bootstrap/test_initial_state.py::test_node_binary_available PASSED
+../../../bootstrap/test_initial_state.py::test_npm_binary_available PASSED
+../../../bootstrap/test_initial_state.py::test_project_directory_exists PASSED
+../../../bootstrap/test_initial_state.py::test_package_json_exists PASSED
+../../../bootstrap/test_initial_state.py::test_package_json_declares_liveblocks_dependencies PASSED
+../../../bootstrap/test_initial_state.py::test_node_modules_installed PASSED
+../../../bootstrap/test_initial_state.py::test_palette_route_skeleton_exists PASSED
+../../../bootstrap/test_initial_state.py::test_liveblocks_auth_route_exists PASSED
+../../../bootstrap/test_initial_state.py::test_liveblocks_config_skeleton_exists PASSED
+../../../bootstrap/test_initial_state.py::test_storage_schema_already_uses_livelist_palette PASSED
+../../../bootstrap/test_initial_state.py::test_palette_page_already_renders_add_form PASSED
+../../../bootstrap/test_initial_state.py::test_palette_page_does_not_wire_history_hooks_yet PASSED
+
+============================== 12 passed in 0.06s ==============================
+pytest-xprocess reminder::Be sure to terminate the started process by running 'pytest --xkill' if you have not explicitly done so in your fixture with 'xprocess.getinfo(<process_name>).terminate()'.

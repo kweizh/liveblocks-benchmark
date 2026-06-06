@@ -1,0 +1,55 @@
+{
+    "results": {
+        "tool": {
+            "name": "pytest",
+            "version": "7.4.4"
+        },
+        "summary": {
+            "tests": 3,
+            "passed": 2,
+            "failed": 1,
+            "skipped": 0,
+            "pending": 0,
+            "other": 0,
+            "start": 1780696914857,
+            "stop": 1780696945413
+        },
+        "environment": {
+            "buildName": "Pytest JSON CTRF Report",
+            "buildNumber": "000",
+            "buildUrl": "https://ctrf.io"
+        },
+        "tests": [
+            {
+                "name": "test_final_state.py::test_snapshot_endpoint_empty_state_returns_404",
+                "status": "passed",
+                "duration": 186,
+                "start": 1780696915208,
+                "stop": 1780696915394,
+                "retries": 0,
+                "file_path": "test_final_state.py"
+            },
+            {
+                "name": "test_final_state.py::test_two_context_realtime_sync_and_snapshot",
+                "status": "failed",
+                "raw_status": "call_failed",
+                "duration": 29991,
+                "start": 1780696915395,
+                "stop": 1780696945386,
+                "retries": 0,
+                "file_path": "test_final_state.py",
+                "trace": "start_app = None\n\n    def test_two_context_realtime_sync_and_snapshot(start_app):\n        from playwright.sync_api import sync_playwright\n    \n        websocket_urls: List[str] = []\n    \n        with sync_playwright() as p:\n            browser = p.chromium.launch(headless=True, args=[\"--no-sandbox\"])\n            try:\n                ctx_a = browser.new_context()\n                ctx_b = browser.new_context()\n    \n                page_a = ctx_a.new_page()\n                page_b = ctx_b.new_page()\n    \n                for page in (page_a, page_b):\n                    page.on(\"websocket\", lambda ws: websocket_urls.append(ws.url))\n    \n                editor_url = f\"{BASE_URL}/editor?room={ROOM_ID}\"\n    \n                page_a.goto(editor_url, wait_until=\"domcontentloaded\")\n                page_b.goto(editor_url, wait_until=\"domcontentloaded\")\n    \n                _wait_editor_ready(page_a)\n                _wait_editor_ready(page_b)\n    \n                # User A types a heading and a paragraph.\n                _focus_editor_end(page_a)\n                page_a.keyboard.type(\"# \", delay=20)\n                page_a.keyboard.type(\"Hello from A\", delay=20)\n                page_a.keyboard.press(\"Enter\")\n                page_a.keyboard.type(\"This is a paragraph from A.\", delay=20)\n    \n                # Wait for sync to context B.\n                deadline = time.time() + 20\n                text_b = \"\"\n                while time.time() < deadline:\n                    text_b = _get_editor_text(page_b)\n                    if \"Hello from A\" in text_b and \"This is a paragraph from A.\" in text_b:\n                        break\n                    page_b.wait_for_timeout(500)\n>               assert \"Hello from A\" in text_b, (\n                    f\"Expected 'Hello from A' to sync from A to B, B sees: {text_b!r}\"\n                )\nE               AssertionError: Expected 'Hello from A' to sync from A to B, B sees: '\\n'\nE               assert 'Hello from A' in '\\n'\n\n/tests/test_final_state.py:140: AssertionError",
+                "message": "The test failed in the call phase due to an assertion error"
+            },
+            {
+                "name": "test_final_state.py::test_snapshot_endpoint_accepts_empty_blocks",
+                "status": "passed",
+                "duration": 26,
+                "start": 1780696945386,
+                "stop": 1780696945412,
+                "retries": 0,
+                "file_path": "test_final_state.py"
+            }
+        ]
+    }
+}

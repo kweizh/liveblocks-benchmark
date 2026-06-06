@@ -1,0 +1,71 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0
+rootdir: /tests
+plugins: xprocess-1.0.2, json-ctrf-0.5.0
+collected 3 items
+
+../../../tests/test_final_state.py .F.                                   [100%]
+
+=================================== FAILURES ===================================
+_________________ test_two_context_realtime_sync_and_snapshot __________________
+
+start_app = None
+
+    def test_two_context_realtime_sync_and_snapshot(start_app):
+        from playwright.sync_api import sync_playwright
+    
+        websocket_urls: List[str] = []
+    
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True, args=["--no-sandbox"])
+            try:
+                ctx_a = browser.new_context()
+                ctx_b = browser.new_context()
+    
+                page_a = ctx_a.new_page()
+                page_b = ctx_b.new_page()
+    
+                for page in (page_a, page_b):
+                    page.on("websocket", lambda ws: websocket_urls.append(ws.url))
+    
+                editor_url = f"{BASE_URL}/editor?room={ROOM_ID}"
+    
+                page_a.goto(editor_url, wait_until="domcontentloaded")
+                page_b.goto(editor_url, wait_until="domcontentloaded")
+    
+                _wait_editor_ready(page_a)
+                _wait_editor_ready(page_b)
+    
+                # User A types a heading and a paragraph.
+                _focus_editor_end(page_a)
+                page_a.keyboard.type("# ", delay=20)
+                page_a.keyboard.type("Hello from A", delay=20)
+                page_a.keyboard.press("Enter")
+                page_a.keyboard.type("This is a paragraph from A.", delay=20)
+    
+                # Wait for sync to context B.
+                deadline = time.time() + 20
+                text_b = ""
+                while time.time() < deadline:
+                    text_b = _get_editor_text(page_b)
+                    if "Hello from A" in text_b and "This is a paragraph from A." in text_b:
+                        break
+                    page_b.wait_for_timeout(500)
+>               assert "Hello from A" in text_b, (
+                    f"Expected 'Hello from A' to sync from A to B, B sees: {text_b!r}"
+                )
+E               AssertionError: Expected 'Hello from A' to sync from A to B, B sees: '\n'
+E               assert 'Hello from A' in '\n'
+
+/tests/test_final_state.py:140: AssertionError
+==================================== PASSES ====================================
+________________ test_snapshot_endpoint_empty_state_returns_404 ________________
+---------------------------- Captured stdout setup -----------------------------
+/tests/.pytest_cache/d/.xprocess/start_app$ npm run dev
+process 'start_app' started pid=2646
+start_app process startup detected
+=========================== short test summary info ============================
+PASSED ../../../tests/test_final_state.py::test_snapshot_endpoint_empty_state_returns_404
+PASSED ../../../tests/test_final_state.py::test_snapshot_endpoint_accepts_empty_blocks
+FAILED ../../../tests/test_final_state.py::test_two_context_realtime_sync_and_snapshot
+========================= 1 failed, 2 passed in 30.55s =========================

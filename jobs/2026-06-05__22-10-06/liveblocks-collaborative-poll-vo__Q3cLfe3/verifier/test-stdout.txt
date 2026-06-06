@@ -1,0 +1,50 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0
+rootdir: /tests
+plugins: xprocess-1.0.2, json-ctrf-0.5.0
+collected 3 items
+
+tests/test_final_state.py ..F                                            [100%]
+
+=================================== FAILURES ===================================
+________________________ test_poll_two_context_realtime ________________________
+
+app_server = 'http://localhost:3000'
+
+    def test_poll_two_context_realtime(app_server):
+        """Drive two real browser contexts through the full poll workflow against
+        the real Liveblocks cloud and validate cross-context synchronisation."""
+    
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            try:
+                ctx_a = browser.new_context()
+                ctx_b = browser.new_context()
+                try:
+                    page_a = ctx_a.new_page()
+                    page_b = ctx_b.new_page()
+    
+                    # Step 1: Alice (owner) joins the room.
+                    page_a.goto(f"{app_server}/?userId=alice&name=Alice", timeout=60000)
+>                   expect(page_a.locator("[data-testid='question-input']")).to_be_visible(
+                        timeout=45000
+                    )
+E                   AssertionError: Locator expected to be visible
+E                   Actual value: - alert
+E                   Error: element(s) not found 
+E                   Call log:
+E                     - Expect "to_be_visible" with timeout 45000ms
+E                     - waiting for locator("[data-testid='question-input']")
+
+tests/test_final_state.py:131: AssertionError
+==================================== PASSES ====================================
+___________________________ test_auth_endpoint_owner ___________________________
+---------------------------- Captured stdout setup -----------------------------
+/tests/.pytest_cache/d/.xprocess/poll_app$ npm run start
+process 'poll_app' started pid=1954
+poll_app process startup detected
+=========================== short test summary info ============================
+PASSED tests/test_final_state.py::test_auth_endpoint_owner
+PASSED tests/test_final_state.py::test_auth_endpoint_voter
+FAILED tests/test_final_state.py::test_poll_two_context_realtime - AssertionE...
+==================== 1 failed, 2 passed in 73.03s (0:01:13) ====================

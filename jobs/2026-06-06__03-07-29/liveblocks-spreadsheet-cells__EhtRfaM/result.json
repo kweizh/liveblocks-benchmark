@@ -1,0 +1,117 @@
+{
+    "id": "f01db9e4-a89d-475b-aaaf-7e5962ac4ebb",
+    "task_name": "liveblocks-spreadsheet-cells",
+    "trial_name": "liveblocks-spreadsheet-cells__EhtRfaM",
+    "trial_uri": "file:///home/kweizh/zealt/zealt-agent/jobs/2026-06-06__03-07-29/liveblocks-spreadsheet-cells__EhtRfaM",
+    "task_id": {
+        "path": "/home/kweizh/zealt/liveblocks-benchmark/scratchpad/pending-tasks/liveblocks-spreadsheet-cells"
+    },
+    "source": "pending-tasks",
+    "task_checksum": "d16e4193e72d9a979af6b51d34b343bce6933d0dfc77cdb3098a88fc3b549307",
+    "config": {
+        "task": {
+            "path": "/home/kweizh/zealt/liveblocks-benchmark/scratchpad/pending-tasks/liveblocks-spreadsheet-cells",
+            "git_url": null,
+            "git_commit_id": null,
+            "name": null,
+            "ref": null,
+            "overwrite": false,
+            "download_dir": null,
+            "source": "pending-tasks"
+        },
+        "trial_name": "liveblocks-spreadsheet-cells__EhtRfaM",
+        "trials_dir": "jobs/2026-06-06__03-07-29",
+        "timeout_multiplier": 1.0,
+        "agent_timeout_multiplier": null,
+        "verifier_timeout_multiplier": null,
+        "agent_setup_timeout_multiplier": null,
+        "environment_build_timeout_multiplier": null,
+        "agent": {
+            "name": null,
+            "import_path": "agents.pochi:Pochi",
+            "model_name": "zai/glm-5.1",
+            "skills": [],
+            "override_timeout_sec": null,
+            "override_setup_timeout_sec": null,
+            "max_timeout_sec": null,
+            "kwargs": {},
+            "env": {},
+            "mcp_servers": []
+        },
+        "environment": {
+            "type": "docker",
+            "import_path": null,
+            "force_build": false,
+            "delete": true,
+            "cpu_enforcement_policy": "auto",
+            "memory_enforcement_policy": "auto",
+            "override_cpus": null,
+            "override_memory_mb": null,
+            "override_storage_mb": null,
+            "override_gpus": null,
+            "suppress_override_warnings": false,
+            "mounts": [
+                {
+                    "type": "bind",
+                    "source": "test_initial_state.py",
+                    "target": "/bootstrap/test_initial_state.py"
+                }
+            ],
+            "extra_docker_compose": [],
+            "env": {},
+            "kwargs": {}
+        },
+        "verifier": {
+            "override_timeout_sec": null,
+            "max_timeout_sec": null,
+            "env": {},
+            "disable": false
+        },
+        "artifacts": [
+            "/home/user"
+        ],
+        "extra_instruction_paths": [],
+        "job_id": "62936e6e-8562-4a05-ab54-b3708139657c"
+    },
+    "agent_info": {
+        "name": "pochi",
+        "version": "0.6.12",
+        "model_info": {
+            "name": "glm-5.1",
+            "provider": "zai"
+        }
+    },
+    "agent_result": {
+        "n_input_tokens": 0,
+        "n_cache_tokens": 0,
+        "n_output_tokens": 59100,
+        "cost_usd": null,
+        "rollout_details": null,
+        "metadata": null
+    },
+    "verifier_result": {
+        "rewards": {
+            "reward": 0.0
+        }
+    },
+    "exception_info": null,
+    "started_at": "2026-06-06T03:16:34.306525Z",
+    "finished_at": "2026-06-06T03:28:38.172697Z",
+    "environment_setup": {
+        "started_at": "2026-06-06T03:16:34.316402Z",
+        "finished_at": "2026-06-06T03:19:31.462637Z"
+    },
+    "agent_setup": {
+        "started_at": "2026-06-06T03:19:31.462680Z",
+        "finished_at": "2026-06-06T03:19:48.968232Z"
+    },
+    "agent_execution": {
+        "started_at": "2026-06-06T03:19:48.968399Z",
+        "finished_at": "2026-06-06T03:27:11.319091Z"
+    },
+    "verifier": {
+        "started_at": "2026-06-06T03:27:45.829996Z",
+        "finished_at": "2026-06-06T03:28:25.326680Z"
+    },
+    "step_results": null
+}

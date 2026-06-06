@@ -1,0 +1,23 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0
+rootdir: /bootstrap
+plugins: xprocess-1.0.2, json-ctrf-0.5.0
+collected 14 items
+
+bootstrap/test_initial_state.py::test_node_binary_available PASSED
+bootstrap/test_initial_state.py::test_npm_binary_available PASSED
+bootstrap/test_initial_state.py::test_project_dir_exists PASSED
+bootstrap/test_initial_state.py::test_package_json_exists_and_declares_liveblocks_deps PASSED
+bootstrap/test_initial_state.py::test_node_modules_pre_installed PASSED
+bootstrap/test_initial_state.py::test_next_binary_available PASSED
+bootstrap/test_initial_state.py::test_next_config_present PASSED
+bootstrap/test_initial_state.py::test_app_router_layout_exists PASSED
+bootstrap/test_initial_state.py::test_auth_route_handler_is_a_stub_returning_501 PASSED
+bootstrap/test_initial_state.py::test_room_page_stub_exists PASSED
+bootstrap/test_initial_state.py::test_playwright_chromium_available PASSED
+bootstrap/test_initial_state.py::test_no_hardcoded_liveblocks_secret_in_source PASSED
+bootstrap/test_initial_state.py::test_next_cli_invokable PASSED
+bootstrap/test_initial_state.py::test_required_env_vars_present PASSED
+
+============================== 14 passed in 1.41s ==============================
+pytest-xprocess reminder::Be sure to terminate the started process by running 'pytest --xkill' if you have not explicitly done so in your fixture with 'xprocess.getinfo(<process_name>).terminate()'.

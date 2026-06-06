@@ -1,0 +1,265 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0
+rootdir: /tests
+plugins: xprocess-1.0.2, json-ctrf-0.5.0
+collected 9 items
+
+tests/test_final_state.py EEEEEEEE.                                      [100%]
+
+==================================== ERRORS ====================================
+___________ ERROR at setup of test_auth_allows_org_a_in_its_own_room ___________
+
+xprocess = <xprocess.xprocess.XProcess object at 0x7f94ac4769f0>
+
+    @pytest.fixture(scope="session")
+    def next_server(xprocess):
+        """Start `npm run dev` on port 3000 and wait until it is reachable."""
+    
+        class Starter(ProcessStarter):
+            name = "next_dev"
+            args = ["npm", "run", "dev", "--", "-p", "3000"]
+            env = os.environ.copy()
+            popen_kwargs = {"cwd": PROJECT_DIR, "text": True}
+            timeout = 240
+            terminate_on_interrupt = True
+    
+            def startup_check(self):
+                return _wait_for_port("127.0.0.1", 3000, timeout=2)
+    
+        xprocess.ensure(Starter.name, Starter)
+    
+        # Belt-and-braces: also wait for HTTP-level readiness.
+>       assert _wait_for_http_ok(BASE_URL, timeout=180), (
+            "Next.js dev server did not become HTTP-ready in time."
+        )
+E       AssertionError: Next.js dev server did not become HTTP-ready in time.
+E       assert False
+E        +  where False = _wait_for_http_ok('http://localhost:3000', timeout=180)
+
+tests/test_final_state.py:70: AssertionError
+---------------------------- Captured stdout setup -----------------------------
+/tests/.pytest_cache/d/.xprocess/next_dev$ npm run dev -- -p 3000
+process 'next_dev' started pid=1444
+next_dev process startup detected
+___________ ERROR at setup of test_auth_allows_org_b_in_its_own_room ___________
+
+xprocess = <xprocess.xprocess.XProcess object at 0x7f94ac4769f0>
+
+    @pytest.fixture(scope="session")
+    def next_server(xprocess):
+        """Start `npm run dev` on port 3000 and wait until it is reachable."""
+    
+        class Starter(ProcessStarter):
+            name = "next_dev"
+            args = ["npm", "run", "dev", "--", "-p", "3000"]
+            env = os.environ.copy()
+            popen_kwargs = {"cwd": PROJECT_DIR, "text": True}
+            timeout = 240
+            terminate_on_interrupt = True
+    
+            def startup_check(self):
+                return _wait_for_port("127.0.0.1", 3000, timeout=2)
+    
+        xprocess.ensure(Starter.name, Starter)
+    
+        # Belt-and-braces: also wait for HTTP-level readiness.
+>       assert _wait_for_http_ok(BASE_URL, timeout=180), (
+            "Next.js dev server did not become HTTP-ready in time."
+        )
+E       AssertionError: Next.js dev server did not become HTTP-ready in time.
+E       assert False
+E        +  where False = _wait_for_http_ok('http://localhost:3000', timeout=180)
+
+tests/test_final_state.py:70: AssertionError
+_____________ ERROR at setup of test_auth_rejects_cross_org_access _____________
+
+xprocess = <xprocess.xprocess.XProcess object at 0x7f94ac4769f0>
+
+    @pytest.fixture(scope="session")
+    def next_server(xprocess):
+        """Start `npm run dev` on port 3000 and wait until it is reachable."""
+    
+        class Starter(ProcessStarter):
+            name = "next_dev"
+            args = ["npm", "run", "dev", "--", "-p", "3000"]
+            env = os.environ.copy()
+            popen_kwargs = {"cwd": PROJECT_DIR, "text": True}
+            timeout = 240
+            terminate_on_interrupt = True
+    
+            def startup_check(self):
+                return _wait_for_port("127.0.0.1", 3000, timeout=2)
+    
+        xprocess.ensure(Starter.name, Starter)
+    
+        # Belt-and-braces: also wait for HTTP-level readiness.
+>       assert _wait_for_http_ok(BASE_URL, timeout=180), (
+            "Next.js dev server did not become HTTP-ready in time."
+        )
+E       AssertionError: Next.js dev server did not become HTTP-ready in time.
+E       assert False
+E        +  where False = _wait_for_http_ok('http://localhost:3000', timeout=180)
+
+tests/test_final_state.py:70: AssertionError
+_________ ERROR at setup of test_auth_rejects_room_without_org_prefix __________
+
+xprocess = <xprocess.xprocess.XProcess object at 0x7f94ac4769f0>
+
+    @pytest.fixture(scope="session")
+    def next_server(xprocess):
+        """Start `npm run dev` on port 3000 and wait until it is reachable."""
+    
+        class Starter(ProcessStarter):
+            name = "next_dev"
+            args = ["npm", "run", "dev", "--", "-p", "3000"]
+            env = os.environ.copy()
+            popen_kwargs = {"cwd": PROJECT_DIR, "text": True}
+            timeout = 240
+            terminate_on_interrupt = True
+    
+            def startup_check(self):
+                return _wait_for_port("127.0.0.1", 3000, timeout=2)
+    
+        xprocess.ensure(Starter.name, Starter)
+    
+        # Belt-and-braces: also wait for HTTP-level readiness.
+>       assert _wait_for_http_ok(BASE_URL, timeout=180), (
+            "Next.js dev server did not become HTTP-ready in time."
+        )
+E       AssertionError: Next.js dev server did not become HTTP-ready in time.
+E       assert False
+E        +  where False = _wait_for_http_ok('http://localhost:3000', timeout=180)
+
+tests/test_final_state.py:70: AssertionError
+_______________ ERROR at setup of test_auth_rejects_unknown_org ________________
+
+xprocess = <xprocess.xprocess.XProcess object at 0x7f94ac4769f0>
+
+    @pytest.fixture(scope="session")
+    def next_server(xprocess):
+        """Start `npm run dev` on port 3000 and wait until it is reachable."""
+    
+        class Starter(ProcessStarter):
+            name = "next_dev"
+            args = ["npm", "run", "dev", "--", "-p", "3000"]
+            env = os.environ.copy()
+            popen_kwargs = {"cwd": PROJECT_DIR, "text": True}
+            timeout = 240
+            terminate_on_interrupt = True
+    
+            def startup_check(self):
+                return _wait_for_port("127.0.0.1", 3000, timeout=2)
+    
+        xprocess.ensure(Starter.name, Starter)
+    
+        # Belt-and-braces: also wait for HTTP-level readiness.
+>       assert _wait_for_http_ok(BASE_URL, timeout=180), (
+            "Next.js dev server did not become HTTP-ready in time."
+        )
+E       AssertionError: Next.js dev server did not become HTTP-ready in time.
+E       assert False
+E        +  where False = _wait_for_http_ok('http://localhost:3000', timeout=180)
+
+tests/test_final_state.py:70: AssertionError
+______________ ERROR at setup of test_auth_rejects_missing_fields ______________
+
+xprocess = <xprocess.xprocess.XProcess object at 0x7f94ac4769f0>
+
+    @pytest.fixture(scope="session")
+    def next_server(xprocess):
+        """Start `npm run dev` on port 3000 and wait until it is reachable."""
+    
+        class Starter(ProcessStarter):
+            name = "next_dev"
+            args = ["npm", "run", "dev", "--", "-p", "3000"]
+            env = os.environ.copy()
+            popen_kwargs = {"cwd": PROJECT_DIR, "text": True}
+            timeout = 240
+            terminate_on_interrupt = True
+    
+            def startup_check(self):
+                return _wait_for_port("127.0.0.1", 3000, timeout=2)
+    
+        xprocess.ensure(Starter.name, Starter)
+    
+        # Belt-and-braces: also wait for HTTP-level readiness.
+>       assert _wait_for_http_ok(BASE_URL, timeout=180), (
+            "Next.js dev server did not become HTTP-ready in time."
+        )
+E       AssertionError: Next.js dev server did not become HTTP-ready in time.
+E       assert False
+E        +  where False = _wait_for_http_ok('http://localhost:3000', timeout=180)
+
+tests/test_final_state.py:70: AssertionError
+_ ERROR at setup of test_room_page_renders_required_test_ids_and_connects_for_allowed_org _
+
+xprocess = <xprocess.xprocess.XProcess object at 0x7f94ac4769f0>
+
+    @pytest.fixture(scope="session")
+    def next_server(xprocess):
+        """Start `npm run dev` on port 3000 and wait until it is reachable."""
+    
+        class Starter(ProcessStarter):
+            name = "next_dev"
+            args = ["npm", "run", "dev", "--", "-p", "3000"]
+            env = os.environ.copy()
+            popen_kwargs = {"cwd": PROJECT_DIR, "text": True}
+            timeout = 240
+            terminate_on_interrupt = True
+    
+            def startup_check(self):
+                return _wait_for_port("127.0.0.1", 3000, timeout=2)
+    
+        xprocess.ensure(Starter.name, Starter)
+    
+        # Belt-and-braces: also wait for HTTP-level readiness.
+>       assert _wait_for_http_ok(BASE_URL, timeout=180), (
+            "Next.js dev server did not become HTTP-ready in time."
+        )
+E       AssertionError: Next.js dev server did not become HTTP-ready in time.
+E       assert False
+E        +  where False = _wait_for_http_ok('http://localhost:3000', timeout=180)
+
+tests/test_final_state.py:70: AssertionError
+____ ERROR at setup of test_room_page_does_not_connect_for_cross_org_access ____
+
+xprocess = <xprocess.xprocess.XProcess object at 0x7f94ac4769f0>
+
+    @pytest.fixture(scope="session")
+    def next_server(xprocess):
+        """Start `npm run dev` on port 3000 and wait until it is reachable."""
+    
+        class Starter(ProcessStarter):
+            name = "next_dev"
+            args = ["npm", "run", "dev", "--", "-p", "3000"]
+            env = os.environ.copy()
+            popen_kwargs = {"cwd": PROJECT_DIR, "text": True}
+            timeout = 240
+            terminate_on_interrupt = True
+    
+            def startup_check(self):
+                return _wait_for_port("127.0.0.1", 3000, timeout=2)
+    
+        xprocess.ensure(Starter.name, Starter)
+    
+        # Belt-and-braces: also wait for HTTP-level readiness.
+>       assert _wait_for_http_ok(BASE_URL, timeout=180), (
+            "Next.js dev server did not become HTTP-ready in time."
+        )
+E       AssertionError: Next.js dev server did not become HTTP-ready in time.
+E       assert False
+E        +  where False = _wait_for_http_ok('http://localhost:3000', timeout=180)
+
+tests/test_final_state.py:70: AssertionError
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/test_final_state.py::test_no_hardcoded_liveblocks_secret_in_source_tree
+ERROR tests/test_final_state.py::test_auth_allows_org_a_in_its_own_room - Ass...
+ERROR tests/test_final_state.py::test_auth_allows_org_b_in_its_own_room - Ass...
+ERROR tests/test_final_state.py::test_auth_rejects_cross_org_access - Asserti...
+ERROR tests/test_final_state.py::test_auth_rejects_room_without_org_prefix - ...
+ERROR tests/test_final_state.py::test_auth_rejects_unknown_org - AssertionErr...
+ERROR tests/test_final_state.py::test_auth_rejects_missing_fields - Assertion...
+ERROR tests/test_final_state.py::test_room_page_renders_required_test_ids_and_connects_for_allowed_org
+ERROR tests/test_final_state.py::test_room_page_does_not_connect_for_cross_org_access
+=================== 1 passed, 8 errors in 276.89s (0:04:36) ====================

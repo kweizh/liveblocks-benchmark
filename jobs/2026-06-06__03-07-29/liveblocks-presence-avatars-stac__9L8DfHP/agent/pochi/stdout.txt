@@ -1,0 +1,77 @@
+- Initializing MCP connections...
+You
+# Liveblocks Presence — Avatar Stack Header ## Background You are extending an existing Next.js scaffold that already includes a `LiveblocksProvider`, a `RoomProvider`, an auth endpoint, and a placeholder `Header` component. The scaffold connects to the **real Liveblocks cloud** using the project's `LIVEBLOCKS_SECRET_KEY` and `NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY`. Your job is to finish implementing a presence-driven **avatar stack** in the header that mirrors what teams expect from collaborative apps like Figma, Linear, or Notion: a horizontal row of overlapping user avatars showing who is currently in the room, with a `+N` overflow badge and per-user hover tooltips. ## Requirements * Render a horizontal stack of overlapping circular avatars in the `Header` for every user currently connected to the room (including the current user). * The current user (from `useSelf()`) must be shown as the **leftmost** avatar and visually marked as "You" in the tooltip. * Other connected users (from `useOthers()`) must be rendered to the right of the current user, ordered by their `connectionId` ascending so the order is stable across all clients. * Show **at most 4 avatars** in the stack. If there are more connected users, render a single trailing **`+N` overflow badge** where `N` is the number of hidden users (total connected users minus 4). * Each avatar must: * Use the user's `info.avatar` URL as the image source if present, with the user's `info.name` initials as a fallback when the image fails to load. * Have its border / outline coloured with the user's `info.color` value. * Show a small **green online dot** in the bottom-right corner of the avatar. * Reveal a **tooltip on hover** that displays the user's `info.name`. For the current user the tooltip text must be of the form `<name> (You)`. * The user info (`name`, `avatar`, `color`) must be supplied to the client via the existing auth route by attaching a `userInfo` object inside `identifyUser` on the server side. Do not hard-code user info on the client. * The header must continue to render correctly when there is only the current user in the room (stack of 1, no `+N` badge) and when the room is empty during initial connection (placeholder/skeleton, no crash). * Do **NOT** mock Liveblocks. The implementation must talk to real Liveblocks cloud using the env vars provided in the environment. ## Implementation Hints * The relevant React hooks are `useSelf` and `useOthers` from `@liveblocks/react/suspense`. * `useOthers()` returns an immutable array of `User` objects, each exposing `connectionId`, `presence`, and `info`. * On the server, `Liveblocks.identifyUser({ userId, groupIds }, { userInfo })` from `@liveblocks/node` is how you attach static metadata (name, avatar, color) to a session so it becomes available on `user.info` on the client. * The scaffold provides a list of fixed mock users keyed by a `?user=<index>` query parameter on the page route, so you can open multiple browser contexts with different users to simulate presence. Use that mechanism — do not invent a new auth flow. * For the tooltip, any pure-CSS hover tooltip is sufficient. You do not need a tooltip library. * For the `+N` badge, treat it as a single DOM node that sits at the right end of the stack. ## Acceptance Criteria * Project path: /home/user/project * Start command: `npm run start` (after `npm run build`). For development verification you may also use `npm run dev`. * Port: 3000 * The home page (`/`) must render a `<header>` element that contains an avatar-stack container with the test id `avatar-stack`. * Inside the `avatar-stack` container: * Each visible avatar wrapper must have the test id `avatar-item` and a `data-user-id` attribute equal to the Liveblocks `userId` of that user. * The current user's avatar wrapper must additionally have `data-self="true"`. * Each avatar wrapper must contain a child element with the test id `online-dot`. * Each avatar wrapper must have a hover-tooltip element with the test id `avatar-tooltip` whose text content equals the user's display name (and `" (You)"` appended for the current user). * When the number of connected users is greater than 4, the container must additionally contain exactly one element with the test id `avatar-overflow` whose text content is `+N` where `N = total_users - 4`. * When the number of connected users is 4 or fewer, no `avatar-overflow` element must be present. * The auth route (`POST /api/liveblocks-auth`) must call `Liveblocks.identifyUser` with a `userInfo` payload containing `name`, `avatar`, and `color` keys derived from the requested mock user. * The room id used by the page must be derived from the request so that all clients in a given test session land in the **same room** (the scaffold already does this; you must not break it). The room id is derived from `ZEALT_RUN_ID`. The evaluation harness only injects `ZEALT_RUN_ID` (server-side); the browser bundle cannot read it directly. You **MUST** re-export it as `NEXT_PUBLIC_ZEALT_RUN_ID` through `next.config.js` (e.g. `env.NEXT_PUBLIC_ZEALT_RUN_ID = process.env.ZEALT_RUN_ID`) or by writing it into `.env`/`.env.local` during build so `NEXT_PUBLIC_ZEALT_RUN_ID` mirrors `ZEALT_RUN_ID` exactly. * The implementation must work against the real Liveblocks cloud using `LIVEBLOCKS_SECRET_KEY` (server) and `NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY` (the public key is currently unused by the scaffold but must remain exported; do not remove it).   
+
+Pochi
+💭 Thinking for 921 characters   
+📋 Updating todo list (6 items) ✔ 
+💭 Thinking for 42 characters   
+📂 Listing files in /home/user/project recursively ✔ 
+💭 Thinking for 92 characters   
+Let me read the key project files to understand the existing scaffold:   
+📖 Reading /home/user/project/app/page.tsx ✔ 
+📖 Reading /home/user/project/app/Room.tsx ✔ 
+📖 Reading /home/user/project/app/components/Header.tsx ✔ 
+📖 Reading /home/user/project/app/lib/mock-users.ts ✔ 
+📖 Reading /home/user/project/app/api/liveblocks-auth/route.ts ✔ 
+📖 Reading /home/user/project/next.config.mjs ✔ 
+📖 Reading /home/user/project/liveblocks.config.ts ✔ 
+📖 Reading /home/user/project/app/layout.tsx ✔ 
+📖 Reading /home/user/project/package.json ✔ 
+💭 Thinking for 16094 characters   
+Now let me check for any environment files:   
+🔍 Searching for *.env* in /home/user/project ✔ 
+💭 Thinking for 479 characters   
+📋 Updating todo list (6 items) ✔ 
+🔧 Applying diff to /home/user/project/next.config.mjs ✔ 
+📋 Updating todo list (6 items) ✔ 
+Now update the auth route to include `userInfo`:   
+🔧 Applying diff to /home/user/project/app/api/liveblocks-auth/route.ts ✔ 
+📋 Updating todo list (6 items) ✔ 
+Now update `Room.tsx` to set the `mockUser` cookie from URL params so the auth endpoint can identifythe user:   
+✏️  Writing /home/user/project/app/Room.tsx ✔ 
+📋 Updating todo list (6 items) ✔ 
+Now implement the main Header component with the avatar stack:   
+✏️  Writing /home/user/project/app/components/Header.tsx ✔ 
+💭 Thinking for 617 characters   
+📋 Updating todo list (6 items) ✔ 
+Let me build the project to checkfor errors:   
+💫 Executing cd /home/user/project && npm run build 2>&1 ✖ "Command exited with code 1"
+💭 Thinking for 1621 characters   
+The build error is because `authEndpoint` and `publicApiKey` are mutually exclusive in the Liveblocks types. Let me fix `Room.tsx`:   
+✏️  Writing /home/user/project/app/Room.tsx ✔ 
+💭 Thinking for 1874 characters   
+💫 Executing cd /home/user/project && npm run build 2>&1 ✖ "Command exited with code 1"
+💭 Thinking for 1693 characters   
+The `identifyUser` requires `groupIds` when using the object form. Let me fix the auth route:   
+🔧 Applying diff to /home/user/project/app/api/liveblocks-auth/route.ts ✔ 
+💫 Executing cd /home/user/project && npm run build 2>&1 ✔ 
+💭 Thinking for 8478 characters   
+The build succeeded. Let me start the dev server to verify:   
+🛠️ Tool startBackgroundJob ✔ 
+🛠️ Tool readBackgroundJobOutput ✔ 
+💭 Thinking for 87 characters   
+The dev server is running. Let me verify the page renders:   
+💫 Executing curl -s http://localhost:3000/ | head -200 ✔ 
+💭 Thinking for 262 characters   
+The page renders correctly. Let me also verify the auth endpoint:   
+💫 Executing curl -s -X POST http://localhost:3000/api/liveblocks-auth -H "Content-Type: application/json" -d '{"room":"test-room"}' 2>&1 | head -20 ✔ 
+💭 Thinking for 870 characters   
+The auth endpoint correctly includes `userInfo` with `name`, `avatar`, and `color`. Let me also test with the `?user=1` parameter:   
+💫 Executing curl -s -X POST http://localhost:3000/api/liveblocks-auth?user=1 -H "Content-Type: application/json" -d '{"room":"test-room"}' 2>&1 | python3 -c "import sys,json; data=json.loads(sys.stdin.read()); import base64; payload=data['token'].split('.')[1]; payload+='='*(4-len(payload)%4); print(base64.urlsafe_b64decode(payload).decode())" ✔ 
+💭 Thinking for 216 characters   
+Auth endpoint works with `?user=1` query parameter, returning Dakota Drift's info. Let me also test the cookie-based mechanism:   
+💫 Executing curl -s -X POST http://localhost:3000/api/liveblocks-auth -H "Content-Type: application/json" -H "Cookie: mockUser=2" -d '{"room":"test-room"}' 2>&1 | python3 -c "import sys,json; data=json.loads(sys.stdin.read()); import base64; payload=data['token'].split('.')[1]; payload+='='*(4-len(payload)%4); print(base64.urlsafe_b64decode(payload).decode())" ✔ 
+💭 Thinking for 3532 characters   
+All authentication mechanisms work correctly. Let me stop the dev server and do a production build:   
+🛠️ Tool killBackgroundJob ✔ 
+💫 Executing cd /home/user/project && npm run build 2>&1 ✔ 
+💭 Thinking for 90 characters   
+Production build succeeds. Let me start the production server andverify:   
+🛠️ Tool startBackgroundJob ✔ 
+🛠️ Tool readBackgroundJobOutput ✔ 
+💫 Executing kill $(lsof -t -i:3000) 2>/dev/null; sleep 1 && cd /home/user/project && npm run start 2>&1 & ✔ 
+💫 Executing fuser -k 3000/tcp 2>/dev/null; sleep 2 ✔ 
+🛠️ Tool startBackgroundJob ✔ 
+🛠️ Tool readBackgroundJobOutput ✔ 
+💫 Executing pkill -f "next" 2>/dev/null; sleep 2; ss -tlnp | grep 3000 ✖ "Command exited with code 1"

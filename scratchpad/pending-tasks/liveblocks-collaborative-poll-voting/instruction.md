@@ -1,0 +1,54 @@
+# Liveblocks Collaborative Poll Voting (Next.js)
+
+## Background
+You are extending a Next.js scaffold to build a real-time multi-user poll page powered by Liveblocks Storage. Every connected viewer of the page can cast a vote, change their vote, and see vote tallies and percentage bars update live for all other viewers. Only a designated poll owner is allowed to author the poll's question or add/remove options. You **MUST** use the real Liveblocks cloud (no mocking, no stubs).
+
+## Requirements
+- Implement a single Next.js page at `/` that joins a single Liveblocks room and renders the poll UI.
+- Authenticate users through a Next.js Route Handler at `/api/liveblocks-auth` using `@liveblocks/node`'s `liveblocks.identifyUser`. The handler must read the `userId` and `name` from the JSON request body and assign `userInfo.role` to `"owner"` if `userId === "alice"`, otherwise `"voter"`. Include `name`, `role`, and a deterministic `color` inside `userInfo`.
+- Configure `Storage` to contain:
+  - `poll: LiveObject<{ question: string; options: LiveList<LiveObject<{ id: string; label: string }>> }>`
+  - `votes: LiveMap<string /* userId */, string /* optionId */>`
+- Implement an `initialStorage` for `RoomProvider` so the room starts with `question = ""`, an empty `options` list, and an empty `votes` map.
+- The page UI must include:
+  - An input bound to `poll.question` (only editable by the owner).
+  - For the owner: an input + "Add option" button to append a new option (assign a stable unique `id`), and a "Remove" button next to each option.
+  - For every authenticated user (owner included): a clickable "Vote" button next to each option that sets/changes the current user's vote in `votes`.
+  - A live tally per option in the form `<percentage>%` rendered inside an element whose `data-testid` is `bar-<optionId>`, plus the option label inside `data-testid="label-<optionId>"`.
+  - A `data-testid="total-votes"` element rendering the text `Total votes: N` where N is the number of entries currently in `votes`.
+  - When `votes` is empty, each option's bar must render `0%`.
+- Voters must NOT see the question editor, the "Add option" form, or per-option "Remove" buttons. Use `useSelf((me) => me.info.role)` to gate these controls.
+- All Storage reads must use `useStorage` selectors, and all Storage writes must be performed through `useMutation` callbacks.
+
+## Implementation Hints
+- Use `@liveblocks/react/suspense` together with `LiveblocksProvider`, `RoomProvider`, and `ClientSideSuspense` to mount the room. Wrap the page in `LiveblocksProvider authEndpoint="/api/liveblocks-auth"`.
+- The Next.js Route Handler should `POST` to Liveblocks using `identifyUser({ userId, groupIds: ["poll-room"] }, { userInfo: { name, color, role } })`. Return its `body` and `status` directly.
+- The room ID must be derived from the `ZEALT_RUN_ID` environment variable so concurrent runs do not collide. The evaluation harness only injects `ZEALT_RUN_ID` (server-side); the browser bundle cannot read it directly. You **MUST** re-export it as `NEXT_PUBLIC_ZEALT_RUN_ID` through `next.config.js` (e.g. `env.NEXT_PUBLIC_ZEALT_RUN_ID = process.env.ZEALT_RUN_ID`) or by writing it into `.env`/`.env.local` during build so `NEXT_PUBLIC_ZEALT_RUN_ID` mirrors `ZEALT_RUN_ID` exactly. Then use a value like `poll-room-${process.env.NEXT_PUBLIC_ZEALT_RUN_ID}` as the room ID inside the page.
+- The `LIVEBLOCKS_SECRET_KEY` must only be used server-side; the `NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY` must only be referenced in client-side code if you choose public-key auth fallback (this task expects auth-endpoint usage; do not set `publicApiKey` on the provider).
+- Compute percentages on the fly inside a `useStorage` selector by iterating the entries of `votes` and counting occurrences per `optionId`. Round percentages to the nearest integer using `Math.round`. When total votes is `0`, all option percentages must be `0`.
+- Use stable option IDs (e.g. `crypto.randomUUID()`). Do NOT use array indices as IDs.
+
+## Acceptance Criteria
+- Project path: /home/user/myproject
+- Start command: npm run start
+- Port: 3000
+- The build (`npm run build`) must succeed before `npm run start` is executed.
+- The Liveblocks authentication endpoint must be served at `POST /api/liveblocks-auth` and accept JSON `{ userId: string, name: string }`. Unknown users are issued the role `"voter"`; only `userId === "alice"` is granted the role `"owner"`.
+- The single page route `/` must render the poll once Liveblocks Storage is loaded. It must accept the query parameters `?userId=<id>&name=<name>` and use them to authenticate.
+- Storage shape constraints:
+  - `poll`: `LiveObject<{ question: string; options: LiveList<LiveObject<{ id: string; label: string }>> }>`
+  - `votes`: `LiveMap<string, string>` mapping `userId` to the chosen option's `id`.
+- DOM contract (used by the verifier):
+  - The question input must have `data-testid="question-input"`.
+  - The owner-only add-option input must have `data-testid="new-option-input"`.
+  - The owner-only add-option button must have `data-testid="add-option-btn"`.
+  - Each option must render:
+    - `data-testid="label-<optionId>"` for the option label text,
+    - `data-testid="bar-<optionId>"` for the percentage text (e.g. `33%`),
+    - `data-testid="vote-<optionId>"` for the vote button,
+    - `data-testid="remove-<optionId>"` for the remove button (owner only).
+  - The total counter must have `data-testid="total-votes"` and render exactly `Total votes: <N>`.
+- A user authenticated as `voter` must NOT see any element with `data-testid="add-option-btn"`, `data-testid="new-option-input"`, or any `data-testid` starting with `remove-`. The voter's `question-input` must either be absent or be disabled/readonly.
+- All vote changes, option add/remove, and question edits must propagate to other connected users within a few seconds without page reload, via the real Liveblocks cloud.
+- The room ID used in the app must be `poll-room-${ZEALT_RUN_ID}` so parallel verifier runs do not collide.
+

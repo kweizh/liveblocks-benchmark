@@ -1,0 +1,109 @@
+{
+    "results": {
+        "tool": {
+            "name": "pytest",
+            "version": "7.4.4"
+        },
+        "summary": {
+            "tests": 9,
+            "passed": 8,
+            "failed": 1,
+            "skipped": 0,
+            "pending": 0,
+            "other": 0,
+            "start": 1780698056132,
+            "stop": 1780698162018
+        },
+        "environment": {
+            "buildName": "Pytest JSON CTRF Report",
+            "buildNumber": "000",
+            "buildUrl": "https://ctrf.io"
+        },
+        "tests": [
+            {
+                "name": "test_final_state.py::test_auth_allows_org_a_in_its_own_room",
+                "status": "passed",
+                "duration": 26944,
+                "start": 1780698056777,
+                "stop": 1780698083721,
+                "retries": 0,
+                "file_path": "test_final_state.py"
+            },
+            {
+                "name": "test_final_state.py::test_auth_allows_org_b_in_its_own_room",
+                "status": "passed",
+                "duration": 63,
+                "start": 1780698083723,
+                "stop": 1780698083786,
+                "retries": 0,
+                "file_path": "test_final_state.py"
+            },
+            {
+                "name": "test_final_state.py::test_auth_rejects_cross_org_access",
+                "status": "passed",
+                "duration": 19,
+                "start": 1780698083787,
+                "stop": 1780698083806,
+                "retries": 0,
+                "file_path": "test_final_state.py"
+            },
+            {
+                "name": "test_final_state.py::test_auth_rejects_room_without_org_prefix",
+                "status": "passed",
+                "duration": 19,
+                "start": 1780698083806,
+                "stop": 1780698083825,
+                "retries": 0,
+                "file_path": "test_final_state.py"
+            },
+            {
+                "name": "test_final_state.py::test_auth_rejects_unknown_org",
+                "status": "passed",
+                "duration": 20,
+                "start": 1780698083826,
+                "stop": 1780698083846,
+                "retries": 0,
+                "file_path": "test_final_state.py"
+            },
+            {
+                "name": "test_final_state.py::test_auth_rejects_missing_fields",
+                "status": "passed",
+                "duration": 21,
+                "start": 1780698083847,
+                "stop": 1780698083868,
+                "retries": 0,
+                "file_path": "test_final_state.py"
+            },
+            {
+                "name": "test_final_state.py::test_room_page_renders_required_test_ids_and_connects_for_allowed_org",
+                "status": "failed",
+                "raw_status": "call_failed",
+                "duration": 51381,
+                "start": 1780698083869,
+                "stop": 1780698135250,
+                "retries": 0,
+                "file_path": "test_final_state.py",
+                "trace": "next_server = None\n\n    def test_room_page_renders_required_test_ids_and_connects_for_allowed_org(next_server):\n        url = f\"{BASE_URL}/rooms/{ROOM_OK_A}?userId={USER_A}&orgId=org-a\"\n        with sync_playwright() as p:\n            browser = p.chromium.launch(headless=True, args=[\"--no-sandbox\"])\n            try:\n                context = browser.new_context()\n                page = context.new_page()\n                response = page.goto(url, wait_until=\"domcontentloaded\", timeout=60000)\n                assert response is not None, \"Playwright returned no response for the room page.\"\n                assert response.status < 400, (\n                    f\"Expected HTTP 2xx/3xx for the room page, got {response.status}.\"\n                )\n    \n                # The required DOM test-ids must be present.\n                assert page.get_by_test_id(\"connection-status\").count() > 0, (\n                    \"Room page must render an element with data-testid='connection-status'.\"\n                )\n                assert page.get_by_test_id(\"counter-value\").count() > 0, (\n                    \"Room page must render an element with data-testid='counter-value'.\"\n                )\n    \n                final_status = _wait_for_test_id_text(page, \"connection-status\", \"connected\", timeout_ms=45000)\n>               assert final_status is not None and \"connected\" in final_status, (\n                    f\"Expected the connection-status element to display 'connected'. \"\n                    f\"Last value seen: {final_status!r}\"\n                )\nE               AssertionError: Expected the connection-status element to display 'connected'. Last value seen: 'connecting'\nE               assert ('connecting' is not None and 'connected' in 'connecting')\n\ntests/test_final_state.py:211: AssertionError",
+                "message": "The test failed in the call phase due to an assertion error"
+            },
+            {
+                "name": "test_final_state.py::test_room_page_does_not_connect_for_cross_org_access",
+                "status": "passed",
+                "duration": 26652,
+                "start": 1780698135250,
+                "stop": 1780698161902,
+                "retries": 0,
+                "file_path": "test_final_state.py"
+            },
+            {
+                "name": "test_final_state.py::test_no_hardcoded_liveblocks_secret_in_source_tree",
+                "status": "passed",
+                "duration": 114,
+                "start": 1780698161903,
+                "stop": 1780698162017,
+                "retries": 0,
+                "file_path": "test_final_state.py"
+            }
+        ]
+    }
+}

@@ -1,0 +1,110 @@
+Skipping image OS validation for hb__liveblocks-nextjs-auth-organization: docker inspect returned 1
+Running command: apt-get update && apt-get install -y curl ripgrep
+Command outputs captured
+Running command: set -euo pipefail; curl -fsSL https://getpochi.com/install.sh | bash -x -s -- pochi-v0.6.12 && mkdir -p /logs/agent/pochi && ~/.pochi/bin/pochi --version
+Command outputs captured
+Running command: ln -sf ~/.pochi/bin/pochi /usr/local/bin/pochi
+Command outputs captured
+Running command: echo zr-aqgat8a > /logs/artifacts/run-id && echo liveblocks-nextjs-auth-organizat__aQGat8a > /logs/artifacts/trial_id
+Command outputs captured
+Running command: mkdir -p ~/.pochi && cat << 'EOF' | sed -e "s/OPENAI_API_KEY/${OPENAI_API_KEY}/g" -e "s/DEEPINFRA_API_KEY/${DEEPINFRA_API_KEY}/g" > ~/.pochi/config.jsonc
+{
+  "providers": {
+    "deepinfra": {
+      "kind": "openai",
+      "baseURL": "https://api.deepinfra.com/v1/openai",
+      "apiKey": "DEEPINFRA_API_KEY",
+      "models": {
+        "zai-org/GLM-4.7-Flash": {
+          "name": "glm-4.7-flash"
+        },
+        "moonshotai/Kimi-K2.6": {
+          "name": "kimi-K2.6"
+        },
+        "deepseek-ai/DeepSeek-V4-Pro": {
+          "name": "DeepSeek-V4-Pro"
+        }
+      }
+    },
+    "openai": {
+      "kind": "openai",
+      "baseURL": "https://api.openai.com/v1",
+      "apiKey": "OPENAI_API_KEY",
+      "models": {
+        "gpt-5.4": {
+          "name": "gpt-5.4"
+        }
+      }
+    }
+  }
+}
+EOF
+Command outputs captured
+Running command: if [ -f /bootstrap/test_initial_state.py ]; then pytest -s --log-cli-level=DEBUG /bootstrap/test_initial_state.py > >(tee /logs/agent/pochi/initial-test-stdout.txt) 2> >(tee /logs/agent/pochi/initial-test-stderr.txt >&2); fi
+Command outputs captured
+Running command: pochi --model zai/glm-5.1 --max-steps 200 --max-retries 10 --blobs-dir /logs/agent/pochi/blobs --experimental-stream-trajectory /logs/agent/pochi/trajectory.jsonl > >(tee /logs/agent/pochi/stdout.txt) 2> >(tee /logs/agent/pochi/stderr.txt >&2) <<'EOF'
+# Liveblocks Next.js Auth: Per-Organization Room Access (ID Token)
+
+## Background
+You are building the back-end authentication for a multi-tenant collaborative SaaS that uses [Liveblocks](https://liveblocks.io) for real-time rooms. Each customer belongs to an **organization** and must only be allowed into rooms that belong to their own organization. Liveblocks recommends ID-token authentication (`liveblocks.identifyUser`) for production apps. Your job is to implement the Next.js 14 App Router `/api/liveblocks-auth` endpoint so that it gates room access by organization, and a small UI page that mounts a `LiveblocksProvider` + `RoomProvider` and renders a real-time counter using Storage.
+
+A partial project skeleton already exists at `/home/user/myproject`. The Next.js app, dependencies (including `@liveblocks/client`, `@liveblocks/react`, `@liveblocks/node`), and the page route shell are pre-installed. The `/api/liveblocks-auth` route handler is currently a stub that returns HTTP 501 (Not Implemented). You must implement the real logic.
+
+## Requirements
+- Implement the `POST /api/liveblocks-auth` route handler at `app/api/liveblocks-auth/route.ts` using `@liveblocks/node` and the `liveblocks.identifyUser` ID-token approach.
+- The request body is JSON with at least the following fields:
+  - `room` (string, required): the Liveblocks room id the client wants to enter.
+  - `userId` (string, required): a mock-authenticated user id (the task is not building real auth, just trusting the body).
+  - `orgId` (string, required): the organization id the user claims to belong to. Only the values `org-a` and `org-b` are accepted.
+- Gate access by organization: a user from organization `${orgId}` may only enter rooms whose id starts with `${orgId}:` (e.g. a user in `org-a` may enter `org-a:project-1` but never `org-b:project-1`).
+- On a valid request, mint an ID token via `liveblocks.identifyUser({ userId, groupIds: [orgId] }, { userInfo: { orgId } })` and return the upstream JSON body and status verbatim (200 on success).
+- Reject invalid requests with `403 Forbidden` and a JSON body of the shape `{ "error": <string> }`. Specifically reject when:
+  - `orgId` is not in the allowed set (`org-a`, `org-b`).
+  - `room` does not start with `${orgId}:`.
+- Reject malformed requests (missing `room`, `userId`, or `orgId`) with `400 Bad Request` and a JSON body of the shape `{ "error": <string> }`.
+- The endpoint must never expose the Liveblocks secret key; it must be read from the `LIVEBLOCKS_SECRET_KEY` environment variable.
+- Implement the page route at `app/rooms/[roomId]/page.tsx` (the file already exists as a stub) so that, when given the URL query parameters `userId` and `orgId`, it:
+  - Mounts `LiveblocksProvider` configured with `authEndpoint: "/api/liveblocks-auth"` and a callback that POSTs `{ room, userId, orgId }` to that endpoint.
+  - Mounts `RoomProvider` for the `roomId` URL path segment, with an initial Storage of `{ counter: 0 }`.
+  - Renders the current counter value from Storage inside a DOM element with `data-testid="counter-value"`.
+  - Renders the current Liveblocks connection status (e.g. `connected`, `connecting`, `disconnected`, `authenticating`) inside a DOM element with `data-testid="connection-status"`.
+  - The page must be a client component (`"use client"`).
+- Use the **real Liveblocks cloud**. Do not mock `@liveblocks/node` or `@liveblocks/client`. Both `LIVEBLOCKS_SECRET_KEY` and `NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY` are available as environment variables at runtime.
+- Use the `ZEALT_RUN_ID` environment variable to scope test resources: when you (or the verifier) construct test user ids or test room ids, append `-${ZEALT_RUN_ID}` to avoid collisions across concurrent runs. The implementation itself does not need to read `ZEALT_RUN_ID`; only the test cases below do.
+
+## Implementation Hints
+- The Next.js App Router route handler should be `export async function POST(request: Request)` and return a `NextResponse` (or a plain `Response`) with the appropriate status code and JSON body.
+- Construct the Liveblocks server client with `new Liveblocks({ secret: process.env.LIVEBLOCKS_SECRET_KEY! })` from `@liveblocks/node`.
+- The result of `liveblocks.identifyUser(...)` returns `{ status, body }` — propagate both as the HTTP response status and body.
+- On the client side, pass the extra payload (`userId`, `orgId`) to the auth endpoint by using the `authEndpoint` *callback* form of `LiveblocksProvider`, which receives the `room` argument and lets you `fetch("/api/liveblocks-auth", { method: "POST", body: JSON.stringify({ room, userId, orgId }) })`.
+- Use `useStorage((root) => root.counter)` to read the counter value, and `useStatus()` (from `@liveblocks/react`) to read the connection status.
+- Do not put the Liveblocks secret key in any client-side bundle; only the public key (`NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY`) may be referenced from client components.
+
+## Acceptance Criteria
+- Project path: `/home/user/myproject`
+- Start command: `npm run dev` (the dev server listens on port 3000)
+- Port: 3000
+- API endpoint `POST /api/liveblocks-auth` (Content-Type: `application/json`):
+  - Request body schema:
+    ```json
+    {
+      "room": string,
+      "userId": string,
+      "orgId": string
+    }
+    ```
+  - Success response (HTTP 200): a JSON body matching the upstream Liveblocks `identifyUser` response, which is an object containing at least a `token` field of type `string`.
+  - Forbidden response (HTTP 403): a JSON body of the shape `{ "error": string }` when `orgId` is not allowed or when `room` does not start with `${orgId}:`.
+  - Bad-request response (HTTP 400): a JSON body of the shape `{ "error": string }` when any of `room`, `userId`, or `orgId` is missing.
+- Page route `GET /rooms/[roomId]?userId=<id>&orgId=<org>`:
+  - Returns HTTP 200 and HTML containing a DOM element with `data-testid="connection-status"` and a DOM element with `data-testid="counter-value"`.
+  - When `orgId` matches the `roomId` prefix and a valid `LIVEBLOCKS_SECRET_KEY` is configured, the `connection-status` element eventually shows `connected`.
+  - When `orgId` does NOT match the `roomId` prefix, the connection never becomes `connected` (the page may show `authenticating` or `disconnected`).
+- The Liveblocks secret key must come from the `LIVEBLOCKS_SECRET_KEY` environment variable. No hard-coded keys or tokens are permitted anywhere in the source code.
+- `ZEALT_RUN_ID`-scoped test resources: any user id or room id constructed during verification must include `-${ZEALT_RUN_ID}` as a suffix.
+
+
+EOF
+Command outputs captured
+Running command: rm -f ~/.pochi/config.jsonc
+Command outputs captured

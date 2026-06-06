@@ -1,0 +1,4 @@
+* { box-sizing: border-box; }
+body { font-family: system-ui, sans-serif; margin: 0; padding: 24px; }
+ul { list-style: none; padding: 0; margin: 16px 0; }
+li { display: flex; gap: 8px; align-items: center; padding: 4px 0; }

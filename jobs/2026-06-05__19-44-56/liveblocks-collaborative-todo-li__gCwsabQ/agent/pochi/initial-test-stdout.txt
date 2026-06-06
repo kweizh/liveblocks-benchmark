@@ -1,0 +1,22 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0
+rootdir: /bootstrap
+plugins: xprocess-1.0.2, json-ctrf-0.5.0
+collected 13 items
+
+../../bootstrap/test_initial_state.py::test_node_available PASSED
+../../bootstrap/test_initial_state.py::test_npm_available PASSED
+../../bootstrap/test_initial_state.py::test_project_dir_exists PASSED
+../../bootstrap/test_initial_state.py::test_package_json_exists PASSED
+../../bootstrap/test_initial_state.py::test_package_json_has_next_and_liveblocks PASSED
+../../bootstrap/test_initial_state.py::test_package_json_has_dev_script PASSED
+../../bootstrap/test_initial_state.py::test_node_modules_installed PASSED
+../../bootstrap/test_initial_state.py::test_liveblocks_config_exists_with_storage_type PASSED
+../../bootstrap/test_initial_state.py::test_root_page_skeleton_exists PASSED
+../../bootstrap/test_initial_state.py::test_root_layout_or_provider_present PASSED
+../../bootstrap/test_initial_state.py::test_auth_endpoint_skeleton_exists PASSED
+../../bootstrap/test_initial_state.py::test_todo_mutations_not_yet_implemented PASSED
+../../bootstrap/test_initial_state.py::test_env_keys_referenced_or_documented PASSED
+
+============================== 13 passed in 0.09s ==============================
+pytest-xprocess reminder::Be sure to terminate the started process by running 'pytest --xkill' if you have not explicitly done so in your fixture with 'xprocess.getinfo(<process_name>).terminate()'.

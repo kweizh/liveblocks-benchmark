@@ -1,0 +1,91 @@
+{
+    "results": {
+        "tool": {
+            "name": "pytest",
+            "version": "7.4.4"
+        },
+        "summary": {
+            "tests": 6,
+            "passed": 2,
+            "failed": 4,
+            "skipped": 0,
+            "pending": 0,
+            "other": 0,
+            "start": 1780717682755,
+            "stop": 1780717810810
+        },
+        "environment": {
+            "buildName": "Pytest JSON CTRF Report",
+            "buildNumber": "000",
+            "buildUrl": "https://ctrf.io"
+        },
+        "tests": [
+            {
+                "name": "test_final_state.py::test_auth_endpoint_returns_token",
+                "status": "passed",
+                "duration": 312,
+                "start": 1780717683138,
+                "stop": 1780717683450,
+                "retries": 0,
+                "file_path": "test_final_state.py"
+            },
+            {
+                "name": "test_final_state.py::test_auth_route_uses_identify_user_with_user_info",
+                "status": "passed",
+                "duration": 2,
+                "start": 1780717683451,
+                "stop": 1780717683453,
+                "retries": 0,
+                "file_path": "test_final_state.py"
+            },
+            {
+                "name": "test_final_state.py::test_avatar_stack_overflow_with_six_users",
+                "status": "failed",
+                "raw_status": "call_failed",
+                "duration": 33551,
+                "start": 1780717683453,
+                "stop": 1780717717004,
+                "retries": 0,
+                "file_path": "test_final_state.py",
+                "trace": "start_app = None\n\n    def test_avatar_stack_overflow_with_six_users(start_app):\n        \"\"\"Open 6 contexts; the first one must show 4 avatars + a \"+2\" overflow badge.\"\"\"\n        from playwright.sync_api import sync_playwright\n    \n        with sync_playwright() as p:\n            browser = p.chromium.launch()\n            contexts = []\n            try:\n                # Open context 0 (the observer) first.\n                ctx0, page0 = _open_context_for_user(browser, 0)\n                contexts.append(ctx0)\n                # Wait until at least the self avatar shows up.\n>               page0.wait_for_selector('[data-testid=\"avatar-item\"]', timeout=30_000)\n\n/tests/test_final_state.py:126: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n/usr/local/lib/python3.12/dist-packages/playwright/sync_api/_generated.py:8770: in wait_for_selector\n    self._sync(\n/usr/local/lib/python3.12/dist-packages/playwright/_impl/_page.py:424: in wait_for_selector\n    return await self._main_frame.wait_for_selector(**locals_to_params(locals()))\n/usr/local/lib/python3.12/dist-packages/playwright/_impl/_frame.py:372: in wait_for_selector\n    await self._channel.send(\n/usr/local/lib/python3.12/dist-packages/playwright/_impl/_connection.py:69: in send\n    return await self._connection.wrap_api_call(\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = <playwright._impl._connection.Connection object at 0x7f4d4d2e0440>\ncb = <function Channel.send.<locals>.<lambda> at 0x7f4d4b9eefc0>\nis_internal = False, title = None\n\n    async def wrap_api_call(\n        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None\n    ) -> Any:\n        if self._api_zone.get():\n            return await cb()\n        task = asyncio.current_task(self._loop)\n        st: List[inspect.FrameInfo] = getattr(\n            task, \"__pw_stack__\", None\n        ) or inspect.stack(0)\n    \n        parsed_st = _extract_stack_trace_information_from_stack(st, is_internal, title)\n        self._api_zone.set(parsed_st)\n        try:\n            return await cb()\n        except Exception as error:\n>           raise rewrite_error(error, f\"{parsed_st['apiName']}: {error}\") from None\nE           playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 30000ms exceeded.\nE           Call log:\nE             - waiting for locator(\"[data-testid=\\\"avatar-item\\\"]\") to be visible\n\n/usr/local/lib/python3.12/dist-packages/playwright/_impl/_connection.py:559: TimeoutError",
+                "message": "The test failed in the call phase due to an exception"
+            },
+            {
+                "name": "test_final_state.py::test_tooltip_shows_user_name_with_you_suffix",
+                "status": "failed",
+                "raw_status": "call_failed",
+                "duration": 31437,
+                "start": 1780717717005,
+                "stop": 1780717748442,
+                "retries": 0,
+                "file_path": "test_final_state.py",
+                "trace": "start_app = None\n\n    def test_tooltip_shows_user_name_with_you_suffix(start_app):\n        \"\"\"Hovering the self avatar shows '<name> (You)'; hovering another shows that user's name.\"\"\"\n        from playwright.sync_api import sync_playwright\n    \n        with sync_playwright() as p:\n            browser = p.chromium.launch()\n            contexts = []\n            try:\n                # Two contexts is enough for this check.\n                ctx0, page0 = _open_context_for_user(browser, 0)\n                contexts.append(ctx0)\n                ctx1, page1 = _open_context_for_user(browser, 1)\n                contexts.append(ctx1)\n    \n                # Wait until context 0 sees at least 2 avatars.\n                deadline = time.time() + 30\n                while time.time() < deadline and _visible_avatar_count(page0) < 2:\n                    time.sleep(0.5)\n>               assert _visible_avatar_count(page0) >= 2, (\n                    \"Context 0 should see at least 2 avatars (self + one other).\"\n                )\nE               AssertionError: Context 0 should see at least 2 avatars (self + one other).\nE               assert 0 >= 2\nE                +  where 0 = _visible_avatar_count(<Page url='http://localhost:3000/'>)\n\n/tests/test_final_state.py:199: AssertionError",
+                "message": "The test failed in the call phase due to an assertion error"
+            },
+            {
+                "name": "test_final_state.py::test_closing_contexts_reduces_avatars",
+                "status": "failed",
+                "raw_status": "call_failed",
+                "duration": 31253,
+                "start": 1780717748443,
+                "stop": 1780717779696,
+                "retries": 0,
+                "file_path": "test_final_state.py",
+                "trace": "start_app = None\n\n    def test_closing_contexts_reduces_avatars(start_app):\n        \"\"\"After closing 3 of 6 contexts, the observer should see exactly 3 avatars (no overflow).\"\"\"\n        from playwright.sync_api import sync_playwright\n    \n        with sync_playwright() as p:\n            browser = p.chromium.launch()\n            contexts = []\n            try:\n                ctx0, page0 = _open_context_for_user(browser, 0)\n                contexts.append(ctx0)\n                for i in range(1, 6):\n                    ctx, page = _open_context_for_user(browser, i)\n                    contexts.append(ctx)\n>                   page.wait_for_selector('[data-testid=\"avatar-item\"]', timeout=30_000)\n\n/tests/test_final_state.py:246: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n/usr/local/lib/python3.12/dist-packages/playwright/sync_api/_generated.py:8770: in wait_for_selector\n    self._sync(\n/usr/local/lib/python3.12/dist-packages/playwright/_impl/_page.py:424: in wait_for_selector\n    return await self._main_frame.wait_for_selector(**locals_to_params(locals()))\n/usr/local/lib/python3.12/dist-packages/playwright/_impl/_frame.py:372: in wait_for_selector\n    await self._channel.send(\n/usr/local/lib/python3.12/dist-packages/playwright/_impl/_connection.py:69: in send\n    return await self._connection.wrap_api_call(\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = <playwright._impl._connection.Connection object at 0x7f4d4ba6ac90>\ncb = <function Channel.send.<locals>.<lambda> at 0x7f4d4b72dda0>\nis_internal = False, title = None\n\n    async def wrap_api_call(\n        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None\n    ) -> Any:\n        if self._api_zone.get():\n            return await cb()\n        task = asyncio.current_task(self._loop)\n        st: List[inspect.FrameInfo] = getattr(\n            task, \"__pw_stack__\", None\n        ) or inspect.stack(0)\n    \n        parsed_st = _extract_stack_trace_information_from_stack(st, is_internal, title)\n        self._api_zone.set(parsed_st)\n        try:\n            return await cb()\n        except Exception as error:\n>           raise rewrite_error(error, f\"{parsed_st['apiName']}: {error}\") from None\nE           playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 30000ms exceeded.\nE           Call log:\nE             - waiting for locator(\"[data-testid=\\\"avatar-item\\\"]\") to be visible\n\n/usr/local/lib/python3.12/dist-packages/playwright/_impl/_connection.py:559: TimeoutError",
+                "message": "The test failed in the call phase due to an exception"
+            },
+            {
+                "name": "test_final_state.py::test_single_user_case",
+                "status": "failed",
+                "raw_status": "call_failed",
+                "duration": 31112,
+                "start": 1780717779697,
+                "stop": 1780717810809,
+                "retries": 0,
+                "file_path": "test_final_state.py",
+                "trace": "start_app = None\n\n    def test_single_user_case(start_app):\n        \"\"\"With only the observer connected, exactly 1 avatar is visible, no overflow.\"\"\"\n        from playwright.sync_api import sync_playwright\n    \n        with sync_playwright() as p:\n            browser = p.chromium.launch()\n            contexts = []\n            try:\n                ctx0, page0 = _open_context_for_user(browser, 0)\n                contexts.append(ctx0)\n>               page0.wait_for_selector('[data-testid=\"avatar-item\"]', timeout=30_000)\n\n/tests/test_final_state.py:300: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n/usr/local/lib/python3.12/dist-packages/playwright/sync_api/_generated.py:8770: in wait_for_selector\n    self._sync(\n/usr/local/lib/python3.12/dist-packages/playwright/_impl/_page.py:424: in wait_for_selector\n    return await self._main_frame.wait_for_selector(**locals_to_params(locals()))\n/usr/local/lib/python3.12/dist-packages/playwright/_impl/_frame.py:372: in wait_for_selector\n    await self._channel.send(\n/usr/local/lib/python3.12/dist-packages/playwright/_impl/_connection.py:69: in send\n    return await self._connection.wrap_api_call(\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = <playwright._impl._connection.Connection object at 0x7f4d4b472f30>\ncb = <function Channel.send.<locals>.<lambda> at 0x7f4d4b8999e0>\nis_internal = False, title = None\n\n    async def wrap_api_call(\n        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None\n    ) -> Any:\n        if self._api_zone.get():\n            return await cb()\n        task = asyncio.current_task(self._loop)\n        st: List[inspect.FrameInfo] = getattr(\n            task, \"__pw_stack__\", None\n        ) or inspect.stack(0)\n    \n        parsed_st = _extract_stack_trace_information_from_stack(st, is_internal, title)\n        self._api_zone.set(parsed_st)\n        try:\n            return await cb()\n        except Exception as error:\n>           raise rewrite_error(error, f\"{parsed_st['apiName']}: {error}\") from None\nE           playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 30000ms exceeded.\nE           Call log:\nE             - waiting for locator(\"[data-testid=\\\"avatar-item\\\"]\") to be visible\n\n/usr/local/lib/python3.12/dist-packages/playwright/_impl/_connection.py:559: TimeoutError",
+                "message": "The test failed in the call phase due to an exception"
+            }
+        ]
+    }
+}

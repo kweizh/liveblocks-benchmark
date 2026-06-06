@@ -1,0 +1,168 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0
+rootdir: /tests
+plugins: xprocess-1.0.2, json-ctrf-0.5.0
+collected 7 items
+
+../../../tests/test_final_state.py .FFF..F                               [100%]
+
+=================================== FAILURES ===================================
+___________________________ test_a_writes_b_observes ___________________________
+
+two_contexts = (<Page url='http://localhost:3000/'>, <Page url='http://localhost:3000/'>)
+
+    def test_a_writes_b_observes(two_contexts):
+        page_a, page_b = two_contexts
+>       _set_cell(page_a, "A1", "10")
+
+/tests/test_final_state.py:154: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/tests/test_final_state.py:93: in _set_cell
+    editable.wait_for(state="visible", timeout=SYNC_TIMEOUT_MS)
+/usr/local/lib/python3.12/dist-packages/playwright/sync_api/_generated.py:20048: in wait_for
+    self._sync(
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_locator.py:741: in wait_for
+    await self._frame.wait_for_selector(
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_frame.py:372: in wait_for_selector
+    await self._channel.send(
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_connection.py:69: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <playwright._impl._connection.Connection object at 0x7f443b406330>
+cb = <function Channel.send.<locals>.<lambda> at 0x7f443a48a8e0>
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -> Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        st: List[inspect.FrameInfo] = getattr(
+            task, "__pw_stack__", None
+        ) or inspect.stack(0)
+    
+        parsed_st = _extract_stack_trace_information_from_stack(st, is_internal, title)
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+>           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Locator.wait_for: Timeout 20000ms exceeded.
+E           Call log:
+E             - waiting for locator("[data-cell='A1']").locator("input, textarea, [contenteditable='true'], [contenteditable='']").first to be visible
+
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_connection.py:559: TimeoutError
+______________________ test_b_writes_formula_both_see_sum ______________________
+
+two_contexts = (<Page url='http://localhost:3000/'>, <Page url='http://localhost:3000/'>)
+
+    def test_b_writes_formula_both_see_sum(two_contexts):
+        page_a, page_b = two_contexts
+        _set_cell(page_b, "B1", "=SUM(A1,A2)")
+>       _wait_for_cell_text(page_b, "B1", "15")
+
+/tests/test_final_state.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+page = <Page url='http://localhost:3000/'>, label = 'B1', needle = '15'
+timeout = 20000
+
+    def _wait_for_cell_text(page, label, needle, timeout=SYNC_TIMEOUT_MS):
+        end = time.time() + timeout / 1000.0
+        last = None
+        while time.time() < end:
+            try:
+                last = page.locator(f"[data-cell='{label}']").inner_text()
+                if needle in last:
+                    return last
+            except Exception:
+                pass
+            time.sleep(0.25)
+>       raise AssertionError(
+            f"Timed out waiting for cell {label} to contain {needle!r}; last value={last!r}"
+        )
+E       AssertionError: Timed out waiting for cell B1 to contain '15'; last value='B1\n0'
+
+/tests/test_final_state.py:115: AssertionError
+___________ test_formula_is_case_insensitive_and_whitespace_tolerant ___________
+
+two_contexts = (<Page url='http://localhost:3000/'>, <Page url='http://localhost:3000/'>)
+
+    def test_formula_is_case_insensitive_and_whitespace_tolerant(two_contexts):
+        page_a, page_b = two_contexts
+        _set_cell(page_a, "C1", "=sum( A1 , A2 )")
+>       _wait_for_cell_text(page_a, "C1", "15")
+
+/tests/test_final_state.py:170: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+page = <Page url='http://localhost:3000/'>, label = 'C1', needle = '15'
+timeout = 20000
+
+    def _wait_for_cell_text(page, label, needle, timeout=SYNC_TIMEOUT_MS):
+        end = time.time() + timeout / 1000.0
+        last = None
+        while time.time() < end:
+            try:
+                last = page.locator(f"[data-cell='{label}']").inner_text()
+                if needle in last:
+                    return last
+            except Exception:
+                pass
+            time.sleep(0.25)
+>       raise AssertionError(
+            f"Timed out waiting for cell {label} to contain {needle!r}; last value={last!r}"
+        )
+E       AssertionError: Timed out waiting for cell C1 to contain '15'; last value='C1\n0'
+
+/tests/test_final_state.py:115: AssertionError
+_______________________ test_real_liveblocks_cloud_used ________________________
+
+two_contexts = (<Page url='http://localhost:3000/'>, <Page url='http://localhost:3000/'>)
+
+    def test_real_liveblocks_cloud_used(two_contexts):
+        """A real Liveblocks cloud connection must be in use (no mocking).
+    
+        We capture network requests from the page and require at least one
+        websocket or HTTPS request to a liveblocks.io host.
+        """
+        page_a, _ = two_contexts
+        seen = {"hit": False}
+    
+        def on_request(req):
+            url = req.url
+            if "liveblocks.io" in url:
+                seen["hit"] = True
+    
+        page_a.on("request", on_request)
+        # Trigger a fresh interaction that should produce traffic.
+        _set_cell(page_a, "E1", "ping")
+        end = time.time() + 10
+        while time.time() < end and not seen["hit"]:
+            time.sleep(0.5)
+    
+>       assert seen["hit"], (
+            "No request to liveblocks.io observed; the task must use the real "
+            "Liveblocks cloud (NEVER mock)."
+        )
+E       AssertionError: No request to liveblocks.io observed; the task must use the real Liveblocks cloud (NEVER mock).
+E       assert False
+
+/tests/test_final_state.py:236: AssertionError
+==================================== PASSES ====================================
+________________________ test_initial_grid_has_25_cells ________________________
+---------------------------- Captured stdout setup -----------------------------
+/tests/.pytest_cache/d/.xprocess/spreadsheet_dev$ npm run dev
+process 'spreadsheet_dev' started pid=1089
+spreadsheet_dev process startup detected
+=========================== short test summary info ============================
+PASSED ../../../tests/test_final_state.py::test_initial_grid_has_25_cells
+PASSED ../../../tests/test_final_state.py::test_malformed_formula_shows_err
+PASSED ../../../tests/test_final_state.py::test_remote_editing_indicator
+FAILED ../../../tests/test_final_state.py::test_a_writes_b_observes - playwri...
+FAILED ../../../tests/test_final_state.py::test_b_writes_formula_both_see_sum
+FAILED ../../../tests/test_final_state.py::test_formula_is_case_insensitive_and_whitespace_tolerant
+FAILED ../../../tests/test_final_state.py::test_real_liveblocks_cloud_used - ...
+==================== 4 failed, 3 passed in 84.28s (0:01:24) ====================

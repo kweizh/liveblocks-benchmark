@@ -1,0 +1,56 @@
+- Initializing MCP connections...
+You
+# Collaborative BlockNote Editor with Liveblocks Yjs ## Background A Next.js 14 (App Router) project lives at `/home/user/myproject`. It already renders a BlockNote editor using `useCreateBlockNote` and `@blocknote/mantine`, but the editor is currently single-player: there is no Yjs document, no Liveblocks Yjs provider, and no Awareness wiring. Your job is to upgrade it to a real-time collaborative block-based editor backed by the real Liveblocks cloud through `@liveblocks/yjs`. You must use the real Liveblocks cloud service. Do **NOT** mock the Liveblocks client, Yjs, the WebSocket layer, or the `LiveblocksYjsProvider`. Real network sync between two browser contexts is what the verifier checks. ## Requirements * Wire the BlockNote editor to Liveblocks via Yjs so that multiple browser tabs editing the same room see each other's blocks in real time. * Configure `useCreateBlockNote` with a `collaboration` option that: * Uses a `Y.Doc` whose updates are synchronized via a `LiveblocksYjsProvider` (or `getYjsProviderForRoom`). * Stores BlockNote data under the Y.Doc XML fragment named exactly `document-store`. * Provides per-user awareness info (`user.name` and `user.color`) so other users' colored cursors are visible. * Render `<BlockNoteView />` from `@blocknote/mantine` with the default BlockNote formatting toolbar (the default top-level toolbar that ships with `BlockNoteView`). * Wrap the editor in `LiveblocksProvider` + `RoomProvider`. Read the room id from a `?room=<id>` query string parameter and use it as the Liveblocks room id verbatim. If `?room` is omitted, fall back to a default room id (e.g. `blocknote-default`). * Authenticate Liveblocks using the **real Liveblocks cloud**. Use the public key in `NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY` for client-side auth and/or the secret key in `LIVEBLOCKS_SECRET_KEY` for a server auth endpoint at `/api/liveblocks-auth`. Either approach is acceptable as long as the editor actually connects to `wss://api.liveblocks.io`. * Add a **Save snapshot** button in the editor UI. When clicked, it must `POST` the current `editor.document` (the JSON block array exposed by BlockNote) to `/api/snapshots` as JSON `{ "roomId": <string>, "blocks": <Block[]> }`. * Implement `/api/snapshots` in the Next.js App Router: * `POST /api/snapshots` — accepts JSON `{ roomId, blocks }`, stores the latest snapshot for that `roomId` in an in-memory map, and returns `{ ok: true, roomId, blockCount }` with status `200`. * `GET /api/snapshots?roomId=<id>` — returns the latest stored snapshot as JSON `{ roomId, blocks }` with status `200`, or `{ error: "not_found" }` with status `404` if no snapshot exists. * The app must run with `npm run dev` on port `3000` and serve the editor at `/editor` (e.g. `http://localhost:3000/editor?room=room-xyz`). ## Implementation Hints * The relevant packages are already installed: `@blocknote/core`, `@blocknote/react`, `@blocknote/mantine`, `yjs`, `@liveblocks/client`, `@liveblocks/react`, `@liveblocks/yjs`. * Liveblocks recommends `getYjsProviderForRoom(room)` from `@liveblocks/yjs` to obtain a per-room provider. The provider's `getYDoc()` returns the shared `Y.Doc`; pass `doc.getXmlFragment("document-store")` to BlockNote's `collaboration.fragment`. * The provider exposes an `awareness` instance backed by Liveblocks Presence. BlockNote uses awareness automatically when the `provider` is passed to its `collaboration` option, so colored remote cursors light up out of the box. * Per-user `user.name` and `user.color` can be derived from `useSelf((me) => me.info)` (when using an auth endpoint that sets `userInfo`) or generated client-side per session. * Read `run-id` from the `ZEALT_RUN_ID` environment variable when you need an isolated default room name, but accept the `?room=` query parameter as the source of truth for the room id at runtime. * Use Next.js Route Handlers (`app/api/snapshots/route.ts`) for the snapshot endpoint. A module-level `Map<string, Block[]>` is enough for the in-memory store. * BlockNote's `editor.document` is the JSON `Block[]` representation used for the snapshot payload. ## Acceptance Criteria * Project path: /home/user/myproject * Start command: npm run dev * Port: 3000 * Routes: * `GET /editor?room=<roomId>`: Renders the BlockNote editor wired to the Liveblocks Yjs provider for the given Liveblocks room. The default BlockNote formatting toolbar must be visible. A **Save snapshot** button must be present. * API Endpoints: * `POST /api/snapshots`: Accepts JSON `{ roomId: string, blocks: Block[] }` and returns 200 with JSON `{ ok: true, roomId: string, blockCount: number }`. * `GET /api/snapshots?roomId=<roomId>`: Returns 200 with JSON `{ roomId: string, blocks: Block[] }` for a previously saved snapshot, or 404 with JSON `{ error: "not_found" }` otherwise. * Collaboration behavior: * Two independent browser contexts opening `/editor?room=<same roomId>` must sync edits in real time through Liveblocks Yjs. * When user A inserts blocks (e.g. a heading and a paragraph), user B must see those blocks appear in their editor without a page reload. * When user B adds additional blocks (e.g. a bullet list item), user A must see them appear. * The room id used by the editor must equal the value of the `?room` query string parameter. * The app must authenticate to the real Liveblocks cloud using `NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY` and/or `LIVEBLOCKS_SECRET_KEY`. Mocking Liveblocks, Yjs, or `LiveblocksYjsProvider` is not allowed.   
+
+Pochi
+📂 Listing files in /home/user/myproject recursively ✔ 
+📖 Reading /home/user/myproject/app/editor/page.tsx ✔ 
+📋 Updating todo list (5 items) ✔ 
+📖 Reading /home/user/myproject/package.json ✔ 
+✏️  Writing /home/user/myproject/app/api/snapshots/route.ts ✔ 
+📋 Updating todo list (5 items) ✔ 
+✏️  Writing /home/user/myproject/app/api/liveblocks-auth/route.ts ✔ 
+📋 Updating todo list (5 items) ✔ 
+✏️  Writing /home/user/myproject/app/editor/page.tsx ✔ 
+📋 Updating todo list (5 items) ✔ 
+🛠️ Tool startBackgroundJob ✔ 
+🛠️ Tool readBackgroundJobOutput ✔ 
+📖 Reading /home/user/myproject/app/layout.tsx ✔ 
+📋 Updating todo list (5 items) ✔ 
+🎉 Task Completed
+I have successfully upgraded the BlockNote editor to a real-time collaborative editor using Liveblocks and Yjs. 
+
+### Changes Made:
+
+1.  **Liveblocks Authentication**:
+    *   Implemented a server-side authentication endpoint at `/api/liveblocks-auth` using `@liveblocks/node`.
+    *   This endpoint generates a random user ID, name, and color for each session and authorizes access to the requested room.
+
+2.  **Collaborative Editor**:
+    *   Updated `/editor/page.tsx` to wrap the editor in `LiveblocksProvider` and `RoomProvider`.
+    *   Wired `useCreateBlockNote` with the `collaboration` option.
+    *   Used `getYjsProviderForRoom` from `@liveblocks/yjs` to synchronize a `Y.Doc`.
+    *   Stored document data in a Y.Doc XML fragment named `document-store`.
+    *   Implemented user awareness for colored cursors using the info from `useSelf`.
+
+3.  **Snapshot API**:
+    *   Created `/api/snapshots/route.ts` with `POST` and `GET` handlers.
+    *   `POST /api/snapshots` saves the current editor blocks to an in-memory map.
+    *   `GET /api/snapshots?roomId=<id>` retrieves the latest snapshot for a given room.
+
+4.  **Save Snapshot Button**:
+    *   Added a "Save snapshot" button to the editor UI.
+    *   When clicked, it sends the current `editor.document` (JSON block array) to the `/api/snapshots` endpoint.
+
+5.  **Room Management**:
+    *   The editor reads the room ID from the `?room=<id>` query parameter, falling back to `blocknote-default` if not provided.
+
+### How to run:
+The application is configured to run with `npm run dev` on port `3000`. You can access the editor at:
+`http://localhost:3000/editor?room=my-collaborative-room`
+
+Multiple users joining the same room will see each other's edits and cursors in real time.
+🤖 Generated with [Pochi](https://getpochi.com) | [Task](https://getpochi.com/tasks/12345)   
+- Waiting for background jobs to complete (timeout: 60000ms)...
+✖ Async wait timeout reached. Remaining: 1 job(s)
+  

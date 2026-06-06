@@ -1,0 +1,41 @@
+* { box-sizing: border-box; }
+body { font-family: system-ui, sans-serif; margin: 0; padding: 24px; }
+button { cursor: pointer; }
+
+.toolbar { display: flex; gap: 6px; margin-bottom: 12px; }
+.toolbar button { padding: 4px 10px; }
+
+.editor {
+  border: 1px solid #ccc;
+  padding: 12px;
+  min-height: 200px;
+  border-radius: 4px;
+}
+.editor:focus { outline: 2px solid #4a90e2; }
+
+.connected-users { display: flex; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; align-items: center; }
+.connected-user { padding: 2px 8px; border-radius: 999px; background: #eee; font-size: 13px; color: #fff; }
+
+/* Collaboration cursor styles */
+.collaboration-cursor__caret {
+  border-left: 1px solid #0d0d0d;
+  border-right: 1px solid #0d0d0d;
+  margin-left: -1px;
+  margin-right: -1px;
+  pointer-events: none;
+  position: relative;
+  word-break: normal;
+}
+
+.collaboration-cursor__label {
+  border-radius: 3px 3px 3px 0;
+  font-size: 11px;
+  font-weight: 600;
+  left: -1px;
+  line-height: normal;
+  padding: 0.1rem 0.3rem;
+  position: absolute;
+  top: -1.4em;
+  user-select: none;
+  white-space: nowrap;
+}

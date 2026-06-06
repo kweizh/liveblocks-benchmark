@@ -1,0 +1,127 @@
+- Initializing MCP connections...
+You
+# Liveblocks Next.js: Role-Based Read-Only Room Access (Access Tokens) ## Background You are building a small collaborative dashboard powered by [Liveblocks](https://liveblocks.io) where each room has two kinds of participants: - **Editors** can view and mutate the shared state. - **Viewers** can only view the shared state in real time; they must **not** be able to mutate it. Liveblocks supports this directly via **Access Token authentication** (`liveblocks.prepareSession`) with `session.allow(roomId, session.READ_ACCESS)` or `session.allow(roomId, session.FULL_ACCESS)`. The server is responsible for inspecting the requested role and granting either read or full access to the room before authorizing the session. A partial Next.js 14 (App Router, TypeScript) project skeleton already exists at `/home/user/myproject`. All Node dependencies — including `@liveblocks/client`, `@liveblocks/react`, `@liveblocks/node`, and `next` — are pre-installed. The `/api/liveblocks-auth` route handler currently exists as a stub that returns HTTP 501 (Not Implemented); the page route exists as a non-functional placeholder. Your job is to make the system real. ## Requirements - Implement the `POST /api/liveblocks-auth` route handler at `app/api/liveblocks-auth/route.ts` using `@liveblocks/node` and the **Access Token** approach (`liveblocks.prepareSession` + `session.allow` + `session.authorize`). - The request body is JSON with at least the following fields: - `room` (string, required): the Liveblocks room id the client wants to enter. - `userId` (string, required): a mock-authenticated user id (the task is not building real auth, just trusting the request body for the role and identity). - `role` (string, required): one of `"editor"` or `"viewer"`. Any other value must be rejected. - Permission rules implemented through `session.allow(...)`: - When `role === "editor"`, grant `session.FULL_ACCESS` to the requested `room`. - When `role === "viewer"`, grant `session.READ_ACCESS` to the requested `room`. - On a valid request, call `session.authorize()` and return the upstream Liveblocks `{ status, body }` verbatim (status 200 with a JSON body containing a `token` string on success). - Reject malformed or invalid requests with `400 Bad Request` and a JSON body of the shape `{ "error": <string> }`. Specifically reject when: - Any of `room`, `userId`, or `role` is missing. - `role` is not one of `"editor"` or `"viewer"`. - The endpoint must never expose the Liveblocks secret key; it must be read from the `LIVEBLOCKS_SECRET_KEY` environment variable. - Implement the room page at `app/rooms/[roomId]/page.tsx` (the file already exists as a stub) so that, when given the URL query parameters `userId` and `role`, it: - Is a client component (`"use client"`). - Mounts `LiveblocksProvider` configured with `authEndpoint` as a **callback** that POSTs `{ room, userId, role }` to `/api/liveblocks-auth`. - Mounts `RoomProvider` for the `roomId` URL path segment with initial Storage of `{ counter: 0 }` (a `LiveObject`-shaped root with a numeric `counter` field). - Renders the current counter value (read from Storage) inside a DOM element with `data-testid="counter-value"`. - Renders the user's effective role inside a DOM element with `data-testid="role-label"` (must contain the literal text `editor` or `viewer`). - Renders the current Liveblocks connection status (e.g. `connected`, `connecting`, `authenticating`, `disconnected`) inside a DOM element with `data-testid="connection-status"`. - Renders an **increment button** with `data-testid="increment-button"` that, when clicked, increases the shared `counter` by 1 via `useMutation`. - The button **must be disabled** (the rendered `<button>` element must have the HTML `disabled` attribute) whenever the current `role` is `viewer`. It must be enabled when the role is `editor`. - Use the **real Liveblocks cloud**. Do not mock `@liveblocks/node` or any Liveblocks client package. Both `LIVEBLOCKS_SECRET_KEY` and `NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY` are provided at runtime as environment variables. - **Parallel-run safety**: any externally visible Liveblocks resource created by the verifier (room id, user id) must be scoped to the `ZEALT_RUN_ID` environment variable (e.g. `room-readonly-${ZEALT_RUN_ID}`). The implementation does not need to read `ZEALT_RUN_ID`; only the verifier does. The implementation must work for arbitrary room ids. ## Implementation Hints - The Next.js App Router route handler should be `export async function POST(request: Request)` returning a `NextResponse` (or a plain `Response`) with the appropriate status code and JSON body. - Construct the Liveblocks server client with `new Liveblocks({ secret: process.env.LIVEBLOCKS_SECRET_KEY! })` from `@liveblocks/node`. - Use `liveblocks.prepareSession(userId, { userInfo: { role } })` to start a session, then `session.allow(room, role === "viewer" ? session.READ_ACCESS : session.FULL_ACCESS)`, then `await session.authorize()`. Propagate the resulting `status` and `body` as the HTTP response. - On the client side, pass the extra payload (`userId`, `role`) to the auth endpoint by using the **callback form** of `authEndpoint`. The callback receives the `room` argument and should `fetch("/api/liveblocks-auth", { method: "POST", body: JSON.stringify({ room, userId, role }) })` and return the parsed JSON. - Use `useStorage((root) => root.counter)` to read the counter value; use `useMutation(({ storage }) => storage.set("counter", (storage.get("counter") as number) + 1), [])` (or equivalent) to mutate it; use `useStatus()` (from `@liveblocks/react`) to read the connection status. - The Liveblocks server will reject any Storage write attempted with a READ_ACCESS token, but the UI must additionally disable the increment button for viewers so that the read-only nature of the role is visible in the DOM. - Do not put the Liveblocks secret key in any client-side bundle; only the public key (`NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY`) may be referenced from client components, and only if you actually need it (the access-token flow does not require it on the client). ## Acceptance Criteria - Project path: `/home/user/myproject` - Start command: `npm run dev -- -p 3000` (the dev server listens on port 3000) - Port: 3000 - API endpoint `POST /api/liveblocks-auth` (Content-Type: `application/json`): - Request body schema: ```json { "room": string, "userId": string, "role": "editor" | "viewer" } ``` - Success response (HTTP 200): a JSON body matching the upstream Liveblocks access-token response, containing at least a `token` field of type `string`. - Bad-request response (HTTP 400): a JSON body of the shape `{ "error": string }` when any of `room`, `userId`, `role` is missing or when `role` is not `"editor"` or `"viewer"`. - Page route `GET /rooms/[roomId]?userId=<id>&role=<editor|viewer>`: - Returns HTTP 200 and HTML containing DOM elements with each of the following `data-testid` attributes: `connection-status`, `counter-value`, `role-label`, `increment-button`. - The `role-label` element contains the literal text matching the requested role (`editor` or `viewer`). - When `role=viewer`, the `increment-button` element is rendered with the HTML `disabled` attribute. - When `role=editor`, the `increment-button` element is rendered without the `disabled` attribute. - With a valid `LIVEBLOCKS_SECRET_KEY`, the `connection-status` element eventually shows `connected` for both editor and viewer roles. - Clicking the editor's `increment-button` increases the shared Storage `counter`; a viewer connected to the same room sees the updated value in their `counter-value` element in real time. - Liveblocks credentials must be read from environment variables (`LIVEBLOCKS_SECRET_KEY` server-side; `NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY` is also available). No hard-coded secret tokens may appear in source files. - Any Liveblocks room id or user id used during verification must be suffixed with `-${ZEALT_RUN_ID}` so concurrent runs do not collide.   
+
+Pochi
+💭 Thinking for 582 characters   
+📋 Updating todo list (4 items) ✔ 
+💭 Thinking for 42 characters   
+📂 Listing files in /home/user/myproject recursively ✔ 
+💭 Thinking for 100 characters   
+Let me look at the key existingfiles:   
+📖 Reading /home/user/myproject/app/api/liveblocks-auth/route.ts ✔ 
+📖 Reading /home/user/myproject/app/rooms/[roomId]/page.tsx ✔ 
+📖 Reading /home/user/myproject/package.json ✔ 
+📖 Reading /home/user/myproject/app/layout.tsx ✔ 
+📖 Reading /home/user/myproject/app/page.tsx ✔ 
+📖 Reading /home/user/myproject/tsconfig.json ✔ 
+💭 Thinking for 156 characters   
+Let me check the Liveblocks API types to ensure I use the correctAPI:   
+📖 Reading /home/user/myproject/node_modules/@liveblocks/node/dist/index.d.ts ✔ 
+📖 Reading /home/user/myproject/node_modules/@liveblocks/react/dist/index.d.ts ✔ 
+💭 Thinking for 181 characters   
+Now let me check the `@liveblocks/client` types for the authEndpointcallback signature:   
+🔍 Searching for authEndpoint in *.d.ts files in /home/user/myproject/node_modules/@liveblocks/client/dist ✔ 
+💭 Thinking for 82 characters   
+📖 Reading /home/user/myproject/node_modules/@liveblocks/client/dist/index.d.ts ✔ 
+💭 Thinking for 116 characters   
+🔍 Searching for authEndpoint in *.d.ts files in /home/user/myproject/node_modules/@liveblocks/core/dist ✔ 
+📖 Reading /home/user/myproject/node_modules/@liveblocks/core/dist/index.d.ts ✔ 
+💭 Thinking for 100 characters   
+🔍 Searching for type AuthEndpoint in *.d.ts files in /home/user/myproject/node_modules/@liveblocks/core/dist ✔ 
+🔍 Searching for CustomAuthenticationResult in *.d.ts files in /home/user/myproject/node_modules/@liveblocks/core/dist ✔ 
+📖 Reading /home/user/myproject/node_modules/@liveblocks/core/dist/index.d.ts ✔ 
+💭 Thinking for 412 characters   
+📖 Reading /home/user/myproject/node_modules/@liveblocks/react/dist/room-CqT08uWZ.d.ts ✔ 
+🔍 Searching for declare function useStatus in *.d.ts files in /home/user/myproject/node_modules/@liveblocks/react/dist ✔ 
+🔍 Searching for declare function useMutation in *.d.ts files in /home/user/myproject/node_modules/@liveblocks/react/dist ✔ 
+🔍 Searching for useMutation in *.d.ts files in /home/user/myproject/node_modules/@liveblocks/react/dist ✔ 
+💭 Thinking for 1310 characters   
+Now I have all the information I need. Let me implementboth files.   
+📋 Updating todo list (4 items) ✔ 
+✏️  Writing /home/user/myproject/app/api/liveblocks-auth/route.ts ✔ 
+💭 Thinking for 2241 characters   
+🔍 Searching for LiveblocksProvider in room-CqT08uWZ.d.ts files in /home/user/myproject/node_modules/@liveblocks/react/dist ✔ 
+💭 Thinking for 448 characters   
+🔍 Searching for RoomProvider in room-CqT08uWZ.d.ts files in /home/user/myproject/node_modules/@liveblocks/react/dist ✔ 
+📖 Reading /home/user/myproject/node_modules/@liveblocks/react/dist/room-CqT08uWZ.d.ts ✔ 
+📖 Reading /home/user/myproject/node_modules/@liveblocks/react/dist/room-CqT08uWZ.d.ts ✔ 
+💭 Thinking for 271 characters   
+Now I have all the information I need. Let me implement theroom page:   
+📋 Updating todo list (4 items) ✔ 
+✏️  Writing /home/user/myproject/app/rooms/[roomId]/page.tsx ✔ 
+💭 Thinking for 182 characters   
+Now let me verify the implementation compiles correctly:   
+📖 Reading /home/user/myproject/next.config.js ✔ 
+💫 Executing cd /home/user/myproject && npx next build 2>&1 | head -80 ✔ 
+💭 Thinking for 743 characters   
+The build failed due to a type error. The `useStorage` return type needs proper handling. Let me fix the page:   
+✏️  Writing /home/user/myproject/app/rooms/[roomId]/page.tsx ✔ 
+💫 Executing cd /home/user/myproject && npx next build 2>&1 | head -60 ✔ 
+💭 Thinking for 5893 characters   
+The build succeeded, but let me reconsider the approach. Using `@liveblocks/react/suspense` might cause Suspense boundary issues. Let me use the regular `@liveblocks/react` import and handle the loading state properly:   
+✏️  Writing /home/user/myproject/app/rooms/[roomId]/page.tsx ✔ 
+💫 Executing cd /home/user/myproject && npx next build 2>&1 | head -60 ✔ 
+💭 Thinking for 79 characters   
+Build succeeded. Let me now start the dev server and test the APIendpoint:   
+🛠️ Tool startBackgroundJob ✔ 
+💫 Executing sleep 5 && curl -s -X POST http://localhost:3000/api/liveblocks-auth -H "Content-Type: application/json" -d '{"room":"test-room","userId":"user-1","role":"editor"}' -w "\nHTTP_STATUS: %{http_code}\n" 2>&1 | head -20 ✔ 
+💭 Thinking for 101 characters   
+The editor request works and returns a token. Let me test morecases:   
+💫 Executing cd /home/user && curl -s -X POST http://localhost:3000/api/liveblocks-auth -H "Content-Type: application/json" -d '{"room":"test-room","userId":"user-2","role":"viewer"}' -w "\nHTTP_STATUS: %{http_code}\n" 2>&1 | head -5 ✔ 
+💫 Executing cd /home/user && curl -s -X POST http://localhost:3000/api/liveblocks-auth -H "Content-Type: application/json" -d '{"room":"test-room","userId":"user-1"}' -w "\nHTTP_STATUS: %{http_code}\n" 2>&1 ✔ 
+💫 Executing cd /home/user && curl -s -X POST http://localhost:3000/api/liveblocks-auth -H "Content-Type: application/json" -d '{"room":"test-room","userId":"user-1","role":"admin"}' -w "\nHTTP_STATUS: %{http_code}\n" 2>&1 ✔ 
+💫 Executing cd /home/user && curl -s -X POST http://localhost:3000/api/liveblocks-auth -H "Content-Type: application/json" -d '{}' -w "\nHTTP_STATUS: %{http_code}\n" 2>&1 ✔ 
+💭 Thinking for 351 characters   
+All API endpoint tests pass. Let me now test the page route:   
+💫 Executing curl -s http://localhost:3000/rooms/test-room?userId=user1\&role=editor 2>&1 | head -40 ✔ 
+💭 Thinking for 1324 characters   
+💫 Executing curl -s http://localhost:3000/rooms/test-room?userId=user1\&role=viewer 2>&1 | grep -o 'data-testid="increment-button"[^>]*' | head -5 ✔ 
+💭 Thinking for 161 characters   
+The viewer role correctly disables the button. Let me verify the editor page doesn't have the disabledattribute:   
+💫 Executing curl -s http://localhost:3000/rooms/test-room?userId=user1\&role=editor 2>&1 | grep -o 'data-testid="increment-button"[^>]*' | head -5 ✔ 
+💭 Thinking for 2132 characters   
+🔍 Searching for type Status in *.d.ts files in /home/user/myproject/node_modules/@liveblocks/core/dist ✔ 
+💭 Thinking for 2985 characters   
+All tests are passing. Let me also verify the viewer page renders correctly with the disabled button:   
+💫 Executing curl -s http://localhost:3000/rooms/test-room?userId=user1\&role=viewer 2>&1 | grep -o 'data-testid="[^"]*"[^>]*>[^<]*<' | head -10 ✔ 
+All elements render correctly. Let me kill the dev server and do a final review:   
+🛠️ Tool killBackgroundJob ✔ 
+📋 Updating todo list (4 items) ✔ 
+Let me do a final review of both files:   
+📖 Reading /home/user/myproject/app/api/liveblocks-auth/route.ts ✔ 
+📖 Reading /home/user/myproject/app/rooms/[roomId]/page.tsx ✔ 
+💭 Thinking for 1541 characters   
+🎉 Task Completed
+Successfully implemented the Liveblocks role-based read-only room access system. Here's a summary of the changes:
+
+### 1. API Route: `app/api/liveblocks-auth/route.ts`
+- Uses `@liveblocks/node` with `Liveblocks` class initialized from `LIVEBLOCKS_SECRET_KEY` env var
+- Parses `room`, `userId`, and `role` from JSON request body
+- Returns `400 Bad Request` with `{ error: string }` when fields are missing or role is invalid
+- Uses the **Access Token** approach: `prepareSession` → `session.allow()` → `session.authorize()`
+- Grants `session.FULL_ACCESS` for `"editor"` role, `session.READ_ACCESS` for `"viewer"` role
+- Returns the upstream Liveblocks response `{ status, body }` verbatim (with `Content-Type: application/json`)
+
+### 2. Page Route: `app/rooms/[roomId]/page.tsx`
+- Client component (`"use client"`) that reads `userId` and `role` from URL search params
+- Mounts `LiveblocksProvider` with a **callback-form** `authEndpoint` that POSTs `{ room, userId, role }` to `/api/liveblocks-auth`
+- Mounts `RoomProvider` with the `roomId` param and `initialStorage={{ counter: 0 }}`
+- Renders DOM elements with required `data-testid` attributes:
+  - `connection-status` — shows Liveblocks connection status (initial/connecting/connected/reconnecting/disconnected)
+  - `counter-value` — shows the shared counter value from Storage
+  - `role-label` — shows the literal text `editor` or `viewer`
+  - `increment-button` — uses `useMutation` to increment the counter; **disabled** when `role === "viewer"`, enabled when `role === "editor"`
+- Uses `Suspense` boundary to properly handle `useSearchParams()` in Next.js App Router
+
+### Verified behavior:
+- `POST /api/liveblocks-auth` with `{ room, userId, role: "editor" }` → 200 with token (full access)
+- `POST /api/liveblocks-auth` with `{ room, userId, role: "viewer" }` → 200 with token (read access)
+- Missing fields → 400 with error message
+- Invalid role → 400 with error message
+- Editor page renders increment button **without** `disabled` attribute
+- Viewer page renders increment button **with** `disabled` attribute
+- No Liveblocks secret key exposed in client bundle   
+- Waiting for background jobs to complete (timeout: 60000ms)...
+✖ Async wait timeout reached. Remaining: 1 job(s)
+  

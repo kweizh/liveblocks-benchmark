@@ -1,0 +1,407 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0
+rootdir: /tests
+plugins: xprocess-1.0.2, json-ctrf-0.5.0
+collected 7 items
+
+../../../tests/test_final_state.py EEEEEEE                               [100%]
+
+==================================== ERRORS ====================================
+_______________ ERROR at setup of test_initial_grid_has_25_cells _______________
+
+start_app = None
+
+    @pytest.fixture(scope="session")
+    def two_contexts(start_app):
+        from playwright.sync_api import sync_playwright
+    
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True, args=["--no-sandbox"])
+            ctx_a = browser.new_context()
+            ctx_b = browser.new_context()
+            page_a = ctx_a.new_page()
+            page_b = ctx_b.new_page()
+    
+            page_a.goto(BASE_URL, wait_until="domcontentloaded")
+>           page_b.goto(BASE_URL, wait_until="domcontentloaded")
+
+/tests/test_final_state.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.12/dist-packages/playwright/sync_api/_generated.py:9612: in goto
+    self._sync(
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_page.py:557: in goto
+    return await self._main_frame.goto(**locals_to_params(locals()))
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_frame.py:156: in goto
+    await self._channel.send(
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_connection.py:69: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <playwright._impl._connection.Connection object at 0x7f194da09e80>
+cb = <function Channel.send.<locals>.<lambda> at 0x7f194c2b20c0>
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -> Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        st: List[inspect.FrameInfo] = getattr(
+            task, "__pw_stack__", None
+        ) or inspect.stack(0)
+    
+        parsed_st = _extract_stack_trace_information_from_stack(st, is_internal, title)
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+>           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.goto: Timeout 30000ms exceeded.
+E           Call log:
+E             - navigating to "http://localhost:3000/", waiting until "domcontentloaded"
+
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_connection.py:559: TimeoutError
+---------------------------- Captured stdout setup -----------------------------
+/tests/.pytest_cache/d/.xprocess/spreadsheet_dev$ npm run dev
+process 'spreadsheet_dev' started pid=1006
+spreadsheet_dev process startup detected
+__________________ ERROR at setup of test_a_writes_b_observes __________________
+
+start_app = None
+
+    @pytest.fixture(scope="session")
+    def two_contexts(start_app):
+        from playwright.sync_api import sync_playwright
+    
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True, args=["--no-sandbox"])
+            ctx_a = browser.new_context()
+            ctx_b = browser.new_context()
+            page_a = ctx_a.new_page()
+            page_b = ctx_b.new_page()
+    
+            page_a.goto(BASE_URL, wait_until="domcontentloaded")
+>           page_b.goto(BASE_URL, wait_until="domcontentloaded")
+
+/tests/test_final_state.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.12/dist-packages/playwright/sync_api/_generated.py:9612: in goto
+    self._sync(
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_page.py:557: in goto
+    return await self._main_frame.goto(**locals_to_params(locals()))
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_frame.py:156: in goto
+    await self._channel.send(
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_connection.py:69: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <playwright._impl._connection.Connection object at 0x7f194da09e80>
+cb = <function Channel.send.<locals>.<lambda> at 0x7f194c2b20c0>
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -> Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        st: List[inspect.FrameInfo] = getattr(
+            task, "__pw_stack__", None
+        ) or inspect.stack(0)
+    
+        parsed_st = _extract_stack_trace_information_from_stack(st, is_internal, title)
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+>           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.goto: Timeout 30000ms exceeded.
+E           Call log:
+E             - navigating to "http://localhost:3000/", waiting until "domcontentloaded"
+
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_connection.py:559: TimeoutError
+_____________ ERROR at setup of test_b_writes_formula_both_see_sum _____________
+
+start_app = None
+
+    @pytest.fixture(scope="session")
+    def two_contexts(start_app):
+        from playwright.sync_api import sync_playwright
+    
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True, args=["--no-sandbox"])
+            ctx_a = browser.new_context()
+            ctx_b = browser.new_context()
+            page_a = ctx_a.new_page()
+            page_b = ctx_b.new_page()
+    
+            page_a.goto(BASE_URL, wait_until="domcontentloaded")
+>           page_b.goto(BASE_URL, wait_until="domcontentloaded")
+
+/tests/test_final_state.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.12/dist-packages/playwright/sync_api/_generated.py:9612: in goto
+    self._sync(
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_page.py:557: in goto
+    return await self._main_frame.goto(**locals_to_params(locals()))
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_frame.py:156: in goto
+    await self._channel.send(
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_connection.py:69: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <playwright._impl._connection.Connection object at 0x7f194da09e80>
+cb = <function Channel.send.<locals>.<lambda> at 0x7f194c2b20c0>
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -> Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        st: List[inspect.FrameInfo] = getattr(
+            task, "__pw_stack__", None
+        ) or inspect.stack(0)
+    
+        parsed_st = _extract_stack_trace_information_from_stack(st, is_internal, title)
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+>           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.goto: Timeout 30000ms exceeded.
+E           Call log:
+E             - navigating to "http://localhost:3000/", waiting until "domcontentloaded"
+
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_connection.py:559: TimeoutError
+__ ERROR at setup of test_formula_is_case_insensitive_and_whitespace_tolerant __
+
+start_app = None
+
+    @pytest.fixture(scope="session")
+    def two_contexts(start_app):
+        from playwright.sync_api import sync_playwright
+    
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True, args=["--no-sandbox"])
+            ctx_a = browser.new_context()
+            ctx_b = browser.new_context()
+            page_a = ctx_a.new_page()
+            page_b = ctx_b.new_page()
+    
+            page_a.goto(BASE_URL, wait_until="domcontentloaded")
+>           page_b.goto(BASE_URL, wait_until="domcontentloaded")
+
+/tests/test_final_state.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.12/dist-packages/playwright/sync_api/_generated.py:9612: in goto
+    self._sync(
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_page.py:557: in goto
+    return await self._main_frame.goto(**locals_to_params(locals()))
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_frame.py:156: in goto
+    await self._channel.send(
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_connection.py:69: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <playwright._impl._connection.Connection object at 0x7f194da09e80>
+cb = <function Channel.send.<locals>.<lambda> at 0x7f194c2b20c0>
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -> Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        st: List[inspect.FrameInfo] = getattr(
+            task, "__pw_stack__", None
+        ) or inspect.stack(0)
+    
+        parsed_st = _extract_stack_trace_information_from_stack(st, is_internal, title)
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+>           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.goto: Timeout 30000ms exceeded.
+E           Call log:
+E             - navigating to "http://localhost:3000/", waiting until "domcontentloaded"
+
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_connection.py:559: TimeoutError
+______________ ERROR at setup of test_malformed_formula_shows_err ______________
+
+start_app = None
+
+    @pytest.fixture(scope="session")
+    def two_contexts(start_app):
+        from playwright.sync_api import sync_playwright
+    
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True, args=["--no-sandbox"])
+            ctx_a = browser.new_context()
+            ctx_b = browser.new_context()
+            page_a = ctx_a.new_page()
+            page_b = ctx_b.new_page()
+    
+            page_a.goto(BASE_URL, wait_until="domcontentloaded")
+>           page_b.goto(BASE_URL, wait_until="domcontentloaded")
+
+/tests/test_final_state.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.12/dist-packages/playwright/sync_api/_generated.py:9612: in goto
+    self._sync(
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_page.py:557: in goto
+    return await self._main_frame.goto(**locals_to_params(locals()))
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_frame.py:156: in goto
+    await self._channel.send(
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_connection.py:69: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <playwright._impl._connection.Connection object at 0x7f194da09e80>
+cb = <function Channel.send.<locals>.<lambda> at 0x7f194c2b20c0>
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -> Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        st: List[inspect.FrameInfo] = getattr(
+            task, "__pw_stack__", None
+        ) or inspect.stack(0)
+    
+        parsed_st = _extract_stack_trace_information_from_stack(st, is_internal, title)
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+>           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.goto: Timeout 30000ms exceeded.
+E           Call log:
+E             - navigating to "http://localhost:3000/", waiting until "domcontentloaded"
+
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_connection.py:559: TimeoutError
+_______________ ERROR at setup of test_remote_editing_indicator ________________
+
+start_app = None
+
+    @pytest.fixture(scope="session")
+    def two_contexts(start_app):
+        from playwright.sync_api import sync_playwright
+    
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True, args=["--no-sandbox"])
+            ctx_a = browser.new_context()
+            ctx_b = browser.new_context()
+            page_a = ctx_a.new_page()
+            page_b = ctx_b.new_page()
+    
+            page_a.goto(BASE_URL, wait_until="domcontentloaded")
+>           page_b.goto(BASE_URL, wait_until="domcontentloaded")
+
+/tests/test_final_state.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.12/dist-packages/playwright/sync_api/_generated.py:9612: in goto
+    self._sync(
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_page.py:557: in goto
+    return await self._main_frame.goto(**locals_to_params(locals()))
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_frame.py:156: in goto
+    await self._channel.send(
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_connection.py:69: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <playwright._impl._connection.Connection object at 0x7f194da09e80>
+cb = <function Channel.send.<locals>.<lambda> at 0x7f194c2b20c0>
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -> Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        st: List[inspect.FrameInfo] = getattr(
+            task, "__pw_stack__", None
+        ) or inspect.stack(0)
+    
+        parsed_st = _extract_stack_trace_information_from_stack(st, is_internal, title)
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+>           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.goto: Timeout 30000ms exceeded.
+E           Call log:
+E             - navigating to "http://localhost:3000/", waiting until "domcontentloaded"
+
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_connection.py:559: TimeoutError
+______________ ERROR at setup of test_real_liveblocks_cloud_used _______________
+
+start_app = None
+
+    @pytest.fixture(scope="session")
+    def two_contexts(start_app):
+        from playwright.sync_api import sync_playwright
+    
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True, args=["--no-sandbox"])
+            ctx_a = browser.new_context()
+            ctx_b = browser.new_context()
+            page_a = ctx_a.new_page()
+            page_b = ctx_b.new_page()
+    
+            page_a.goto(BASE_URL, wait_until="domcontentloaded")
+>           page_b.goto(BASE_URL, wait_until="domcontentloaded")
+
+/tests/test_final_state.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.12/dist-packages/playwright/sync_api/_generated.py:9612: in goto
+    self._sync(
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_page.py:557: in goto
+    return await self._main_frame.goto(**locals_to_params(locals()))
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_frame.py:156: in goto
+    await self._channel.send(
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_connection.py:69: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <playwright._impl._connection.Connection object at 0x7f194da09e80>
+cb = <function Channel.send.<locals>.<lambda> at 0x7f194c2b20c0>
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -> Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        st: List[inspect.FrameInfo] = getattr(
+            task, "__pw_stack__", None
+        ) or inspect.stack(0)
+    
+        parsed_st = _extract_stack_trace_information_from_stack(st, is_internal, title)
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+>           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.goto: Timeout 30000ms exceeded.
+E           Call log:
+E             - navigating to "http://localhost:3000/", waiting until "domcontentloaded"
+
+/usr/local/lib/python3.12/dist-packages/playwright/_impl/_connection.py:559: TimeoutError
+=========================== short test summary info ============================
+ERROR ../../../tests/test_final_state.py::test_initial_grid_has_25_cells - pl...
+ERROR ../../../tests/test_final_state.py::test_a_writes_b_observes - playwrig...
+ERROR ../../../tests/test_final_state.py::test_b_writes_formula_both_see_sum
+ERROR ../../../tests/test_final_state.py::test_formula_is_case_insensitive_and_whitespace_tolerant
+ERROR ../../../tests/test_final_state.py::test_malformed_formula_shows_err - ...
+ERROR ../../../tests/test_final_state.py::test_remote_editing_indicator - pla...
+ERROR ../../../tests/test_final_state.py::test_real_liveblocks_cloud_used - p...
+============================== 7 errors in 37.52s ==============================

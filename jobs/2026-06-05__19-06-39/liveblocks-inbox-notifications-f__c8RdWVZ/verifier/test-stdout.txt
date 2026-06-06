@@ -1,0 +1,279 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0
+rootdir: /tests
+plugins: xprocess-1.0.2, json-ctrf-0.5.0
+collected 2 items
+
+../../../tests/test_final_state.py EE                                    [100%]
+
+==================================== ERRORS ====================================
+_ ERROR at setup of test_inbox_page_shows_unread_notification_and_supports_mark_all_as_read _
+
+    @pytest.fixture(scope="session")
+    def seeded_thread():
+        """Seed a fresh inbox notification for user-1 via the real Liveblocks cloud."""
+        run_id = _run_id()
+        room_id = f"inbox-task-room-{run_id}"
+        seed_script = """
+    const { Liveblocks } = require("@liveblocks/node");
+    
+    (async () => {
+      const liveblocks = new Liveblocks({ secret: process.env.LIVEBLOCKS_SECRET_KEY });
+      const roomId = process.env.SEED_ROOM_ID;
+      const mentionedUser = process.env.SEED_MENTIONED_USER;
+      const commenterUser = process.env.SEED_COMMENTER_USER;
+    
+      // 1. Clear existing notifications for the mentioned user (best-effort).
+      try {
+        await liveblocks.deleteAllInboxNotifications({ userId: mentionedUser });
+      } catch (e) {
+        // ignore: nothing to delete
+      }
+    
+      // 2. Ensure the room exists.
+      try {
+        await liveblocks.createRoom(roomId, { defaultAccesses: ["room:write"] });
+      } catch (e) {
+        if (!String(e && e.message).match(/already exists/i)) {
+          // Try to update instead.
+          try {
+            await liveblocks.updateRoom(roomId, { defaultAccesses: ["room:write"] });
+          } catch (e2) {
+            // ignore - the room might exist with another config
+          }
+        }
+      }
+    
+      // 3. Create a thread with a comment mentioning the user.
+      const thread = await liveblocks.createThread({
+        roomId,
+        data: {
+          comment: {
+            userId: commenterUser,
+            body: {
+              version: 1,
+              content: [
+                {
+                  type: "paragraph",
+                  children: [
+                    { text: "Hey " },
+                    { type: "mention", kind: "user", id: mentionedUser },
+                    { text: " please review this." },
+                  ],
+                },
+              ],
+            },
+          },
+        },
+      });
+    
+      // 4. Poll until the notification shows up for the mentioned user.
+      const deadline = Date.now() + 30_000;
+      let found = null;
+      while (Date.now() < deadline) {
+        const { inboxNotifications } = await liveblocks.getInboxNotifications({ userId: mentionedUser });
+        found = (inboxNotifications || []).find(
+          (n) => n.kind === "thread" && n.roomId === roomId && n.threadId === thread.id && n.readAt == null
+        );
+        if (found) break;
+        await new Promise((r) => setTimeout(r, 1500));
+      }
+    
+      if (!found) {
+        console.error(JSON.stringify({ ok: false, reason: "notification not visible", threadId: thread.id }));
+        process.exit(1);
+      }
+    
+      console.log(JSON.stringify({ ok: true, threadId: thread.id, notificationId: found.id, roomId }));
+    })().catch((err) => {
+      console.error(JSON.stringify({ ok: false, error: String(err && err.stack || err) }));
+      process.exit(1);
+    });
+    """
+        seed_path = "/tmp/liveblocks_seed.cjs"
+        with open(seed_path, "w") as f:
+            f.write(seed_script)
+    
+        env = os.environ.copy()
+        env["SEED_ROOM_ID"] = room_id
+        env["SEED_MENTIONED_USER"] = USER_ID
+        env["SEED_COMMENTER_USER"] = COMMENTER_USER_ID
+        env["LIVEBLOCKS_SECRET_KEY"] = _secret_key()
+    
+        result = subprocess.run(
+            ["node", seed_path],
+            cwd=PROJECT_DIR,
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
+>       assert result.returncode == 0, (
+            f"Seeding inbox notification failed.\nstdout: {result.stdout}\nstderr: {result.stderr}"
+        )
+E       AssertionError: Seeding inbox notification failed.
+E         stdout: 
+E         stderr: node:internal/modules/cjs/loader:1210
+E           throw err;
+E           ^
+E         
+E         Error: Cannot find module '@liveblocks/node'
+E         Require stack:
+E         - /tmp/liveblocks_seed.cjs
+E             at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
+E             at Module._load (node:internal/modules/cjs/loader:1038:27)
+E             at Module.require (node:internal/modules/cjs/loader:1289:19)
+E             at require (node:internal/modules/helpers:182:18)
+E             at Object.<anonymous> (/tmp/liveblocks_seed.cjs:2:24)
+E             at Module._compile (node:internal/modules/cjs/loader:1521:14)
+E             at Module._extensions..js (node:internal/modules/cjs/loader:1623:10)
+E             at Module.load (node:internal/modules/cjs/loader:1266:32)
+E             at Module._load (node:internal/modules/cjs/loader:1091:12)
+E             at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12) {
+E           code: 'MODULE_NOT_FOUND',
+E           requireStack: [ '/tmp/liveblocks_seed.cjs' ]
+E         }
+E         
+E         Node.js v20.20.2
+E         
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['node', '/tmp/liveblocks_seed.cjs'], returncode=1, stdout='', stderr="node:internal/modules/cjs..._main:164:12) {\n  code: 'MODULE_NOT_FOUND',\n  requireStack: [ '/tmp/liveblocks_seed.cjs' ]\n}\n\nNode.js v20.20.2\n").returncode
+
+/tests/test_final_state.py:129: AssertionError
+______ ERROR at setup of test_all_notifications_marked_read_via_rest_api _______
+
+    @pytest.fixture(scope="session")
+    def seeded_thread():
+        """Seed a fresh inbox notification for user-1 via the real Liveblocks cloud."""
+        run_id = _run_id()
+        room_id = f"inbox-task-room-{run_id}"
+        seed_script = """
+    const { Liveblocks } = require("@liveblocks/node");
+    
+    (async () => {
+      const liveblocks = new Liveblocks({ secret: process.env.LIVEBLOCKS_SECRET_KEY });
+      const roomId = process.env.SEED_ROOM_ID;
+      const mentionedUser = process.env.SEED_MENTIONED_USER;
+      const commenterUser = process.env.SEED_COMMENTER_USER;
+    
+      // 1. Clear existing notifications for the mentioned user (best-effort).
+      try {
+        await liveblocks.deleteAllInboxNotifications({ userId: mentionedUser });
+      } catch (e) {
+        // ignore: nothing to delete
+      }
+    
+      // 2. Ensure the room exists.
+      try {
+        await liveblocks.createRoom(roomId, { defaultAccesses: ["room:write"] });
+      } catch (e) {
+        if (!String(e && e.message).match(/already exists/i)) {
+          // Try to update instead.
+          try {
+            await liveblocks.updateRoom(roomId, { defaultAccesses: ["room:write"] });
+          } catch (e2) {
+            // ignore - the room might exist with another config
+          }
+        }
+      }
+    
+      // 3. Create a thread with a comment mentioning the user.
+      const thread = await liveblocks.createThread({
+        roomId,
+        data: {
+          comment: {
+            userId: commenterUser,
+            body: {
+              version: 1,
+              content: [
+                {
+                  type: "paragraph",
+                  children: [
+                    { text: "Hey " },
+                    { type: "mention", kind: "user", id: mentionedUser },
+                    { text: " please review this." },
+                  ],
+                },
+              ],
+            },
+          },
+        },
+      });
+    
+      // 4. Poll until the notification shows up for the mentioned user.
+      const deadline = Date.now() + 30_000;
+      let found = null;
+      while (Date.now() < deadline) {
+        const { inboxNotifications } = await liveblocks.getInboxNotifications({ userId: mentionedUser });
+        found = (inboxNotifications || []).find(
+          (n) => n.kind === "thread" && n.roomId === roomId && n.threadId === thread.id && n.readAt == null
+        );
+        if (found) break;
+        await new Promise((r) => setTimeout(r, 1500));
+      }
+    
+      if (!found) {
+        console.error(JSON.stringify({ ok: false, reason: "notification not visible", threadId: thread.id }));
+        process.exit(1);
+      }
+    
+      console.log(JSON.stringify({ ok: true, threadId: thread.id, notificationId: found.id, roomId }));
+    })().catch((err) => {
+      console.error(JSON.stringify({ ok: false, error: String(err && err.stack || err) }));
+      process.exit(1);
+    });
+    """
+        seed_path = "/tmp/liveblocks_seed.cjs"
+        with open(seed_path, "w") as f:
+            f.write(seed_script)
+    
+        env = os.environ.copy()
+        env["SEED_ROOM_ID"] = room_id
+        env["SEED_MENTIONED_USER"] = USER_ID
+        env["SEED_COMMENTER_USER"] = COMMENTER_USER_ID
+        env["LIVEBLOCKS_SECRET_KEY"] = _secret_key()
+    
+        result = subprocess.run(
+            ["node", seed_path],
+            cwd=PROJECT_DIR,
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
+>       assert result.returncode == 0, (
+            f"Seeding inbox notification failed.\nstdout: {result.stdout}\nstderr: {result.stderr}"
+        )
+E       AssertionError: Seeding inbox notification failed.
+E         stdout: 
+E         stderr: node:internal/modules/cjs/loader:1210
+E           throw err;
+E           ^
+E         
+E         Error: Cannot find module '@liveblocks/node'
+E         Require stack:
+E         - /tmp/liveblocks_seed.cjs
+E             at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
+E             at Module._load (node:internal/modules/cjs/loader:1038:27)
+E             at Module.require (node:internal/modules/cjs/loader:1289:19)
+E             at require (node:internal/modules/helpers:182:18)
+E             at Object.<anonymous> (/tmp/liveblocks_seed.cjs:2:24)
+E             at Module._compile (node:internal/modules/cjs/loader:1521:14)
+E             at Module._extensions..js (node:internal/modules/cjs/loader:1623:10)
+E             at Module.load (node:internal/modules/cjs/loader:1266:32)
+E             at Module._load (node:internal/modules/cjs/loader:1091:12)
+E             at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12) {
+E           code: 'MODULE_NOT_FOUND',
+E           requireStack: [ '/tmp/liveblocks_seed.cjs' ]
+E         }
+E         
+E         Node.js v20.20.2
+E         
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['node', '/tmp/liveblocks_seed.cjs'], returncode=1, stdout='', stderr="node:internal/modules/cjs..._main:164:12) {\n  code: 'MODULE_NOT_FOUND',\n  requireStack: [ '/tmp/liveblocks_seed.cjs' ]\n}\n\nNode.js v20.20.2\n").returncode
+
+/tests/test_final_state.py:129: AssertionError
+=========================== short test summary info ============================
+ERROR ../../../tests/test_final_state.py::test_inbox_page_shows_unread_notification_and_supports_mark_all_as_read
+ERROR ../../../tests/test_final_state.py::test_all_notifications_marked_read_via_rest_api
+============================== 2 errors in 0.27s ===============================

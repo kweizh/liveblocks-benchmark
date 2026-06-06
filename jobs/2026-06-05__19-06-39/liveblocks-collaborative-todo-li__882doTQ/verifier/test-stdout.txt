@@ -1,0 +1,678 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0
+rootdir: /tests
+plugins: xprocess-1.0.2, json-ctrf-0.5.0
+collected 7 items
+
+../../tests/test_final_state.py EEEEEEE                                  [100%]
+
+==================================== ERRORS ====================================
+_______________ ERROR at setup of test_skeleton_elements_visible _______________
+
+xprocess = <xprocess.xprocess.XProcess object at 0x7f7d95af7b60>
+
+    @pytest.fixture(scope="session")
+    def start_app(xprocess):
+        run_id = os.environ.get("ZEALT_RUN_ID", "")
+        assert run_id, "ZEALT_RUN_ID must be set in the verifier environment."
+    
+        env = os.environ.copy()
+        env["ZEALT_RUN_ID"] = run_id
+        env["NEXT_PUBLIC_ZEALT_RUN_ID"] = run_id
+        env.setdefault("PORT", str(PORT))
+    
+        class Starter(ProcessStarter):
+            name = "next_app"
+            args = ["npm", "run", "dev"]
+            popen_kwargs = {"cwd": PROJECT_DIR, "text": True, "env": env}
+            timeout = 180
+            terminate_on_interrupt = True
+    
+            def startup_check(self):
+                return _wait_for_port("localhost", PORT, timeout=1.0)
+    
+>       xprocess.ensure(Starter.name, Starter)
+
+/tests/test_final_state.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <xprocess.xprocess.XProcess object at 0x7f7d95af7b60>, name = 'next_app'
+preparefunc = <class 'test_final_state.start_app.<locals>.Starter'>
+restart = True, persist_logs = True
+
+    def ensure(self, name, preparefunc, restart=False, persist_logs=True):
+        """Returns (PID, logfile) from a newly started or already
+            running process.
+    
+        @param name: name of the external process, used for caching info
+                     across test runs.
+    
+        @param preparefunc:
+                A subclass of ProcessStarter.
+    
+        @param restart: force restarting the process if it is running.
+    
+        @return: (PID, logfile) logfile will be seeked to the end if the
+                 server was running, otherwise seeked to the line after
+                 where the waitpattern matched."""
+        from subprocess import Popen, STDOUT
+    
+        xresource = XProcessResources(self.proc_wait_timeout)
+        self.resources.append(xresource)
+    
+        info = self.getinfo(name)
+        if not restart and not info.isrunning():
+            restart = True
+    
+        if restart:
+            if info.pid is not None:
+                info.terminate()
+    
+            # TODO: after droping py module, review this and break
+            # it down into more readable chunks, possibly extracting pieces
+            # into internal methods would make things more clear too
+            controldir = info.controldir.ensure(dir=1)
+            starter = preparefunc(controldir, self)
+            args = [str(x) for x in starter.args]
+            self.log.debug("%s$ %s", controldir, " ".join(args))
+            if persist_logs:
+                stdout = open(str(info.logpath), "a+b", 0)
+                stdout.write(bytes(f"{XPROCESS_BLOCK_DELIMITER}\n", "utf8"))
+            else:
+                stdout = open(str(info.logpath), "wb", 0)
+            kwargs = {"env": starter.env}
+            popen_kwargs = {
+                "cwd": str(controldir),
+                "stdout": stdout,
+                "stderr": STDOUT,
+                **starter.popen_kwargs,
+            }
+            if sys.platform == "win32":  # pragma: no cover
+                kwargs["startupinfo"] = sinfo = subprocess.STARTUPINFO()
+                sinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                sinfo.wShowWindow |= subprocess.SW_HIDE
+            else:
+                kwargs["close_fds"] = True
+                kwargs["preexec_fn"] = os.setpgrp  # no CONTROL-C
+    
+            # keep references of all popen and info objects for cleanup
+            xresource.info = (info, starter.terminate_on_interrupt)
+>           xresource.popen = Popen(args, **popen_kwargs, **kwargs)
+E           TypeError: subprocess.Popen() got multiple values for keyword argument 'env'
+
+/usr/local/lib/python3.12/dist-packages/xprocess/xprocess.py:264: TypeError
+---------------------------- Captured stdout setup -----------------------------
+/tests/.pytest_cache/d/.xprocess/next_app$ npm run dev
+_________________ ERROR at setup of test_add_propagates_a_to_b _________________
+
+xprocess = <xprocess.xprocess.XProcess object at 0x7f7d95af7b60>
+
+    @pytest.fixture(scope="session")
+    def start_app(xprocess):
+        run_id = os.environ.get("ZEALT_RUN_ID", "")
+        assert run_id, "ZEALT_RUN_ID must be set in the verifier environment."
+    
+        env = os.environ.copy()
+        env["ZEALT_RUN_ID"] = run_id
+        env["NEXT_PUBLIC_ZEALT_RUN_ID"] = run_id
+        env.setdefault("PORT", str(PORT))
+    
+        class Starter(ProcessStarter):
+            name = "next_app"
+            args = ["npm", "run", "dev"]
+            popen_kwargs = {"cwd": PROJECT_DIR, "text": True, "env": env}
+            timeout = 180
+            terminate_on_interrupt = True
+    
+            def startup_check(self):
+                return _wait_for_port("localhost", PORT, timeout=1.0)
+    
+>       xprocess.ensure(Starter.name, Starter)
+
+/tests/test_final_state.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <xprocess.xprocess.XProcess object at 0x7f7d95af7b60>, name = 'next_app'
+preparefunc = <class 'test_final_state.start_app.<locals>.Starter'>
+restart = True, persist_logs = True
+
+    def ensure(self, name, preparefunc, restart=False, persist_logs=True):
+        """Returns (PID, logfile) from a newly started or already
+            running process.
+    
+        @param name: name of the external process, used for caching info
+                     across test runs.
+    
+        @param preparefunc:
+                A subclass of ProcessStarter.
+    
+        @param restart: force restarting the process if it is running.
+    
+        @return: (PID, logfile) logfile will be seeked to the end if the
+                 server was running, otherwise seeked to the line after
+                 where the waitpattern matched."""
+        from subprocess import Popen, STDOUT
+    
+        xresource = XProcessResources(self.proc_wait_timeout)
+        self.resources.append(xresource)
+    
+        info = self.getinfo(name)
+        if not restart and not info.isrunning():
+            restart = True
+    
+        if restart:
+            if info.pid is not None:
+                info.terminate()
+    
+            # TODO: after droping py module, review this and break
+            # it down into more readable chunks, possibly extracting pieces
+            # into internal methods would make things more clear too
+            controldir = info.controldir.ensure(dir=1)
+            starter = preparefunc(controldir, self)
+            args = [str(x) for x in starter.args]
+            self.log.debug("%s$ %s", controldir, " ".join(args))
+            if persist_logs:
+                stdout = open(str(info.logpath), "a+b", 0)
+                stdout.write(bytes(f"{XPROCESS_BLOCK_DELIMITER}\n", "utf8"))
+            else:
+                stdout = open(str(info.logpath), "wb", 0)
+            kwargs = {"env": starter.env}
+            popen_kwargs = {
+                "cwd": str(controldir),
+                "stdout": stdout,
+                "stderr": STDOUT,
+                **starter.popen_kwargs,
+            }
+            if sys.platform == "win32":  # pragma: no cover
+                kwargs["startupinfo"] = sinfo = subprocess.STARTUPINFO()
+                sinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                sinfo.wShowWindow |= subprocess.SW_HIDE
+            else:
+                kwargs["close_fds"] = True
+                kwargs["preexec_fn"] = os.setpgrp  # no CONTROL-C
+    
+            # keep references of all popen and info objects for cleanup
+            xresource.info = (info, starter.terminate_on_interrupt)
+>           xresource.popen = Popen(args, **popen_kwargs, **kwargs)
+E           TypeError: subprocess.Popen() got multiple values for keyword argument 'env'
+
+/usr/local/lib/python3.12/dist-packages/xprocess/xprocess.py:264: TypeError
+_______________ ERROR at setup of test_toggle_propagates_a_to_b ________________
+
+xprocess = <xprocess.xprocess.XProcess object at 0x7f7d95af7b60>
+
+    @pytest.fixture(scope="session")
+    def start_app(xprocess):
+        run_id = os.environ.get("ZEALT_RUN_ID", "")
+        assert run_id, "ZEALT_RUN_ID must be set in the verifier environment."
+    
+        env = os.environ.copy()
+        env["ZEALT_RUN_ID"] = run_id
+        env["NEXT_PUBLIC_ZEALT_RUN_ID"] = run_id
+        env.setdefault("PORT", str(PORT))
+    
+        class Starter(ProcessStarter):
+            name = "next_app"
+            args = ["npm", "run", "dev"]
+            popen_kwargs = {"cwd": PROJECT_DIR, "text": True, "env": env}
+            timeout = 180
+            terminate_on_interrupt = True
+    
+            def startup_check(self):
+                return _wait_for_port("localhost", PORT, timeout=1.0)
+    
+>       xprocess.ensure(Starter.name, Starter)
+
+/tests/test_final_state.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <xprocess.xprocess.XProcess object at 0x7f7d95af7b60>, name = 'next_app'
+preparefunc = <class 'test_final_state.start_app.<locals>.Starter'>
+restart = True, persist_logs = True
+
+    def ensure(self, name, preparefunc, restart=False, persist_logs=True):
+        """Returns (PID, logfile) from a newly started or already
+            running process.
+    
+        @param name: name of the external process, used for caching info
+                     across test runs.
+    
+        @param preparefunc:
+                A subclass of ProcessStarter.
+    
+        @param restart: force restarting the process if it is running.
+    
+        @return: (PID, logfile) logfile will be seeked to the end if the
+                 server was running, otherwise seeked to the line after
+                 where the waitpattern matched."""
+        from subprocess import Popen, STDOUT
+    
+        xresource = XProcessResources(self.proc_wait_timeout)
+        self.resources.append(xresource)
+    
+        info = self.getinfo(name)
+        if not restart and not info.isrunning():
+            restart = True
+    
+        if restart:
+            if info.pid is not None:
+                info.terminate()
+    
+            # TODO: after droping py module, review this and break
+            # it down into more readable chunks, possibly extracting pieces
+            # into internal methods would make things more clear too
+            controldir = info.controldir.ensure(dir=1)
+            starter = preparefunc(controldir, self)
+            args = [str(x) for x in starter.args]
+            self.log.debug("%s$ %s", controldir, " ".join(args))
+            if persist_logs:
+                stdout = open(str(info.logpath), "a+b", 0)
+                stdout.write(bytes(f"{XPROCESS_BLOCK_DELIMITER}\n", "utf8"))
+            else:
+                stdout = open(str(info.logpath), "wb", 0)
+            kwargs = {"env": starter.env}
+            popen_kwargs = {
+                "cwd": str(controldir),
+                "stdout": stdout,
+                "stderr": STDOUT,
+                **starter.popen_kwargs,
+            }
+            if sys.platform == "win32":  # pragma: no cover
+                kwargs["startupinfo"] = sinfo = subprocess.STARTUPINFO()
+                sinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                sinfo.wShowWindow |= subprocess.SW_HIDE
+            else:
+                kwargs["close_fds"] = True
+                kwargs["preexec_fn"] = os.setpgrp  # no CONTROL-C
+    
+            # keep references of all popen and info objects for cleanup
+            xresource.info = (info, starter.terminate_on_interrupt)
+>           xresource.popen = Popen(args, **popen_kwargs, **kwargs)
+E           TypeError: subprocess.Popen() got multiple values for keyword argument 'env'
+
+/usr/local/lib/python3.12/dist-packages/xprocess/xprocess.py:264: TypeError
+_________________ ERROR at setup of test_add_propagates_b_to_a _________________
+
+xprocess = <xprocess.xprocess.XProcess object at 0x7f7d95af7b60>
+
+    @pytest.fixture(scope="session")
+    def start_app(xprocess):
+        run_id = os.environ.get("ZEALT_RUN_ID", "")
+        assert run_id, "ZEALT_RUN_ID must be set in the verifier environment."
+    
+        env = os.environ.copy()
+        env["ZEALT_RUN_ID"] = run_id
+        env["NEXT_PUBLIC_ZEALT_RUN_ID"] = run_id
+        env.setdefault("PORT", str(PORT))
+    
+        class Starter(ProcessStarter):
+            name = "next_app"
+            args = ["npm", "run", "dev"]
+            popen_kwargs = {"cwd": PROJECT_DIR, "text": True, "env": env}
+            timeout = 180
+            terminate_on_interrupt = True
+    
+            def startup_check(self):
+                return _wait_for_port("localhost", PORT, timeout=1.0)
+    
+>       xprocess.ensure(Starter.name, Starter)
+
+/tests/test_final_state.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <xprocess.xprocess.XProcess object at 0x7f7d95af7b60>, name = 'next_app'
+preparefunc = <class 'test_final_state.start_app.<locals>.Starter'>
+restart = True, persist_logs = True
+
+    def ensure(self, name, preparefunc, restart=False, persist_logs=True):
+        """Returns (PID, logfile) from a newly started or already
+            running process.
+    
+        @param name: name of the external process, used for caching info
+                     across test runs.
+    
+        @param preparefunc:
+                A subclass of ProcessStarter.
+    
+        @param restart: force restarting the process if it is running.
+    
+        @return: (PID, logfile) logfile will be seeked to the end if the
+                 server was running, otherwise seeked to the line after
+                 where the waitpattern matched."""
+        from subprocess import Popen, STDOUT
+    
+        xresource = XProcessResources(self.proc_wait_timeout)
+        self.resources.append(xresource)
+    
+        info = self.getinfo(name)
+        if not restart and not info.isrunning():
+            restart = True
+    
+        if restart:
+            if info.pid is not None:
+                info.terminate()
+    
+            # TODO: after droping py module, review this and break
+            # it down into more readable chunks, possibly extracting pieces
+            # into internal methods would make things more clear too
+            controldir = info.controldir.ensure(dir=1)
+            starter = preparefunc(controldir, self)
+            args = [str(x) for x in starter.args]
+            self.log.debug("%s$ %s", controldir, " ".join(args))
+            if persist_logs:
+                stdout = open(str(info.logpath), "a+b", 0)
+                stdout.write(bytes(f"{XPROCESS_BLOCK_DELIMITER}\n", "utf8"))
+            else:
+                stdout = open(str(info.logpath), "wb", 0)
+            kwargs = {"env": starter.env}
+            popen_kwargs = {
+                "cwd": str(controldir),
+                "stdout": stdout,
+                "stderr": STDOUT,
+                **starter.popen_kwargs,
+            }
+            if sys.platform == "win32":  # pragma: no cover
+                kwargs["startupinfo"] = sinfo = subprocess.STARTUPINFO()
+                sinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                sinfo.wShowWindow |= subprocess.SW_HIDE
+            else:
+                kwargs["close_fds"] = True
+                kwargs["preexec_fn"] = os.setpgrp  # no CONTROL-C
+    
+            # keep references of all popen and info objects for cleanup
+            xresource.info = (info, starter.terminate_on_interrupt)
+>           xresource.popen = Popen(args, **popen_kwargs, **kwargs)
+E           TypeError: subprocess.Popen() got multiple values for keyword argument 'env'
+
+/usr/local/lib/python3.12/dist-packages/xprocess/xprocess.py:264: TypeError
+___________________ ERROR at setup of test_delete_propagates ___________________
+
+xprocess = <xprocess.xprocess.XProcess object at 0x7f7d95af7b60>
+
+    @pytest.fixture(scope="session")
+    def start_app(xprocess):
+        run_id = os.environ.get("ZEALT_RUN_ID", "")
+        assert run_id, "ZEALT_RUN_ID must be set in the verifier environment."
+    
+        env = os.environ.copy()
+        env["ZEALT_RUN_ID"] = run_id
+        env["NEXT_PUBLIC_ZEALT_RUN_ID"] = run_id
+        env.setdefault("PORT", str(PORT))
+    
+        class Starter(ProcessStarter):
+            name = "next_app"
+            args = ["npm", "run", "dev"]
+            popen_kwargs = {"cwd": PROJECT_DIR, "text": True, "env": env}
+            timeout = 180
+            terminate_on_interrupt = True
+    
+            def startup_check(self):
+                return _wait_for_port("localhost", PORT, timeout=1.0)
+    
+>       xprocess.ensure(Starter.name, Starter)
+
+/tests/test_final_state.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <xprocess.xprocess.XProcess object at 0x7f7d95af7b60>, name = 'next_app'
+preparefunc = <class 'test_final_state.start_app.<locals>.Starter'>
+restart = True, persist_logs = True
+
+    def ensure(self, name, preparefunc, restart=False, persist_logs=True):
+        """Returns (PID, logfile) from a newly started or already
+            running process.
+    
+        @param name: name of the external process, used for caching info
+                     across test runs.
+    
+        @param preparefunc:
+                A subclass of ProcessStarter.
+    
+        @param restart: force restarting the process if it is running.
+    
+        @return: (PID, logfile) logfile will be seeked to the end if the
+                 server was running, otherwise seeked to the line after
+                 where the waitpattern matched."""
+        from subprocess import Popen, STDOUT
+    
+        xresource = XProcessResources(self.proc_wait_timeout)
+        self.resources.append(xresource)
+    
+        info = self.getinfo(name)
+        if not restart and not info.isrunning():
+            restart = True
+    
+        if restart:
+            if info.pid is not None:
+                info.terminate()
+    
+            # TODO: after droping py module, review this and break
+            # it down into more readable chunks, possibly extracting pieces
+            # into internal methods would make things more clear too
+            controldir = info.controldir.ensure(dir=1)
+            starter = preparefunc(controldir, self)
+            args = [str(x) for x in starter.args]
+            self.log.debug("%s$ %s", controldir, " ".join(args))
+            if persist_logs:
+                stdout = open(str(info.logpath), "a+b", 0)
+                stdout.write(bytes(f"{XPROCESS_BLOCK_DELIMITER}\n", "utf8"))
+            else:
+                stdout = open(str(info.logpath), "wb", 0)
+            kwargs = {"env": starter.env}
+            popen_kwargs = {
+                "cwd": str(controldir),
+                "stdout": stdout,
+                "stderr": STDOUT,
+                **starter.popen_kwargs,
+            }
+            if sys.platform == "win32":  # pragma: no cover
+                kwargs["startupinfo"] = sinfo = subprocess.STARTUPINFO()
+                sinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                sinfo.wShowWindow |= subprocess.SW_HIDE
+            else:
+                kwargs["close_fds"] = True
+                kwargs["preexec_fn"] = os.setpgrp  # no CONTROL-C
+    
+            # keep references of all popen and info objects for cleanup
+            xresource.info = (info, starter.terminate_on_interrupt)
+>           xresource.popen = Popen(args, **popen_kwargs, **kwargs)
+E           TypeError: subprocess.Popen() got multiple values for keyword argument 'env'
+
+/usr/local/lib/python3.12/dist-packages/xprocess/xprocess.py:264: TypeError
+______________ ERROR at setup of test_clear_completed_is_batched _______________
+
+xprocess = <xprocess.xprocess.XProcess object at 0x7f7d95af7b60>
+
+    @pytest.fixture(scope="session")
+    def start_app(xprocess):
+        run_id = os.environ.get("ZEALT_RUN_ID", "")
+        assert run_id, "ZEALT_RUN_ID must be set in the verifier environment."
+    
+        env = os.environ.copy()
+        env["ZEALT_RUN_ID"] = run_id
+        env["NEXT_PUBLIC_ZEALT_RUN_ID"] = run_id
+        env.setdefault("PORT", str(PORT))
+    
+        class Starter(ProcessStarter):
+            name = "next_app"
+            args = ["npm", "run", "dev"]
+            popen_kwargs = {"cwd": PROJECT_DIR, "text": True, "env": env}
+            timeout = 180
+            terminate_on_interrupt = True
+    
+            def startup_check(self):
+                return _wait_for_port("localhost", PORT, timeout=1.0)
+    
+>       xprocess.ensure(Starter.name, Starter)
+
+/tests/test_final_state.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <xprocess.xprocess.XProcess object at 0x7f7d95af7b60>, name = 'next_app'
+preparefunc = <class 'test_final_state.start_app.<locals>.Starter'>
+restart = True, persist_logs = True
+
+    def ensure(self, name, preparefunc, restart=False, persist_logs=True):
+        """Returns (PID, logfile) from a newly started or already
+            running process.
+    
+        @param name: name of the external process, used for caching info
+                     across test runs.
+    
+        @param preparefunc:
+                A subclass of ProcessStarter.
+    
+        @param restart: force restarting the process if it is running.
+    
+        @return: (PID, logfile) logfile will be seeked to the end if the
+                 server was running, otherwise seeked to the line after
+                 where the waitpattern matched."""
+        from subprocess import Popen, STDOUT
+    
+        xresource = XProcessResources(self.proc_wait_timeout)
+        self.resources.append(xresource)
+    
+        info = self.getinfo(name)
+        if not restart and not info.isrunning():
+            restart = True
+    
+        if restart:
+            if info.pid is not None:
+                info.terminate()
+    
+            # TODO: after droping py module, review this and break
+            # it down into more readable chunks, possibly extracting pieces
+            # into internal methods would make things more clear too
+            controldir = info.controldir.ensure(dir=1)
+            starter = preparefunc(controldir, self)
+            args = [str(x) for x in starter.args]
+            self.log.debug("%s$ %s", controldir, " ".join(args))
+            if persist_logs:
+                stdout = open(str(info.logpath), "a+b", 0)
+                stdout.write(bytes(f"{XPROCESS_BLOCK_DELIMITER}\n", "utf8"))
+            else:
+                stdout = open(str(info.logpath), "wb", 0)
+            kwargs = {"env": starter.env}
+            popen_kwargs = {
+                "cwd": str(controldir),
+                "stdout": stdout,
+                "stderr": STDOUT,
+                **starter.popen_kwargs,
+            }
+            if sys.platform == "win32":  # pragma: no cover
+                kwargs["startupinfo"] = sinfo = subprocess.STARTUPINFO()
+                sinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                sinfo.wShowWindow |= subprocess.SW_HIDE
+            else:
+                kwargs["close_fds"] = True
+                kwargs["preexec_fn"] = os.setpgrp  # no CONTROL-C
+    
+            # keep references of all popen and info objects for cleanup
+            xresource.info = (info, starter.terminate_on_interrupt)
+>           xresource.popen = Popen(args, **popen_kwargs, **kwargs)
+E           TypeError: subprocess.Popen() got multiple values for keyword argument 'env'
+
+/usr/local/lib/python3.12/dist-packages/xprocess/xprocess.py:264: TypeError
+________________ ERROR at setup of test_empty_input_is_rejected ________________
+
+xprocess = <xprocess.xprocess.XProcess object at 0x7f7d95af7b60>
+
+    @pytest.fixture(scope="session")
+    def start_app(xprocess):
+        run_id = os.environ.get("ZEALT_RUN_ID", "")
+        assert run_id, "ZEALT_RUN_ID must be set in the verifier environment."
+    
+        env = os.environ.copy()
+        env["ZEALT_RUN_ID"] = run_id
+        env["NEXT_PUBLIC_ZEALT_RUN_ID"] = run_id
+        env.setdefault("PORT", str(PORT))
+    
+        class Starter(ProcessStarter):
+            name = "next_app"
+            args = ["npm", "run", "dev"]
+            popen_kwargs = {"cwd": PROJECT_DIR, "text": True, "env": env}
+            timeout = 180
+            terminate_on_interrupt = True
+    
+            def startup_check(self):
+                return _wait_for_port("localhost", PORT, timeout=1.0)
+    
+>       xprocess.ensure(Starter.name, Starter)
+
+/tests/test_final_state.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <xprocess.xprocess.XProcess object at 0x7f7d95af7b60>, name = 'next_app'
+preparefunc = <class 'test_final_state.start_app.<locals>.Starter'>
+restart = True, persist_logs = True
+
+    def ensure(self, name, preparefunc, restart=False, persist_logs=True):
+        """Returns (PID, logfile) from a newly started or already
+            running process.
+    
+        @param name: name of the external process, used for caching info
+                     across test runs.
+    
+        @param preparefunc:
+                A subclass of ProcessStarter.
+    
+        @param restart: force restarting the process if it is running.
+    
+        @return: (PID, logfile) logfile will be seeked to the end if the
+                 server was running, otherwise seeked to the line after
+                 where the waitpattern matched."""
+        from subprocess import Popen, STDOUT
+    
+        xresource = XProcessResources(self.proc_wait_timeout)
+        self.resources.append(xresource)
+    
+        info = self.getinfo(name)
+        if not restart and not info.isrunning():
+            restart = True
+    
+        if restart:
+            if info.pid is not None:
+                info.terminate()
+    
+            # TODO: after droping py module, review this and break
+            # it down into more readable chunks, possibly extracting pieces
+            # into internal methods would make things more clear too
+            controldir = info.controldir.ensure(dir=1)
+            starter = preparefunc(controldir, self)
+            args = [str(x) for x in starter.args]
+            self.log.debug("%s$ %s", controldir, " ".join(args))
+            if persist_logs:
+                stdout = open(str(info.logpath), "a+b", 0)
+                stdout.write(bytes(f"{XPROCESS_BLOCK_DELIMITER}\n", "utf8"))
+            else:
+                stdout = open(str(info.logpath), "wb", 0)
+            kwargs = {"env": starter.env}
+            popen_kwargs = {
+                "cwd": str(controldir),
+                "stdout": stdout,
+                "stderr": STDOUT,
+                **starter.popen_kwargs,
+            }
+            if sys.platform == "win32":  # pragma: no cover
+                kwargs["startupinfo"] = sinfo = subprocess.STARTUPINFO()
+                sinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                sinfo.wShowWindow |= subprocess.SW_HIDE
+            else:
+                kwargs["close_fds"] = True
+                kwargs["preexec_fn"] = os.setpgrp  # no CONTROL-C
+    
+            # keep references of all popen and info objects for cleanup
+            xresource.info = (info, starter.terminate_on_interrupt)
+>           xresource.popen = Popen(args, **popen_kwargs, **kwargs)
+E           TypeError: subprocess.Popen() got multiple values for keyword argument 'env'
+
+/usr/local/lib/python3.12/dist-packages/xprocess/xprocess.py:264: TypeError
+=========================== short test summary info ============================
+ERROR ../../tests/test_final_state.py::test_skeleton_elements_visible - TypeE...
+ERROR ../../tests/test_final_state.py::test_add_propagates_a_to_b - TypeError...
+ERROR ../../tests/test_final_state.py::test_toggle_propagates_a_to_b - TypeEr...
+ERROR ../../tests/test_final_state.py::test_add_propagates_b_to_a - TypeError...
+ERROR ../../tests/test_final_state.py::test_delete_propagates - TypeError: su...
+ERROR ../../tests/test_final_state.py::test_clear_completed_is_batched - Type...
+ERROR ../../tests/test_final_state.py::test_empty_input_is_rejected - TypeErr...
+============================== 7 errors in 0.28s ===============================

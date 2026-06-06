@@ -1,0 +1,21 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0
+rootdir: /bootstrap
+plugins: xprocess-1.0.2, json-ctrf-0.5.0
+collected 12 items
+
+../../../bootstrap/test_initial_state.py::test_node_available PASSED
+../../../bootstrap/test_initial_state.py::test_npm_available PASSED
+../../../bootstrap/test_initial_state.py::test_project_dir_exists PASSED
+../../../bootstrap/test_initial_state.py::test_package_json_exists_and_has_next PASSED
+../../../bootstrap/test_initial_state.py::test_node_modules_preinstalled PASSED
+../../../bootstrap/test_initial_state.py::test_liveblocks_config_exists PASSED
+../../../bootstrap/test_initial_state.py::test_room_provider_and_page_exist PASSED
+../../../bootstrap/test_initial_state.py::test_header_component_skeleton_exists PASSED
+../../../bootstrap/test_initial_state.py::test_auth_route_exists_but_no_userinfo_yet PASSED
+../../../bootstrap/test_initial_state.py::test_mock_users_fixture_exists PASSED
+../../../bootstrap/test_initial_state.py::test_env_vars_present PASSED
+../../../bootstrap/test_initial_state.py::test_playwright_chromium_available PASSED
+
+============================== 12 passed in 0.15s ==============================
+pytest-xprocess reminder::Be sure to terminate the started process by running 'pytest --xkill' if you have not explicitly done so in your fixture with 'xprocess.getinfo(<process_name>).terminate()'.

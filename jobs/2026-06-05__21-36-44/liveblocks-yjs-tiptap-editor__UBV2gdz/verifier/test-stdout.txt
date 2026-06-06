@@ -1,0 +1,391 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0
+rootdir: /tests
+plugins: xprocess-1.0.2, json-ctrf-0.5.0
+collected 8 items
+
+../../tests/test_final_state.py EEEEEEEE                                 [100%]
+
+==================================== ERRORS ====================================
+_____________ ERROR at setup of test_liveblocks_auth_returns_token _____________
+
+xprocess = <xprocess.xprocess.XProcess object at 0x7f1244193b60>
+
+    @pytest.fixture(scope="session")
+    def start_app(xprocess):
+        """Start the Next.js dev server using xprocess and wait for the port to open."""
+    
+        class Starter(ProcessStarter):
+            name = "next_dev"
+            args = ["npm", "run", "dev", "--", "-p", str(APP_PORT)]
+            env = os.environ.copy()
+            popen_kwargs = {
+                "cwd": PROJECT_DIR,
+                "text": True,
+            }
+            timeout = 240
+            terminate_on_interrupt = True
+    
+            def startup_check(self):
+                return _port_open("localhost", APP_PORT)
+    
+        xprocess.ensure(Starter.name, Starter)
+        # Extra wait for Next.js to compile the first page request.
+>       _wait_http_ready(APP_BASE_URL, timeout=120)
+
+/tests/test_final_state.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+url = 'http://localhost:3000', timeout = 120
+
+    def _wait_http_ready(url: str, timeout: float = 120.0) -> None:
+        deadline = time.time() + timeout
+        last_err = None
+        while time.time() < deadline:
+            try:
+                r = requests.get(url, timeout=5)
+                if r.status_code < 500:
+                    return
+            except requests.RequestException as exc:
+                last_err = exc
+            time.sleep(1.0)
+>       raise RuntimeError(f"Server at {url} did not become ready within {timeout}s; last error: {last_err}")
+E       RuntimeError: Server at http://localhost:3000 did not become ready within 120s; last error: HTTPConnectionPool(host='localhost', port=3000): Read timed out. (read timeout=5)
+
+/tests/test_final_state.py:41: RuntimeError
+---------------------------- Captured stdout setup -----------------------------
+/tests/.pytest_cache/d/.xprocess/next_dev$ npm run dev -- -p 3000
+process 'next_dev' started pid=1807
+next_dev process startup detected
+_________ ERROR at setup of test_single_client_connected_count_is_one __________
+
+xprocess = <xprocess.xprocess.XProcess object at 0x7f1244193b60>
+
+    @pytest.fixture(scope="session")
+    def start_app(xprocess):
+        """Start the Next.js dev server using xprocess and wait for the port to open."""
+    
+        class Starter(ProcessStarter):
+            name = "next_dev"
+            args = ["npm", "run", "dev", "--", "-p", str(APP_PORT)]
+            env = os.environ.copy()
+            popen_kwargs = {
+                "cwd": PROJECT_DIR,
+                "text": True,
+            }
+            timeout = 240
+            terminate_on_interrupt = True
+    
+            def startup_check(self):
+                return _port_open("localhost", APP_PORT)
+    
+        xprocess.ensure(Starter.name, Starter)
+        # Extra wait for Next.js to compile the first page request.
+>       _wait_http_ready(APP_BASE_URL, timeout=120)
+
+/tests/test_final_state.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+url = 'http://localhost:3000', timeout = 120
+
+    def _wait_http_ready(url: str, timeout: float = 120.0) -> None:
+        deadline = time.time() + timeout
+        last_err = None
+        while time.time() < deadline:
+            try:
+                r = requests.get(url, timeout=5)
+                if r.status_code < 500:
+                    return
+            except requests.RequestException as exc:
+                last_err = exc
+            time.sleep(1.0)
+>       raise RuntimeError(f"Server at {url} did not become ready within {timeout}s; last error: {last_err}")
+E       RuntimeError: Server at http://localhost:3000 did not become ready within 120s; last error: HTTPConnectionPool(host='localhost', port=3000): Read timed out. (read timeout=5)
+
+/tests/test_final_state.py:41: RuntimeError
+____________ ERROR at setup of test_single_client_shows_alice_user _____________
+
+xprocess = <xprocess.xprocess.XProcess object at 0x7f1244193b60>
+
+    @pytest.fixture(scope="session")
+    def start_app(xprocess):
+        """Start the Next.js dev server using xprocess and wait for the port to open."""
+    
+        class Starter(ProcessStarter):
+            name = "next_dev"
+            args = ["npm", "run", "dev", "--", "-p", str(APP_PORT)]
+            env = os.environ.copy()
+            popen_kwargs = {
+                "cwd": PROJECT_DIR,
+                "text": True,
+            }
+            timeout = 240
+            terminate_on_interrupt = True
+    
+            def startup_check(self):
+                return _port_open("localhost", APP_PORT)
+    
+        xprocess.ensure(Starter.name, Starter)
+        # Extra wait for Next.js to compile the first page request.
+>       _wait_http_ready(APP_BASE_URL, timeout=120)
+
+/tests/test_final_state.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+url = 'http://localhost:3000', timeout = 120
+
+    def _wait_http_ready(url: str, timeout: float = 120.0) -> None:
+        deadline = time.time() + timeout
+        last_err = None
+        while time.time() < deadline:
+            try:
+                r = requests.get(url, timeout=5)
+                if r.status_code < 500:
+                    return
+            except requests.RequestException as exc:
+                last_err = exc
+            time.sleep(1.0)
+>       raise RuntimeError(f"Server at {url} did not become ready within {timeout}s; last error: {last_err}")
+E       RuntimeError: Server at http://localhost:3000 did not become ready within 120s; last error: HTTPConnectionPool(host='localhost', port=3000): Read timed out. (read timeout=5)
+
+/tests/test_final_state.py:41: RuntimeError
+______ ERROR at setup of test_two_clients_connected_count_is_two_in_both _______
+
+xprocess = <xprocess.xprocess.XProcess object at 0x7f1244193b60>
+
+    @pytest.fixture(scope="session")
+    def start_app(xprocess):
+        """Start the Next.js dev server using xprocess and wait for the port to open."""
+    
+        class Starter(ProcessStarter):
+            name = "next_dev"
+            args = ["npm", "run", "dev", "--", "-p", str(APP_PORT)]
+            env = os.environ.copy()
+            popen_kwargs = {
+                "cwd": PROJECT_DIR,
+                "text": True,
+            }
+            timeout = 240
+            terminate_on_interrupt = True
+    
+            def startup_check(self):
+                return _port_open("localhost", APP_PORT)
+    
+        xprocess.ensure(Starter.name, Starter)
+        # Extra wait for Next.js to compile the first page request.
+>       _wait_http_ready(APP_BASE_URL, timeout=120)
+
+/tests/test_final_state.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+url = 'http://localhost:3000', timeout = 120
+
+    def _wait_http_ready(url: str, timeout: float = 120.0) -> None:
+        deadline = time.time() + timeout
+        last_err = None
+        while time.time() < deadline:
+            try:
+                r = requests.get(url, timeout=5)
+                if r.status_code < 500:
+                    return
+            except requests.RequestException as exc:
+                last_err = exc
+            time.sleep(1.0)
+>       raise RuntimeError(f"Server at {url} did not become ready within {timeout}s; last error: {last_err}")
+E       RuntimeError: Server at http://localhost:3000 did not become ready within 120s; last error: HTTPConnectionPool(host='localhost', port=3000): Read timed out. (read timeout=5)
+
+/tests/test_final_state.py:41: RuntimeError
+__________ ERROR at setup of test_two_clients_show_each_others_names ___________
+
+xprocess = <xprocess.xprocess.XProcess object at 0x7f1244193b60>
+
+    @pytest.fixture(scope="session")
+    def start_app(xprocess):
+        """Start the Next.js dev server using xprocess and wait for the port to open."""
+    
+        class Starter(ProcessStarter):
+            name = "next_dev"
+            args = ["npm", "run", "dev", "--", "-p", str(APP_PORT)]
+            env = os.environ.copy()
+            popen_kwargs = {
+                "cwd": PROJECT_DIR,
+                "text": True,
+            }
+            timeout = 240
+            terminate_on_interrupt = True
+    
+            def startup_check(self):
+                return _port_open("localhost", APP_PORT)
+    
+        xprocess.ensure(Starter.name, Starter)
+        # Extra wait for Next.js to compile the first page request.
+>       _wait_http_ready(APP_BASE_URL, timeout=120)
+
+/tests/test_final_state.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+url = 'http://localhost:3000', timeout = 120
+
+    def _wait_http_ready(url: str, timeout: float = 120.0) -> None:
+        deadline = time.time() + timeout
+        last_err = None
+        while time.time() < deadline:
+            try:
+                r = requests.get(url, timeout=5)
+                if r.status_code < 500:
+                    return
+            except requests.RequestException as exc:
+                last_err = exc
+            time.sleep(1.0)
+>       raise RuntimeError(f"Server at {url} did not become ready within {timeout}s; last error: {last_err}")
+E       RuntimeError: Server at http://localhost:3000 did not become ready within 120s; last error: HTTPConnectionPool(host='localhost', port=3000): Read timed out. (read timeout=5)
+
+/tests/test_final_state.py:41: RuntimeError
+______________ ERROR at setup of test_text_syncs_between_clients _______________
+
+xprocess = <xprocess.xprocess.XProcess object at 0x7f1244193b60>
+
+    @pytest.fixture(scope="session")
+    def start_app(xprocess):
+        """Start the Next.js dev server using xprocess and wait for the port to open."""
+    
+        class Starter(ProcessStarter):
+            name = "next_dev"
+            args = ["npm", "run", "dev", "--", "-p", str(APP_PORT)]
+            env = os.environ.copy()
+            popen_kwargs = {
+                "cwd": PROJECT_DIR,
+                "text": True,
+            }
+            timeout = 240
+            terminate_on_interrupt = True
+    
+            def startup_check(self):
+                return _port_open("localhost", APP_PORT)
+    
+        xprocess.ensure(Starter.name, Starter)
+        # Extra wait for Next.js to compile the first page request.
+>       _wait_http_ready(APP_BASE_URL, timeout=120)
+
+/tests/test_final_state.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+url = 'http://localhost:3000', timeout = 120
+
+    def _wait_http_ready(url: str, timeout: float = 120.0) -> None:
+        deadline = time.time() + timeout
+        last_err = None
+        while time.time() < deadline:
+            try:
+                r = requests.get(url, timeout=5)
+                if r.status_code < 500:
+                    return
+            except requests.RequestException as exc:
+                last_err = exc
+            time.sleep(1.0)
+>       raise RuntimeError(f"Server at {url} did not become ready within {timeout}s; last error: {last_err}")
+E       RuntimeError: Server at http://localhost:3000 did not become ready within 120s; last error: HTTPConnectionPool(host='localhost', port=3000): Read timed out. (read timeout=5)
+
+/tests/test_final_state.py:41: RuntimeError
+_________________ ERROR at setup of test_bold_formatting_syncs _________________
+
+xprocess = <xprocess.xprocess.XProcess object at 0x7f1244193b60>
+
+    @pytest.fixture(scope="session")
+    def start_app(xprocess):
+        """Start the Next.js dev server using xprocess and wait for the port to open."""
+    
+        class Starter(ProcessStarter):
+            name = "next_dev"
+            args = ["npm", "run", "dev", "--", "-p", str(APP_PORT)]
+            env = os.environ.copy()
+            popen_kwargs = {
+                "cwd": PROJECT_DIR,
+                "text": True,
+            }
+            timeout = 240
+            terminate_on_interrupt = True
+    
+            def startup_check(self):
+                return _port_open("localhost", APP_PORT)
+    
+        xprocess.ensure(Starter.name, Starter)
+        # Extra wait for Next.js to compile the first page request.
+>       _wait_http_ready(APP_BASE_URL, timeout=120)
+
+/tests/test_final_state.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+url = 'http://localhost:3000', timeout = 120
+
+    def _wait_http_ready(url: str, timeout: float = 120.0) -> None:
+        deadline = time.time() + timeout
+        last_err = None
+        while time.time() < deadline:
+            try:
+                r = requests.get(url, timeout=5)
+                if r.status_code < 500:
+                    return
+            except requests.RequestException as exc:
+                last_err = exc
+            time.sleep(1.0)
+>       raise RuntimeError(f"Server at {url} did not become ready within {timeout}s; last error: {last_err}")
+E       RuntimeError: Server at http://localhost:3000 did not become ready within 120s; last error: HTTPConnectionPool(host='localhost', port=3000): Read timed out. (read timeout=5)
+
+/tests/test_final_state.py:41: RuntimeError
+________________ ERROR at setup of test_italic_formatting_syncs ________________
+
+xprocess = <xprocess.xprocess.XProcess object at 0x7f1244193b60>
+
+    @pytest.fixture(scope="session")
+    def start_app(xprocess):
+        """Start the Next.js dev server using xprocess and wait for the port to open."""
+    
+        class Starter(ProcessStarter):
+            name = "next_dev"
+            args = ["npm", "run", "dev", "--", "-p", str(APP_PORT)]
+            env = os.environ.copy()
+            popen_kwargs = {
+                "cwd": PROJECT_DIR,
+                "text": True,
+            }
+            timeout = 240
+            terminate_on_interrupt = True
+    
+            def startup_check(self):
+                return _port_open("localhost", APP_PORT)
+    
+        xprocess.ensure(Starter.name, Starter)
+        # Extra wait for Next.js to compile the first page request.
+>       _wait_http_ready(APP_BASE_URL, timeout=120)
+
+/tests/test_final_state.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+url = 'http://localhost:3000', timeout = 120
+
+    def _wait_http_ready(url: str, timeout: float = 120.0) -> None:
+        deadline = time.time() + timeout
+        last_err = None
+        while time.time() < deadline:
+            try:
+                r = requests.get(url, timeout=5)
+                if r.status_code < 500:
+                    return
+            except requests.RequestException as exc:
+                last_err = exc
+            time.sleep(1.0)
+>       raise RuntimeError(f"Server at {url} did not become ready within {timeout}s; last error: {last_err}")
+E       RuntimeError: Server at http://localhost:3000 did not become ready within 120s; last error: HTTPConnectionPool(host='localhost', port=3000): Read timed out. (read timeout=5)
+
+/tests/test_final_state.py:41: RuntimeError
+=========================== short test summary info ============================
+ERROR ../../tests/test_final_state.py::test_liveblocks_auth_returns_token - R...
+ERROR ../../tests/test_final_state.py::test_single_client_connected_count_is_one
+ERROR ../../tests/test_final_state.py::test_single_client_shows_alice_user - ...
+ERROR ../../tests/test_final_state.py::test_two_clients_connected_count_is_two_in_both
+ERROR ../../tests/test_final_state.py::test_two_clients_show_each_others_names
+ERROR ../../tests/test_final_state.py::test_text_syncs_between_clients - Runt...
+ERROR ../../tests/test_final_state.py::test_bold_formatting_syncs - RuntimeEr...
+ERROR ../../tests/test_final_state.py::test_italic_formatting_syncs - Runtime...
+======================== 8 errors in 121.31s (0:02:01) =========================
