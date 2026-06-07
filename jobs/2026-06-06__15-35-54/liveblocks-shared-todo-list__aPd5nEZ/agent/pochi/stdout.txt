@@ -1,0 +1,43 @@
+- Initializing MCP connections...
+You
+# Build a Liveblocks Shared Todo List (Next.js) ## Background You are extending a pre-scaffolded Next.js 14 (App Router) project located at `/home/user/project` with a real-time collaborative todo list backed by https://liveblocks.io/ Storage. The packages `@liveblocks/client` and `@liveblocks/react` (v2) are already installed. Your job is to wire up Liveblocks and implement the UI so that multiple browser tabs connected to the same room see the same todos in real time. ## Requirements * Implement a shared, real-time todo list on the home page (`/`). * Persist the todos in Liveblocks Storage using a `LiveList` of todo items. Each item must contain at minimum a stable string `id`, a string `text`, and a boolean `completed`. * The UI must allow the user to: * Type new todo text in a text input and add a new todo to the shared list. * Toggle the `completed` flag of any existing todo. * Delete any existing todo. * All three operations (add / toggle / delete) must be performed through Liveblocks Storage mutations, so that other browser tabs/clients see the updates in real time. * Use Liveblocks v2 React API (`@liveblocks/react` / `@liveblocks/react/suspense`). Do **NOT** invent your own websocket layer. * Use the Liveblocks **public** API key on the client, read from `NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY`. * The Liveblocks room id used by `RoomProvider` must be the value of the environment variable `NEXT_PUBLIC_ZEALT_RUN_ID`. Before starting the dev server, run `export NEXT_PUBLIC_ZEALT_RUN_ID=$ZEALT_RUN_ID` so the public env var is populated. ## Implementation Hints * Wrap your app (or the page) with `LiveblocksProvider` (passing `publicApiKey={process.env.NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY!}`) and a `RoomProvider` whose `id` is `process.env.NEXT_PUBLIC_ZEALT_RUN_ID!`. Provide an `initialStorage` that contains an empty `LiveList` of todos. * Read the todos using `useStorage((root) => root.todos)` and mutate them with `useMutation`. Inside `useMutation`, get the `LiveList` via `storage.get("todos")` and call `.push`, `.set`, or `.delete` (find the target index using the todo `id`). * Liveblocks Storage hooks require client-only rendering. Wrap them in `<ClientSideSuspense fallback={...}>` (from `@liveblocks/react/suspense`) and add a `"use client"` directive at the top of any file that uses Liveblocks hooks. * Each todo `id` should be unique and stable for the lifetime of the item (e.g. `crypto.randomUUID()`). Do **NOT** use the array index as the id. * Read `ZEALT_RUN_ID` from the environment at runtime; do not hard-code a room id. * Before finishing the task, **kill any background `next dev` process you may have started** — the verifier starts its own dev server. ## Acceptance Criteria * Project path: `/home/user/project` * Start command: `npm run dev` (must serve the app on port 3000 within \~60 seconds of starting) * Port: 3000 * Route: `GET /` renders the shared todo list page. * Room id: equal to `process.env.NEXT_PUBLIC_ZEALT_RUN_ID` (which is set from `$ZEALT_RUN_ID`). * Storage shape: the room's Storage root must have a `todos` field that is a `LiveList`. After verification interactions, fetching `https://api.liveblocks.io/v2/rooms/{ZEALT_RUN_ID}/storage?format=json` (with `Authorization: Bearer ${LIVEBLOCKS_SECRET_KEY}`) must return a JSON document of the shape: ```json { "todos": [ { "id": "<string>", "text": "<string>", "completed": <boolean> } // … zero or more items ] } ``` * UI selectors (used by the automated verifier): * A text input with `data-testid="new-todo-input"` (or DOM id `new-todo-input`). * An add button with `data-testid="add-todo-btn"` that, when clicked, appends the current input value as a new todo and clears the input. * Each todo row must include `data-testid="todo-item"` and an attribute `data-todo-text` containing the todo's text. The row must contain: * A toggle control with `data-testid="toggle-btn"` (clicking it flips `completed`). * A delete control with `data-testid="delete-btn"` (clicking it removes the todo from the list). * Completed todos must additionally carry `data-completed="true"` on the row; non-completed todos must carry `data-completed="false"`. * Real-time sync: opening the page in a second browser context targeting the same room must reflect all add/toggle/delete operations performed in the first context within a few seconds, without a page reload. * The dev server must NOT be left running by the agent; the verifier will start and stop its own dev server.   
+
+Pochi
+📂 Listing files in /home/user/project ✔ 
+📂 Listing files in /home/user/project/app recursively ✔ 
+📖 Reading /home/user/project/package.json ✔ 
+📖 Reading /home/user/project/app/page.tsx ✔ 
+📖 Reading /home/user/project/app/layout.tsx ✔ 
+📋 Updating todo list (5 items) ✔ 
+📋 Updating todo list (5 items) ✔ 
+💭 Thinking for 687 characters   
+📖 Reading /home/user/project/node_modules/@liveblocks/react/package.json ✔ 
+📖 Reading /home/user/project/node_modules/@liveblocks/react/dist/suspense.d.ts ✔ 
+💭 Thinking for 1504 characters   
+🔍 Searching for class LiveList in *.d.ts files in /home/user/project/node_modules/@liveblocks/client ✔ 
+🔍 Searching for class LiveList in *.d.ts files in /home/user/project/node_modules/@liveblocks/core ✔ 
+📖 Reading /home/user/project/node_modules/@liveblocks/core/dist/index.d.ts ✔ 
+📖 Reading /home/user/project/node_modules/@liveblocks/core/dist/index.d.ts ✔ 
+💭 Thinking for 3937 characters   
+✏️  Writing /home/user/project/app/page.tsx ✔ 
+💭 Thinking for 251 characters   
+📋 Updating todo list (5 items) ✔ 
+💫 Executing npm run build ✔ 
+💭 Thinking for 2136 characters   
+✏️  Writing /home/user/project/app/page.tsx ✔ 
+💫 Executing npm run build ✔ 
+📋 Updating todo list (5 items) ✔ 
+💭 Thinking for 882 characters   
+🎉 Task Completed
+I have successfully built the Liveblocks Shared Todo List for your Next.js project.
+
+Here is a summary of the implementation:
+1. **Liveblocks Provider Configuration**: Configured the application using `LiveblocksProvider` and `RoomProvider` in `app/page.tsx`, dynamically reading `NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY` and `NEXT_PUBLIC_ZEALT_RUN_ID` at runtime.
+2. **Hydration & SSR Safety**: Used a `mounted` state checking mechanism to ensure that Liveblocks providers and hooks are initialized strictly on the client-side, avoiding any potential hydration mismatches or build-time environment variable issues in Next.js SSR.
+3. **Real-time Liveblocks Storage Integration**:
+   - Initialized the storage root with a `todos` field containing an empty `LiveList`.
+   - Used `useStorage` to retrieve a live, real-time reactive list of todos.
+   - Implemented mutations with `useMutation` to cleanly update the `LiveList` for adding, toggling, and deleting todos in real-time.
+4. **UI Elements & Selectors**: Built a fully responsive and structured interface with all the required DOM selectors and `data-testid` attributes (e.g. `data-testid="new-todo-input"`, `data-testid="add-todo-btn"`, `data-testid="todo-item"`, `data-todo-text`, `data-testid="toggle-btn"`, `data-testid="delete-btn"`, and `data-completed`) as specified.
+5. **Verification Build**: Ran a production build (`npm run build`) which compiled perfectly with zero errors. No development server was left running, satisfying the clean-up criteria.   
+  

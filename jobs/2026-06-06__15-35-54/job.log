@@ -1,0 +1,1664 @@
+Skipping image OS validation for hb__liveblocks-collaborative-form-storage: docker inspect returned 1
+Running command: apt-get update && apt-get install -y curl ripgrep
+Command outputs captured
+Running command: set -euo pipefail; curl -fsSL https://getpochi.com/install.sh | bash -x -s -- pochi-v0.6.12 && mkdir -p /logs/agent/pochi && ~/.pochi/bin/pochi --version
+Command outputs captured
+Running command: ln -sf ~/.pochi/bin/pochi /usr/local/bin/pochi
+Command outputs captured
+Running command: echo zr-m76yjto > /logs/artifacts/run-id && echo liveblocks-collaborative-form-st__M76yjto > /logs/artifacts/trial_id
+Command outputs captured
+Running command: mkdir -p ~/.pochi && cat << 'EOF' | sed -e "s/OPENAI_API_KEY/${OPENAI_API_KEY}/g" -e "s/DEEPINFRA_API_KEY/${DEEPINFRA_API_KEY}/g" > ~/.pochi/config.jsonc
+{
+  "providers": {
+    "deepinfra": {
+      "kind": "openai",
+      "baseURL": "https://api.deepinfra.com/v1/openai",
+      "apiKey": "DEEPINFRA_API_KEY",
+      "models": {
+        "zai-org/GLM-4.7-Flash": {
+          "name": "glm-4.7-flash"
+        },
+        "moonshotai/Kimi-K2.6": {
+          "name": "kimi-K2.6"
+        },
+        "deepseek-ai/DeepSeek-V4-Pro": {
+          "name": "DeepSeek-V4-Pro"
+        }
+      }
+    },
+    "openai": {
+      "kind": "openai",
+      "baseURL": "https://api.openai.com/v1",
+      "apiKey": "OPENAI_API_KEY",
+      "models": {
+        "gpt-5.4": {
+          "name": "gpt-5.4"
+        }
+      }
+    }
+  }
+}
+EOF
+Command outputs captured
+Running command: if [ -f /bootstrap/test_initial_state.py ]; then pytest -s --log-cli-level=DEBUG /bootstrap/test_initial_state.py > >(tee /logs/agent/pochi/initial-test-stdout.txt) 2> >(tee /logs/agent/pochi/initial-test-stderr.txt >&2); fi
+Command outputs captured
+Running command: pochi --model google/gemini-3.5-flash --max-steps 200 --max-retries 10 --blobs-dir /logs/agent/pochi/blobs --experimental-stream-trajectory /logs/agent/pochi/trajectory.jsonl > >(tee /logs/agent/pochi/stdout.txt) 2> >(tee /logs/agent/pochi/stderr.txt >&2) <<'EOF'
+# Liveblocks Collaborative Form (Storage)
+
+## Background
+Build a real-time collaborative multi-field form using Liveblocks Storage on Next.js. As one user types into the form fields, all other users connected to the same room must instantly see the same values. A submit button persists a `submitted` flag in the same shared storage so that every connected client can observe the submission.
+
+The project is a Next.js (App Router) application using the Liveblocks v2 React SDK (`@liveblocks/client`, `@liveblocks/react`). The Liveblocks public API key is provided via the `NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY` environment variable so that the browser client can connect directly using it (no auth endpoint required).
+
+A `run-id` is supplied via the `ZEALT_RUN_ID` environment variable; before running the dev server you MUST re-export it as `NEXT_PUBLIC_ZEALT_RUN_ID` so the browser code can read it and derive a unique Liveblocks room id, isolating concurrent test runs.
+
+## Requirements
+- Implement a single page at the route `/form` that renders three text-style inputs: `name` (text), `email` (email), `message` (textarea).
+- Back the form state with a Liveblocks `LiveObject` stored at `storage.root.form`, containing the fields `name`, `email`, `message`, and `submitted`.
+- Updates to any field in any browser must be reflected in every other connected browser in real time using `useStorage` / `useMutation`.
+- A button labeled `Submit` must, when clicked, set `submitted = true` on the shared `LiveObject`. Once submitted, the page should clearly show a submitted state that is visible to every connected user (e.g. a visible element with the text `Submitted`).
+- The Liveblocks room id must be `harbor-form-${NEXT_PUBLIC_ZEALT_RUN_ID}` so concurrent runs do not collide.
+- All Liveblocks connectivity must use the real Liveblocks service via the public key — do not mock or stub the client.
+
+## Implementation Hints
+- Install `@liveblocks/client` and `@liveblocks/react` (v2.x) alongside Next.js.
+- Use `createClient({ publicApiKey: process.env.NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY! })` in a client component and wrap the page with `RoomProvider` from `@liveblocks/react`, passing `initialStorage` so the `form` LiveObject is seeded with empty strings and `submitted: false` on first connect.
+- Read individual form fields with `useStorage((root) => root.form.name)` (and similar), and write them via `useMutation(({ storage }, key, value) => { storage.get('form').set(key, value); }, [])`.
+- Re-export the run id at dev-server start time, e.g. `NEXT_PUBLIC_ZEALT_RUN_ID=$ZEALT_RUN_ID npm run dev`.
+- Make sure each input has a stable, queryable identifier such as `data-testid="field-name"`, `data-testid="field-email"`, `data-testid="field-message"`, the submit button has `data-testid="submit"`, and the submitted indicator has `data-testid="submitted"`.
+- After verifying things work locally, KILL the dev server before finishing — the verifier will start its own server. Leaving the dev server running will cause the port to be in use and the verifier to fail.
+
+## Acceptance Criteria
+- Project path: /home/user/myproject
+- Start command: `NEXT_PUBLIC_ZEALT_RUN_ID="$ZEALT_RUN_ID" npm run dev`
+- Port: 3000
+- Route: `/form`
+- Required environment variables in `.env.local` (or equivalent) at the project root:
+  - `NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY`
+- The page at `/form` must render three input elements with `data-testid` values `field-name`, `field-email`, `field-message`, and a button with `data-testid` value `submit`.
+- Two browser sessions opened on the same `/form` page must share the values of the three inputs in real time via Liveblocks Storage.
+- Clicking the `submit` button must set `submitted=true` on the shared `LiveObject` so it is visible to every connected client, and the page must surface a visible element with `data-testid="submitted"` once submitted.
+- The Liveblocks room id used by the client must be `harbor-form-${NEXT_PUBLIC_ZEALT_RUN_ID}`.
+- After verifying behavior, the agent MUST stop the dev server before finishing the task.
+
+
+EOF
+Skipping image OS validation for hb__liveblocks-collaborative-like-button: docker inspect returned 1
+Skipping image OS validation for hb__liveblocks-follow-user-cursor: docker inspect returned 1
+Skipping image OS validation for hb__liveblocks-resolve-thread-metadata: docker inspect returned 1
+Running command: apt-get update && apt-get install -y curl ripgrep
+Running command: apt-get update && apt-get install -y curl ripgrep
+Running command: apt-get update && apt-get install -y curl ripgrep
+Skipping image OS validation for hb__liveblocks-username-presence-display: docker inspect returned 1
+Running command: apt-get update && apt-get install -y curl ripgrep
+Command outputs captured
+Running command: set -euo pipefail; curl -fsSL https://getpochi.com/install.sh | bash -x -s -- pochi-v0.6.12 && mkdir -p /logs/agent/pochi && ~/.pochi/bin/pochi --version
+Command outputs captured
+Running command: set -euo pipefail; curl -fsSL https://getpochi.com/install.sh | bash -x -s -- pochi-v0.6.12 && mkdir -p /logs/agent/pochi && ~/.pochi/bin/pochi --version
+Command outputs captured
+Running command: set -euo pipefail; curl -fsSL https://getpochi.com/install.sh | bash -x -s -- pochi-v0.6.12 && mkdir -p /logs/agent/pochi && ~/.pochi/bin/pochi --version
+Command outputs captured
+Running command: set -euo pipefail; curl -fsSL https://getpochi.com/install.sh | bash -x -s -- pochi-v0.6.12 && mkdir -p /logs/agent/pochi && ~/.pochi/bin/pochi --version
+Command outputs captured
+Running command: ln -sf ~/.pochi/bin/pochi /usr/local/bin/pochi
+Command outputs captured
+Command outputs captured
+Running command: ln -sf ~/.pochi/bin/pochi /usr/local/bin/pochi
+Command outputs captured
+Command outputs captured
+Running command: ln -sf ~/.pochi/bin/pochi /usr/local/bin/pochi
+Command outputs captured
+Running command: echo zr-kylalih > /logs/artifacts/run-id && echo liveblocks-collaborative-like-bu__kYLALiH > /logs/artifacts/trial_id
+Command outputs captured
+Running command: mkdir -p ~/.pochi && cat << 'EOF' | sed -e "s/OPENAI_API_KEY/${OPENAI_API_KEY}/g" -e "s/DEEPINFRA_API_KEY/${DEEPINFRA_API_KEY}/g" > ~/.pochi/config.jsonc
+{
+  "providers": {
+    "deepinfra": {
+      "kind": "openai",
+      "baseURL": "https://api.deepinfra.com/v1/openai",
+      "apiKey": "DEEPINFRA_API_KEY",
+      "models": {
+        "zai-org/GLM-4.7-Flash": {
+          "name": "glm-4.7-flash"
+        },
+        "moonshotai/Kimi-K2.6": {
+          "name": "kimi-K2.6"
+        },
+        "deepseek-ai/DeepSeek-V4-Pro": {
+          "name": "DeepSeek-V4-Pro"
+        }
+      }
+    },
+    "openai": {
+      "kind": "openai",
+      "baseURL": "https://api.openai.com/v1",
+      "apiKey": "OPENAI_API_KEY",
+      "models": {
+        "gpt-5.4": {
+          "name": "gpt-5.4"
+        }
+      }
+    }
+  }
+}
+EOF
+Running command: echo zr-mwrt8as > /logs/artifacts/run-id && echo liveblocks-resolve-thread-metada__MwRt8AS > /logs/artifacts/trial_id
+Command outputs captured
+Running command: if [ -f /bootstrap/test_initial_state.py ]; then pytest -s --log-cli-level=DEBUG /bootstrap/test_initial_state.py > >(tee /logs/agent/pochi/initial-test-stdout.txt) 2> >(tee /logs/agent/pochi/initial-test-stderr.txt >&2); fi
+Command outputs captured
+Running command: mkdir -p ~/.pochi && cat << 'EOF' | sed -e "s/OPENAI_API_KEY/${OPENAI_API_KEY}/g" -e "s/DEEPINFRA_API_KEY/${DEEPINFRA_API_KEY}/g" > ~/.pochi/config.jsonc
+{
+  "providers": {
+    "deepinfra": {
+      "kind": "openai",
+      "baseURL": "https://api.deepinfra.com/v1/openai",
+      "apiKey": "DEEPINFRA_API_KEY",
+      "models": {
+        "zai-org/GLM-4.7-Flash": {
+          "name": "glm-4.7-flash"
+        },
+        "moonshotai/Kimi-K2.6": {
+          "name": "kimi-K2.6"
+        },
+        "deepseek-ai/DeepSeek-V4-Pro": {
+          "name": "DeepSeek-V4-Pro"
+        }
+      }
+    },
+    "openai": {
+      "kind": "openai",
+      "baseURL": "https://api.openai.com/v1",
+      "apiKey": "OPENAI_API_KEY",
+      "models": {
+        "gpt-5.4": {
+          "name": "gpt-5.4"
+        }
+      }
+    }
+  }
+}
+EOF
+Command outputs captured
+Running command: if [ -f /bootstrap/test_initial_state.py ]; then pytest -s --log-cli-level=DEBUG /bootstrap/test_initial_state.py > >(tee /logs/agent/pochi/initial-test-stdout.txt) 2> >(tee /logs/agent/pochi/initial-test-stderr.txt >&2); fi
+Command outputs captured
+Running command: ln -sf ~/.pochi/bin/pochi /usr/local/bin/pochi
+Command outputs captured
+Command outputs captured
+Running command: pochi --model google/gemini-3.5-flash --max-steps 200 --max-retries 10 --blobs-dir /logs/agent/pochi/blobs --experimental-stream-trajectory /logs/agent/pochi/trajectory.jsonl > >(tee /logs/agent/pochi/stdout.txt) 2> >(tee /logs/agent/pochi/stderr.txt >&2) <<'EOF'
+# Collaborative Like Button with Liveblocks Storage
+
+## Background
+You are working on a Next.js application that needs a simple multiplayer feature: a "Like" button whose count is synchronized in realtime across every connected client using [Liveblocks](https://liveblocks.io/). The counter must live inside Liveblocks Storage (a `LiveObject`), and clicking the button must mutate that shared state. All connected browsers must immediately reflect the new value.
+
+A Next.js (App Router) scaffold has been prepared for you at `/home/user/myproject`. Your job is to wire up Liveblocks on the home page so the like button becomes truly collaborative.
+
+## Requirements
+- Use the Liveblocks v2 React SDK (`@liveblocks/client`, `@liveblocks/react`).
+- Connect to Liveblocks using the **public** API key, exposed to the frontend via `NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY`.
+- The Liveblocks room id used by the page must be read at runtime from the `NEXT_PUBLIC_ZEALT_RUN_ID` environment variable (this is exported into the shell before `npm run dev`).
+- The shared counter must live in Liveblocks Storage inside a `LiveObject` under the key `count` (i.e. `storage.root.count`). Its initial value when the room storage is first created must be `0`.
+- The home page (`/`) must render:
+  - A button with accessible name `Like` (e.g. `<button>Like</button>` or `<button aria-label="Like">…`).
+  - A visible element containing the current count value as plain text (so that text content of the page contains the current count number).
+- Clicking the `Like` button must call a Liveblocks `useMutation` that increments `storage.root.count` by 1.
+- Reads of the counter shown on the page must go through `useStorage` so the UI updates reactively when storage changes.
+- The page must render entirely on the client (Liveblocks React hooks are not allowed in server components). Wrap any client tree with `RoomProvider` and `LiveblocksProvider` as required by v2.
+
+## Implementation Hints
+- Initialize the project at `/home/user/myproject` and install the required Liveblocks v2 packages: `@liveblocks/client` and `@liveblocks/react`.
+- Create a `liveblocks.config.ts` (or equivalent) that declares the `Storage` type with `count: number` and re-exports the typed hooks (`useStorage`, `useMutation`).
+- Use `<LiveblocksProvider publicApiKey={...}>` and `<RoomProvider id={...} initialStorage={{ count: 0 }}>` to set up the room. Read the public key from `process.env.NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY` and the room id from `process.env.NEXT_PUBLIC_ZEALT_RUN_ID`.
+- Mark any component using Liveblocks hooks with `"use client"`.
+- Make sure the dev server can build and serve the page without runtime errors before considering the task done.
+- IMPORTANT: Before reporting completion, **kill any dev/build processes you started** (e.g. `npm run dev`) so that the verifier can start its own server on port 3000.
+
+## Acceptance Criteria
+- Project path: `/home/user/myproject`
+- Start command: `npm run dev`
+- Port: `3000`
+- Routes:
+  - `GET /` — Renders an HTML page that includes:
+    - A `Like` button (accessible name `Like`).
+    - A visible numeric counter showing `storage.root.count`.
+- Liveblocks state shape (verified via the Liveblocks REST API `GET https://api.liveblocks.io/v2/rooms/{roomId}/storage?format=json`):
+  ```json
+  {
+    "count": <integer>
+  }
+  ```
+- Behavior: clicking the `Like` button N times in a single browser session increases `storage.root.count` by exactly N (eventually consistent within a few seconds), and the displayed number on the page updates to match.
+- The Liveblocks room id used by the page must equal the value of the `NEXT_PUBLIC_ZEALT_RUN_ID` environment variable at runtime.
+- No dev server may be left running by the agent when reporting completion.
+
+
+EOF
+Running command: echo zr-ktwlrff > /logs/artifacts/run-id && echo liveblocks-follow-user-cursor__KtWLrff > /logs/artifacts/trial_id
+Command outputs captured
+Running command: mkdir -p ~/.pochi && cat << 'EOF' | sed -e "s/OPENAI_API_KEY/${OPENAI_API_KEY}/g" -e "s/DEEPINFRA_API_KEY/${DEEPINFRA_API_KEY}/g" > ~/.pochi/config.jsonc
+{
+  "providers": {
+    "deepinfra": {
+      "kind": "openai",
+      "baseURL": "https://api.deepinfra.com/v1/openai",
+      "apiKey": "DEEPINFRA_API_KEY",
+      "models": {
+        "zai-org/GLM-4.7-Flash": {
+          "name": "glm-4.7-flash"
+        },
+        "moonshotai/Kimi-K2.6": {
+          "name": "kimi-K2.6"
+        },
+        "deepseek-ai/DeepSeek-V4-Pro": {
+          "name": "DeepSeek-V4-Pro"
+        }
+      }
+    },
+    "openai": {
+      "kind": "openai",
+      "baseURL": "https://api.openai.com/v1",
+      "apiKey": "OPENAI_API_KEY",
+      "models": {
+        "gpt-5.4": {
+          "name": "gpt-5.4"
+        }
+      }
+    }
+  }
+}
+EOF
+Command outputs captured
+Running command: if [ -f /bootstrap/test_initial_state.py ]; then pytest -s --log-cli-level=DEBUG /bootstrap/test_initial_state.py > >(tee /logs/agent/pochi/initial-test-stdout.txt) 2> >(tee /logs/agent/pochi/initial-test-stderr.txt >&2); fi
+Command outputs captured
+Running command: pochi --model google/gemini-3.5-flash --max-steps 200 --max-retries 10 --blobs-dir /logs/agent/pochi/blobs --experimental-stream-trajectory /logs/agent/pochi/trajectory.jsonl > >(tee /logs/agent/pochi/stdout.txt) 2> >(tee /logs/agent/pochi/stderr.txt >&2) <<'EOF'
+# Liveblocks Multiplayer Whiteboard with Follow-User-Cursor Mode
+
+## Background
+You are building a collaborative whiteboard page using Next.js and Liveblocks v2. Users connecting to the page see each other's live cursors and can "follow" another user — when follow mode is active, the canvas pans via a CSS `transform` so that the followed user's cursor is visually centered in the viewport. The followed user's avatar in the sidebar must visually toggle via a `data-following="true"` attribute so styles can react to it.
+
+A Liveblocks project has been provisioned. The page uses Liveblocks Presence (not Storage) for cursor coordinates, and plain local React state for tracking the followed connection. A starter Next.js scaffold exists at `/home/user/myproject` with the Liveblocks v2 SDK already installed.
+
+## Requirements
+- Implement a single Next.js page at route `/` that connects to a Liveblocks v2 room and:
+  - Broadcasts the current user's pointer position over the whiteboard area as a `Presence` field named `cursor` (an `{ x, y }` object, or `null` when the pointer leaves).
+  - Subscribes to other users' cursors and renders a cursor indicator at each other user's reported coordinates.
+  - Renders a sidebar listing every other connected user as an avatar button.
+  - Lets the user toggle "follow mode" by clicking an avatar. Following is single-target: clicking an avatar follows that user; clicking the currently-followed avatar (or any other avatar) updates the follow target.
+  - When follow mode is active, applies a CSS `transform: translate(...)` on the canvas wrapper so the followed user's cursor position appears centered in the viewport. When follow mode is off, the canvas wrapper applies no translation (e.g. `transform: none` or `translate(0px, 0px)`).
+  - Uses Liveblocks v2 hooks (`@liveblocks/react`): `LiveblocksProvider`, `RoomProvider`, `useUpdateMyPresence`, and `useOthers`.
+
+## Implementation Hints
+- The Liveblocks v2 React SDK (`@liveblocks/react`, `@liveblocks/client`) is already installed. Wrap the page in a `LiveblocksProvider` configured with the public API key, then a `RoomProvider`.
+- The whiteboard must be scoped per evaluation run. Before `npm run dev`, re-export the runtime environment variable `ZEALT_RUN_ID` as `NEXT_PUBLIC_ZEALT_RUN_ID` so the value is available client-side (for example: `export NEXT_PUBLIC_ZEALT_RUN_ID="$ZEALT_RUN_ID"`). The room id must be `whiteboard-${NEXT_PUBLIC_ZEALT_RUN_ID}`.
+- Frontend Liveblocks credentials must be read from `process.env.NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY`.
+- Use a `onPointerMove` handler on the whiteboard area to call the setter returned by `useUpdateMyPresence` with the new `cursor` value. Use `useOthers` (with a selector) to read the other users and their cursors. Liveblocks Presence is ephemeral — that is exactly what we want.
+- Track the followed `connectionId` in plain React state with `useState`. Derive the CSS transform from the followed user's current cursor and the viewport dimensions (`window.innerWidth`, `window.innerHeight`) so the cursor is centered.
+- Provide stable, test-friendly selectors on the DOM (see Acceptance Criteria). Do not gate them behind hover or animation states.
+- This is a client component — Liveblocks hooks cannot run on the server. Use the Next.js App Router `"use client"` directive on the page (and on any component using Liveblocks hooks).
+- Use real Liveblocks credentials supplied via environment variables. Do not mock or stub the Liveblocks client.
+- **Important**: After you have started the dev server and confirmed the page loads, **kill the dev server before finishing the task**. The verifier will start its own dev server. Leaving a process bound to port 3000 will cause verification to fail.
+
+## Acceptance Criteria
+- Project path: `/home/user/myproject`
+- Start command: `npm run dev` (must be run after `export NEXT_PUBLIC_ZEALT_RUN_ID="$ZEALT_RUN_ID"`)
+- Port: `3000`
+- Route `/` renders the whiteboard UI.
+- The DOM exposes the following stable hooks for automated verification:
+  - A whiteboard surface element with attribute `data-testid="whiteboard-area"`. Pointer events fired on this element must trigger Presence cursor updates.
+  - A canvas wrapper element with attribute `data-testid="canvas-pan"`. Its inline `style.transform` must be the empty string, `none`, or `translate(0px, 0px)` when no follow target is active, and must contain a non-identity `translate(...)` (with non-zero pixel values reflecting the followed cursor's position) when a follow target is active.
+  - One sidebar button per other connected user, each with:
+    - `data-testid="follow-avatar"`
+    - `data-connection-id="<connectionId-as-string>"` matching the Liveblocks `connectionId` of the represented user
+    - `data-following="true"` when that user is currently being followed, `data-following="false"` otherwise
+  - Clicking a `follow-avatar` button toggles its `data-following` to `"true"` and flips any previously-followed avatar back to `"false"`.
+- The page must connect to the Liveblocks room `whiteboard-${NEXT_PUBLIC_ZEALT_RUN_ID}` using `NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY`.
+- Use Liveblocks v2 API (`@liveblocks/react` and `@liveblocks/client`).
+
+
+EOF
+Running command: echo zr-zb4gwev > /logs/artifacts/run-id && echo liveblocks-username-presence-dis__Zb4gWev > /logs/artifacts/trial_id
+Command outputs captured
+Running command: mkdir -p ~/.pochi && cat << 'EOF' | sed -e "s/OPENAI_API_KEY/${OPENAI_API_KEY}/g" -e "s/DEEPINFRA_API_KEY/${DEEPINFRA_API_KEY}/g" > ~/.pochi/config.jsonc
+{
+  "providers": {
+    "deepinfra": {
+      "kind": "openai",
+      "baseURL": "https://api.deepinfra.com/v1/openai",
+      "apiKey": "DEEPINFRA_API_KEY",
+      "models": {
+        "zai-org/GLM-4.7-Flash": {
+          "name": "glm-4.7-flash"
+        },
+        "moonshotai/Kimi-K2.6": {
+          "name": "kimi-K2.6"
+        },
+        "deepseek-ai/DeepSeek-V4-Pro": {
+          "name": "DeepSeek-V4-Pro"
+        }
+      }
+    },
+    "openai": {
+      "kind": "openai",
+      "baseURL": "https://api.openai.com/v1",
+      "apiKey": "OPENAI_API_KEY",
+      "models": {
+        "gpt-5.4": {
+          "name": "gpt-5.4"
+        }
+      }
+    }
+  }
+}
+EOF
+Command outputs captured
+Running command: if [ -f /bootstrap/test_initial_state.py ]; then pytest -s --log-cli-level=DEBUG /bootstrap/test_initial_state.py > >(tee /logs/agent/pochi/initial-test-stdout.txt) 2> >(tee /logs/agent/pochi/initial-test-stderr.txt >&2); fi
+Command outputs captured
+Running command: pochi --model google/gemini-3.5-flash --max-steps 200 --max-retries 10 --blobs-dir /logs/agent/pochi/blobs --experimental-stream-trajectory /logs/agent/pochi/trajectory.jsonl > >(tee /logs/agent/pochi/stdout.txt) 2> >(tee /logs/agent/pochi/stderr.txt >&2) <<'EOF'
+# Liveblocks Comments Sidebar with Resolvable Threads (Custom Metadata)
+
+## Background
+You are extending a Next.js Comments sidebar built on Liveblocks v2 (`@liveblocks/react` + `@liveblocks/react-ui`). The room already contains at least one Comments thread (created via the Liveblocks REST API by the environment). You must render the list of threads on a single page and add a **Resolve** action to each thread that sets a custom `metadata.resolved` boolean on the thread via `useEditThreadMetadata`. Resolved threads must visually fade so reviewers can immediately see what is done. Authentication must be implemented server-side using a Liveblocks access-token endpoint backed by `@liveblocks/node`'s `prepareSession`.
+
+A Liveblocks Cloud project has been provisioned. A starter Next.js scaffold exists at `/home/user/myproject` with the Liveblocks v2 SDK (`@liveblocks/client`, `@liveblocks/react`, `@liveblocks/react-ui`, `@liveblocks/node`) already installed.
+
+## Requirements
+- Implement a single Next.js (App Router) page at route `/` that:
+  - Connects to the Liveblocks v2 room `comments-${NEXT_PUBLIC_ZEALT_RUN_ID}` (the value of `ZEALT_RUN_ID` re-exported as `NEXT_PUBLIC_ZEALT_RUN_ID`).
+  - Uses `LiveblocksProvider` configured with an `authEndpoint` pointing at the local Route Handler `/api/liveblocks-auth` (NOT a public API key).
+  - Wraps the page in a `RoomProvider` for the room above.
+  - Loads all threads in the room with `useThreads` from `@liveblocks/react` (or its Suspense variant) and renders them as a vertical list.
+  - For each thread renders the standard `Thread` component from `@liveblocks/react-ui` plus a **Resolve** button next to it.
+  - Clicking **Resolve** must call the function returned by `useEditThreadMetadata` with `{ threadId, metadata: { resolved: true } }` so that the room's REST-visible thread metadata gains `resolved: true`.
+  - When a thread's `metadata.resolved === true`, its container element must visibly fade — concretely, the container element must expose `data-resolved="true"` and apply an inline `opacity` strictly less than `1` (for example `0.5`). When `metadata.resolved` is not `true`, the container must expose `data-resolved="false"` and an opacity of `1`.
+- Implement the Liveblocks authentication endpoint at the App Router route `/api/liveblocks-auth`:
+  - Use `@liveblocks/node`'s `Liveblocks` client constructed with `process.env.LIVEBLOCKS_SECRET_KEY`.
+  - Use `liveblocks.prepareSession(...)` (access tokens) — NOT `identifyUser` (ID tokens).
+  - Grant the session full read+write access to the room `comments-${process.env.NEXT_PUBLIC_ZEALT_RUN_ID}` (use the room's id directly; wildcards are not required).
+  - Return the session's `authorize()` result as the Route Handler's response.
+- Extend the Liveblocks types so `ThreadMetadata` includes an optional `resolved?: boolean`. This is required for `useEditThreadMetadata({ metadata: { resolved: true } })` to type-check under TypeScript.
+
+## Implementation Hints
+- The Liveblocks v2 React SDK and UI components are already installed (`@liveblocks/react`, `@liveblocks/react-ui`, `@liveblocks/client`, `@liveblocks/node`). Remember to import the Liveblocks UI stylesheet (e.g. `@liveblocks/react-ui/styles.css`) so the `Thread` component renders.
+- The Liveblocks room id must be scoped per evaluation run. Before `npm run dev`, re-export the runtime environment variable `ZEALT_RUN_ID` as `NEXT_PUBLIC_ZEALT_RUN_ID` (for example: `export NEXT_PUBLIC_ZEALT_RUN_ID="$ZEALT_RUN_ID"`) so the value is available client-side and server-side at the same time. The room id must be `comments-${NEXT_PUBLIC_ZEALT_RUN_ID}`.
+- Liveblocks credentials:
+  - The server-side auth endpoint reads `LIVEBLOCKS_SECRET_KEY` from `process.env` (never expose it to the client).
+  - The client uses an `authEndpoint: "/api/liveblocks-auth"` callback — do **not** use `publicApiKey` for this task.
+- The page (and any component using Liveblocks hooks) must be a client component (`"use client"`). The auth endpoint is a Route Handler (server-only).
+- `useEditThreadMetadata` returns a function with signature `(options: { threadId: string; metadata: ThreadMetadata }) => void`. To delete a metadata property, pass `null`; passing `undefined` leaves it untouched. This task only needs to set `resolved: true`.
+- The visual fade must be driven by the thread's metadata coming back from Liveblocks (i.e. read `thread.metadata.resolved`), not by local component state alone. The verifier inspects the DOM after the metadata update has propagated through Liveblocks.
+- Use real Liveblocks credentials supplied via environment variables. Do not mock or stub the Liveblocks client or the network.
+- **Important**: After you have started the dev server and confirmed the page loads, **kill the dev server before finishing the task**. The verifier will start its own dev server. Leaving a process bound to port 3000 will cause verification to fail.
+
+## Acceptance Criteria
+- Project path: `/home/user/myproject`
+- Start command: `npm run dev` (must be run after `export NEXT_PUBLIC_ZEALT_RUN_ID="$ZEALT_RUN_ID"`)
+- Port: `3000`
+- Route `/` renders the list of comment threads loaded from the Liveblocks room `comments-${NEXT_PUBLIC_ZEALT_RUN_ID}`.
+- A Route Handler is mounted at `/api/liveblocks-auth` that returns a Liveblocks **access token** session response. Hitting it with a POST request from a browser context that loaded `/` must succeed and allow the page to enter the room.
+- The DOM exposes the following stable hooks for automated verification:
+  - One container element per thread with attribute `data-testid="thread-card"` and `data-thread-id="<thread-id>"` matching the Liveblocks thread id. Each container element must also expose `data-resolved="true"` (when `metadata.resolved === true`) or `data-resolved="false"` (otherwise), and have an inline `style.opacity` of a number strictly less than `1` when resolved, and exactly `1` when not resolved.
+  - One `Resolve` button per thread with attribute `data-testid="resolve-button"` and `data-thread-id="<thread-id>"` matching the thread id of the thread it resolves.
+- Clicking a `resolve-button`:
+  - Calls `useEditThreadMetadata` to set `metadata.resolved = true` on the corresponding thread.
+  - Causes the matching `thread-card` container to flip `data-resolved` to `"true"` and reduce its inline opacity below `1`.
+  - Causes the Liveblocks REST API endpoint `GET /v2/rooms/{roomId}/threads` to return that thread with `metadata.resolved` truthy.
+- Use Liveblocks v2 API (`@liveblocks/react`, `@liveblocks/react-ui`, `@liveblocks/client`, `@liveblocks/node`).
+
+
+EOF
+Command failed
+Trial liveblocks-username-presence-dis__Zb4gWev failed: Initial state test failed
+Not retrying trial because the maximum number of retries has been reached
+Command outputs captured
+Running command: rm -f ~/.pochi/config.jsonc
+Command outputs captured
+Command outputs captured
+Running command: rm -f ~/.pochi/config.jsonc
+Command outputs captured
+Skipping image OS validation for hb__liveblocks-kanban-board: docker inspect returned 1
+Running command: apt-get update && apt-get install -y curl ripgrep
+Command outputs captured
+Running command: set -euo pipefail; curl -fsSL https://getpochi.com/install.sh | bash -x -s -- pochi-v0.6.12 && mkdir -p /logs/agent/pochi && ~/.pochi/bin/pochi --version
+Command outputs captured
+Running command: ln -sf ~/.pochi/bin/pochi /usr/local/bin/pochi
+Command outputs captured
+Running command: echo zr-pspuey5 > /logs/artifacts/run-id && echo liveblocks-kanban-board__pspUEY5 > /logs/artifacts/trial_id
+Command outputs captured
+Running command: mkdir -p ~/.pochi && cat << 'EOF' | sed -e "s/OPENAI_API_KEY/${OPENAI_API_KEY}/g" -e "s/DEEPINFRA_API_KEY/${DEEPINFRA_API_KEY}/g" > ~/.pochi/config.jsonc
+{
+  "providers": {
+    "deepinfra": {
+      "kind": "openai",
+      "baseURL": "https://api.deepinfra.com/v1/openai",
+      "apiKey": "DEEPINFRA_API_KEY",
+      "models": {
+        "zai-org/GLM-4.7-Flash": {
+          "name": "glm-4.7-flash"
+        },
+        "moonshotai/Kimi-K2.6": {
+          "name": "kimi-K2.6"
+        },
+        "deepseek-ai/DeepSeek-V4-Pro": {
+          "name": "DeepSeek-V4-Pro"
+        }
+      }
+    },
+    "openai": {
+      "kind": "openai",
+      "baseURL": "https://api.openai.com/v1",
+      "apiKey": "OPENAI_API_KEY",
+      "models": {
+        "gpt-5.4": {
+          "name": "gpt-5.4"
+        }
+      }
+    }
+  }
+}
+EOF
+Command outputs captured
+Running command: if [ -f /bootstrap/test_initial_state.py ]; then pytest -s --log-cli-level=DEBUG /bootstrap/test_initial_state.py > >(tee /logs/agent/pochi/initial-test-stdout.txt) 2> >(tee /logs/agent/pochi/initial-test-stderr.txt >&2); fi
+Command outputs captured
+Running command: pochi --model google/gemini-3.5-flash --max-steps 200 --max-retries 10 --blobs-dir /logs/agent/pochi/blobs --experimental-stream-trajectory /logs/agent/pochi/trajectory.jsonl > >(tee /logs/agent/pochi/stdout.txt) 2> >(tee /logs/agent/pochi/stderr.txt >&2) <<'EOF'
+# Build a Liveblocks 3-Column Kanban Board (Next.js)
+
+## Background
+You are extending a pre-scaffolded Next.js 14 (App Router) project at `/home/user/project` with a real-time collaborative 3-column Kanban board backed by [Liveblocks](https://liveblocks.io/) Storage. The packages `@liveblocks/client` and `@liveblocks/react` (v2) are already installed. Your job is to wire up Liveblocks and implement the UI so that multiple browser tabs connected to the same room see the same board in real time.
+
+## Requirements
+- Implement a Kanban board on the home page (`/`) with exactly three columns, in this order: `Todo`, `In Progress`, `Done`.
+- Persist the board in Liveblocks Storage using a `LiveObject` `columns` root whose children are three `LiveList<LiveObject<Card>>` named `todo`, `inProgress`, `done`. Each card must contain at minimum a stable string `id` and a string `title`.
+- The UI must allow the user to:
+  - Type a new card title into a per-column text input and click an Add button to append a new card to that column's `LiveList`.
+  - On every card (in `todo` and `inProgress` only), a `Move →` button promotes the card to the next column (`todo` → `inProgress` → `done`). Cards in `done` do NOT need a `Move →` button (and SHOULD NOT have one), since there is no next column.
+- All add and move operations must be performed through Liveblocks Storage mutations via `useMutation`, so that other browser tabs/clients see the updates in real time.
+- Use Liveblocks v2 React API (`@liveblocks/react` / `@liveblocks/react/suspense`). Do **NOT** invent your own websocket layer.
+- Use the Liveblocks **public** API key on the client, read from `NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY`.
+- The Liveblocks room id used by `RoomProvider` must be the value of the environment variable `NEXT_PUBLIC_ZEALT_RUN_ID`. Before starting the dev server, run `export NEXT_PUBLIC_ZEALT_RUN_ID=$ZEALT_RUN_ID` so the public env var is populated for Next.js.
+
+## Implementation Hints
+- Wrap your app (or page) with `LiveblocksProvider` (passing `publicApiKey={process.env.NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY!}`) and a `RoomProvider` whose `id` is `process.env.NEXT_PUBLIC_ZEALT_RUN_ID!`. Provide an `initialStorage` that contains a `columns` `LiveObject` with three empty `LiveList`s.
+- Read each column with `useStorage((root) => root.columns.<name>)` and mutate them with `useMutation`. Inside `useMutation`, get a column with `storage.get("columns").get("<name>")` (a `LiveList<LiveObject<Card>>`) and call `.push`, `.delete`, etc.
+- To move a card, in a single `useMutation`, find the card's index in its source `LiveList`, remove it with `.delete(index)`, then `.push` a new `LiveObject` (or the same object — `LiveObject`s can be moved between `LiveList`s using `LiveList.move` or by removing and re-creating) onto the destination `LiveList`. All mutations in a single `useMutation` callback are batched into one update.
+- Liveblocks Storage hooks require client-only rendering. Wrap them in `<ClientSideSuspense fallback={...}>` (from `@liveblocks/react/suspense`) and add a `"use client"` directive at the top of any file that uses Liveblocks hooks.
+- Each card `id` should be unique and stable for the lifetime of the card (e.g. `crypto.randomUUID()`). Do **NOT** use the array index as the id.
+- Read `ZEALT_RUN_ID` from the environment at runtime; do not hard-code a room id.
+- Before finishing the task, **kill any background `next dev` process you may have started** — the verifier starts its own dev server.
+
+## Acceptance Criteria
+- Project path: `/home/user/project`
+- Start command: `npm run dev` (must serve the app on port 3000 within ~60 seconds of starting)
+- Port: 3000
+- Route: `GET /` renders the Kanban board page.
+- Room id: equal to `process.env.NEXT_PUBLIC_ZEALT_RUN_ID` (which is set from `$ZEALT_RUN_ID`).
+- Storage shape: the room's Storage root must have a `columns` object with `todo`, `inProgress`, and `done` arrays. Each entry is an object with at minimum `id` and `title`. Fetching `https://api.liveblocks.io/v2/rooms/{ZEALT_RUN_ID}/storage?format=json` (with `Authorization: Bearer ${LIVEBLOCKS_SECRET_KEY}`) must return JSON of the shape:
+
+  ```json
+  {
+    "columns": {
+      "todo":       [ { "id": "<string>", "title": "<string>" } ],
+      "inProgress": [ { "id": "<string>", "title": "<string>" } ],
+      "done":       [ { "id": "<string>", "title": "<string>" } ]
+    }
+  }
+  ```
+
+- UI selectors (used by the automated verifier). Column keys are exactly `todo`, `inProgress`, `done`:
+  - Each column must be a region with `data-testid="column"` and `data-column="<todo|inProgress|done>"`.
+  - Each column must contain a text input with `data-testid="new-card-input"` (used to type a card title).
+  - Each column must contain an add button with `data-testid="add-card-btn"` that, when clicked, appends the current input value as a new card to that column and clears the input. Empty / whitespace-only input MUST NOT add a card.
+  - Each card row must include `data-testid="card"` and an attribute `data-card-title` containing the card's title.
+  - Cards in `todo` and `inProgress` must contain a control with `data-testid="move-btn"` whose click promotes the card to the next column (`todo` → `inProgress` → `done`). Cards in `done` MUST NOT contain `data-testid="move-btn"`.
+- Real-time sync: opening the page in a second browser context targeting the same room must reflect all add/move operations performed in the first context within a few seconds, without a page reload.
+- The dev server must NOT be left running by the agent; the verifier will start and stop its own dev server.
+
+
+EOF
+Command outputs captured
+Running command: rm -f ~/.pochi/config.jsonc
+Command outputs captured
+Skipping image OS validation for hb__liveblocks-active-users-list: docker inspect returned 1
+Running command: apt-get update && apt-get install -y curl ripgrep
+Command outputs captured
+Running command: set -euo pipefail; curl -fsSL https://getpochi.com/install.sh | bash -x -s -- pochi-v0.6.12 && mkdir -p /logs/agent/pochi && ~/.pochi/bin/pochi --version
+Command outputs captured
+Running command: rm -f ~/.pochi/config.jsonc
+Command outputs captured
+Command outputs captured
+Running command: ln -sf ~/.pochi/bin/pochi /usr/local/bin/pochi
+Command outputs captured
+Running command: echo zr-mcj94hw > /logs/artifacts/run-id && echo liveblocks-active-users-list__mCj94HW > /logs/artifacts/trial_id
+Command outputs captured
+Running command: mkdir -p ~/.pochi && cat << 'EOF' | sed -e "s/OPENAI_API_KEY/${OPENAI_API_KEY}/g" -e "s/DEEPINFRA_API_KEY/${DEEPINFRA_API_KEY}/g" > ~/.pochi/config.jsonc
+{
+  "providers": {
+    "deepinfra": {
+      "kind": "openai",
+      "baseURL": "https://api.deepinfra.com/v1/openai",
+      "apiKey": "DEEPINFRA_API_KEY",
+      "models": {
+        "zai-org/GLM-4.7-Flash": {
+          "name": "glm-4.7-flash"
+        },
+        "moonshotai/Kimi-K2.6": {
+          "name": "kimi-K2.6"
+        },
+        "deepseek-ai/DeepSeek-V4-Pro": {
+          "name": "DeepSeek-V4-Pro"
+        }
+      }
+    },
+    "openai": {
+      "kind": "openai",
+      "baseURL": "https://api.openai.com/v1",
+      "apiKey": "OPENAI_API_KEY",
+      "models": {
+        "gpt-5.4": {
+          "name": "gpt-5.4"
+        }
+      }
+    }
+  }
+}
+EOF
+Command outputs captured
+Running command: if [ -f /bootstrap/test_initial_state.py ]; then pytest -s --log-cli-level=DEBUG /bootstrap/test_initial_state.py > >(tee /logs/agent/pochi/initial-test-stdout.txt) 2> >(tee /logs/agent/pochi/initial-test-stderr.txt >&2); fi
+Command outputs captured
+Running command: pochi --model google/gemini-3.5-flash --max-steps 200 --max-retries 10 --blobs-dir /logs/agent/pochi/blobs --experimental-stream-trajectory /logs/agent/pochi/trajectory.jsonl > >(tee /logs/agent/pochi/stdout.txt) 2> >(tee /logs/agent/pochi/stderr.txt >&2) <<'EOF'
+# Liveblocks Active Users List (Next.js)
+
+## Background
+You are extending a minimal Next.js (App Router) starter that already wires up Liveblocks `LiveblocksProvider` and `RoomProvider`. Your job is to build a small read-only page that shows who is currently connected to a Liveblocks room: a numeric "active user count" (including the current viewer) and a list of all connected users keyed by their `connectionId`, each with a colored badge.
+
+The app must remain wired to real Liveblocks cloud — no mocks, no fake WebSocket, no stubbed presence.
+
+## Requirements
+- The active-users page lives at the dynamic route `/users/[room]` (App Router). Visiting `/users/foo` joins a Liveblocks room named `foo`. The room name used during verification MUST be derived from the `ZEALT_RUN_ID` environment variable (e.g., `users-room-${ZEALT_RUN_ID}`).
+- The page MUST be a Client Component (or wrap one) since Liveblocks presence hooks require the client runtime.
+- Use `useOthers()` to enumerate other connected users in the room.
+- Use `useSelf()` to read the current viewer's identity in the room.
+- Render the total active user count (i.e., `others.length + (self ? 1 : 0)`) into an element with `id="user-count"` so it can be discovered from the rendered HTML.
+- Render one row per connected user inside a container with `id="users-list"`. Each row MUST:
+  - have `data-testid="user-row"`,
+  - include a `data-connection-id="<connectionId>"` attribute, and
+  - contain a colored badge element with `data-testid="user-badge"` whose background color is derived deterministically from the user's `connectionId` (any deterministic mapping is acceptable — e.g., HSL based on `connectionId`, or pick from a fixed palette indexed by `connectionId`).
+- The list MUST include the current viewer (`self`) in addition to all entries returned by `useOthers()`.
+- All Liveblocks access goes through the official `@liveblocks/react` provider configured to use a server-side authentication endpoint at `/api/liveblocks-auth` that uses `LIVEBLOCKS_SECRET_KEY` and `@liveblocks/node`.
+
+## Implementation Hints
+- Read the `[room]` path segment with `useParams` and pass it to `RoomProvider`.
+- `useOthers()` returns an array of `User` objects, each with a numeric `connectionId`. `useSelf()` returns the current viewer (also with a `connectionId`), or `null` if not yet connected.
+- Pick the badge color deterministically from `connectionId` so each connected user gets a stable color across renders.
+- The starter already exposes `@liveblocks/react/suspense` and an authenticated `Room` wrapper — focus your implementation on the users-list page only.
+- IMPORTANT: When you are done implementing and the page renders correctly, KILL any dev server / `next dev` process you started. The verifier starts its own production server (`npm run build && npm run start`) and will fail if port 3000 is still occupied by your dev server.
+
+## Acceptance Criteria
+- Project path: `/home/user/project`
+- Start command: `npm run start` (after `npm run build`)
+- Port: `3000`
+- Route: `/users/[room]` renders the active users page for the given `room` segment.
+- Auth endpoint: `POST /api/liveblocks-auth` returns HTTP 200 and a JSON body containing a non-empty `token` field, produced by `@liveblocks/node` against the real Liveblocks API.
+- DOM contract (stable selectors used by verification):
+  - An element with `id="user-count"` whose visible text contains the active user count as a decimal integer (e.g., when only the viewer is connected, this MUST be `1`).
+  - A container element with `id="users-list"` that contains one child per connected user.
+  - Each child row has `data-testid="user-row"` and a `data-connection-id="<connectionId>"` attribute whose value is the user's Liveblocks `connectionId`.
+  - Each row contains an element with `data-testid="user-badge"` styled with a non-empty background color (inline `style="background: ..."` or `style="background-color: ..."`).
+- Real Liveblocks cloud only — do not stub `@liveblocks/react`, `@liveblocks/client`, or the WebSocket layer.
+- The room name used during verification MUST be derived from `ZEALT_RUN_ID` (e.g., `users-room-${ZEALT_RUN_ID}`).
+
+
+EOF
+Skipping image OS validation for hb__liveblocks-emoji-reaction-broadcast: docker inspect returned 1
+Running command: apt-get update && apt-get install -y curl ripgrep
+Command outputs captured
+Running command: set -euo pipefail; curl -fsSL https://getpochi.com/install.sh | bash -x -s -- pochi-v0.6.12 && mkdir -p /logs/agent/pochi && ~/.pochi/bin/pochi --version
+Command outputs captured
+Running command: ln -sf ~/.pochi/bin/pochi /usr/local/bin/pochi
+Command outputs captured
+Running command: echo zr-rqcqvos > /logs/artifacts/run-id && echo liveblocks-emoji-reaction-broadc__rqCQVos > /logs/artifacts/trial_id
+Command outputs captured
+Running command: mkdir -p ~/.pochi && cat << 'EOF' | sed -e "s/OPENAI_API_KEY/${OPENAI_API_KEY}/g" -e "s/DEEPINFRA_API_KEY/${DEEPINFRA_API_KEY}/g" > ~/.pochi/config.jsonc
+{
+  "providers": {
+    "deepinfra": {
+      "kind": "openai",
+      "baseURL": "https://api.deepinfra.com/v1/openai",
+      "apiKey": "DEEPINFRA_API_KEY",
+      "models": {
+        "zai-org/GLM-4.7-Flash": {
+          "name": "glm-4.7-flash"
+        },
+        "moonshotai/Kimi-K2.6": {
+          "name": "kimi-K2.6"
+        },
+        "deepseek-ai/DeepSeek-V4-Pro": {
+          "name": "DeepSeek-V4-Pro"
+        }
+      }
+    },
+    "openai": {
+      "kind": "openai",
+      "baseURL": "https://api.openai.com/v1",
+      "apiKey": "OPENAI_API_KEY",
+      "models": {
+        "gpt-5.4": {
+          "name": "gpt-5.4"
+        }
+      }
+    }
+  }
+}
+EOF
+Command outputs captured
+Running command: if [ -f /bootstrap/test_initial_state.py ]; then pytest -s --log-cli-level=DEBUG /bootstrap/test_initial_state.py > >(tee /logs/agent/pochi/initial-test-stdout.txt) 2> >(tee /logs/agent/pochi/initial-test-stderr.txt >&2); fi
+Command outputs captured
+Running command: pochi --model google/gemini-3.5-flash --max-steps 200 --max-retries 10 --blobs-dir /logs/agent/pochi/blobs --experimental-stream-trajectory /logs/agent/pochi/trajectory.jsonl > >(tee /logs/agent/pochi/stdout.txt) 2> >(tee /logs/agent/pochi/stderr.txt >&2) <<'EOF'
+# Liveblocks Emoji Reaction Broadcast
+
+## Background
+Build a Next.js page that lets multiple users in the same Liveblocks room send floating emoji reactions to each other. When any user clicks one of four emoji buttons (👍 ❤️ 🎉 😂), every other connected user should briefly see that emoji float on their screen for about 2 seconds before fading away. This evaluates your ability to use Liveblocks v2 broadcast events (`useBroadcastEvent` and `useEventListener`) to deliver ephemeral, non-persisted realtime signals between clients.
+
+## Requirements
+- Implement a single-page Next.js app at `/` that joins a fixed Liveblocks room.
+- Render four clickable emoji buttons: 👍, ❤️, 🎉, 😂.
+- Clicking a button must broadcast a custom event of shape `{ type: "REACTION", emoji: "<emoji>" }` to all other users in the room.
+- Receiving clients must visibly display the received emoji somewhere on the page as a floating reaction element. The element must remain in the DOM for at least 2 seconds and then disappear (fade or be removed) after roughly 2 seconds.
+- Each floating reaction element must carry the CSS class `reaction` and the attribute `data-testid="floating-reaction"`, and its text content must include the emoji character.
+- Use real Liveblocks credentials read from environment variables. No mocking of Liveblocks.
+
+## Implementation Hints
+- Use Liveblocks v2 React bindings: import from `@liveblocks/react` and `@liveblocks/client`.
+- Wrap the page in a `LiveblocksProvider` (configured with the public API key) and a `RoomProvider`. The public key must come from the env var with the `NEXT_PUBLIC_` prefix so it is available to client components.
+- Use `useBroadcastEvent()` to send events from the clicking client.
+- Use `useEventListener()` to receive events on other clients. The callback receives `{ event, user, connectionId }` — read `event.type` and `event.emoji`.
+- Store incoming reactions in local React state with unique IDs, and remove each one after about 2000ms (e.g., via `setTimeout`).
+- The button that triggers a reaction should be identifiable from the DOM (any reasonable selector, e.g., button text containing the emoji works fine).
+- Mark the page with `"use client"` since it relies on browser hooks and state.
+- Read the `run-id` from `ZEALT_RUN_ID` at runtime and use it to derive the Liveblocks room ID (for example, `harbor-emoji-reaction-${ZEALT_RUN_ID}`). Re-export it as `NEXT_PUBLIC_ZEALT_RUN_ID` so the client can read it.
+- When you are finished implementing and have verified the dev server runs, KILL the dev server. The verifier will start its own server.
+
+## Acceptance Criteria
+- Project path: /home/user/myproject
+- Start command: npm run dev
+- Port: 3000
+- Routes:
+  - `GET /`: Renders an interactive page with four emoji buttons (👍, ❤️, 🎉, 😂). The page must connect to a Liveblocks room derived from `ZEALT_RUN_ID`.
+- DOM contract:
+  - Each emoji button must be a clickable element (e.g., `<button>`) whose text content contains the corresponding emoji character.
+  - When a reaction is received from another user, a DOM element with CSS class `reaction` AND attribute `data-testid="floating-reaction"` must appear on the page. Its text content must include the broadcast emoji character.
+  - The floating reaction element must be visible for at least 2 seconds and be removed (or hidden) shortly after.
+- Environment variables:
+  - The Liveblocks public API key must be exposed to the client via a `NEXT_PUBLIC_`-prefixed environment variable.
+  - The room ID must incorporate `ZEALT_RUN_ID` so concurrent runs do not collide.
+
+
+EOF
+Skipping image OS validation for hb__liveblocks-shared-todo-list: docker inspect returned 1
+Running command: apt-get update && apt-get install -y curl ripgrep
+Command outputs captured
+Running command: rm -f ~/.pochi/config.jsonc
+Command outputs captured
+Command outputs captured
+Running command: set -euo pipefail; curl -fsSL https://getpochi.com/install.sh | bash -x -s -- pochi-v0.6.12 && mkdir -p /logs/agent/pochi && ~/.pochi/bin/pochi --version
+Command outputs captured
+Running command: ln -sf ~/.pochi/bin/pochi /usr/local/bin/pochi
+Command outputs captured
+Running command: echo zr-apd5nez > /logs/artifacts/run-id && echo liveblocks-shared-todo-list__aPd5nEZ > /logs/artifacts/trial_id
+Command outputs captured
+Running command: mkdir -p ~/.pochi && cat << 'EOF' | sed -e "s/OPENAI_API_KEY/${OPENAI_API_KEY}/g" -e "s/DEEPINFRA_API_KEY/${DEEPINFRA_API_KEY}/g" > ~/.pochi/config.jsonc
+{
+  "providers": {
+    "deepinfra": {
+      "kind": "openai",
+      "baseURL": "https://api.deepinfra.com/v1/openai",
+      "apiKey": "DEEPINFRA_API_KEY",
+      "models": {
+        "zai-org/GLM-4.7-Flash": {
+          "name": "glm-4.7-flash"
+        },
+        "moonshotai/Kimi-K2.6": {
+          "name": "kimi-K2.6"
+        },
+        "deepseek-ai/DeepSeek-V4-Pro": {
+          "name": "DeepSeek-V4-Pro"
+        }
+      }
+    },
+    "openai": {
+      "kind": "openai",
+      "baseURL": "https://api.openai.com/v1",
+      "apiKey": "OPENAI_API_KEY",
+      "models": {
+        "gpt-5.4": {
+          "name": "gpt-5.4"
+        }
+      }
+    }
+  }
+}
+EOF
+Command outputs captured
+Running command: if [ -f /bootstrap/test_initial_state.py ]; then pytest -s --log-cli-level=DEBUG /bootstrap/test_initial_state.py > >(tee /logs/agent/pochi/initial-test-stdout.txt) 2> >(tee /logs/agent/pochi/initial-test-stderr.txt >&2); fi
+Command outputs captured
+Running command: pochi --model google/gemini-3.5-flash --max-steps 200 --max-retries 10 --blobs-dir /logs/agent/pochi/blobs --experimental-stream-trajectory /logs/agent/pochi/trajectory.jsonl > >(tee /logs/agent/pochi/stdout.txt) 2> >(tee /logs/agent/pochi/stderr.txt >&2) <<'EOF'
+# Build a Liveblocks Shared Todo List (Next.js)
+
+## Background
+You are extending a pre-scaffolded Next.js 14 (App Router) project located at `/home/user/project` with a real-time collaborative todo list backed by [Liveblocks](https://liveblocks.io/) Storage. The packages `@liveblocks/client` and `@liveblocks/react` (v2) are already installed. Your job is to wire up Liveblocks and implement the UI so that multiple browser tabs connected to the same room see the same todos in real time.
+
+## Requirements
+- Implement a shared, real-time todo list on the home page (`/`).
+- Persist the todos in Liveblocks Storage using a `LiveList` of todo items. Each item must contain at minimum a stable string `id`, a string `text`, and a boolean `completed`.
+- The UI must allow the user to:
+  - Type new todo text in a text input and add a new todo to the shared list.
+  - Toggle the `completed` flag of any existing todo.
+  - Delete any existing todo.
+- All three operations (add / toggle / delete) must be performed through Liveblocks Storage mutations, so that other browser tabs/clients see the updates in real time.
+- Use Liveblocks v2 React API (`@liveblocks/react` / `@liveblocks/react/suspense`). Do **NOT** invent your own websocket layer.
+- Use the Liveblocks **public** API key on the client, read from `NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY`.
+- The Liveblocks room id used by `RoomProvider` must be the value of the environment variable `NEXT_PUBLIC_ZEALT_RUN_ID`. Before starting the dev server, run `export NEXT_PUBLIC_ZEALT_RUN_ID=$ZEALT_RUN_ID` so the public env var is populated.
+
+## Implementation Hints
+- Wrap your app (or the page) with `LiveblocksProvider` (passing `publicApiKey={process.env.NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY!}`) and a `RoomProvider` whose `id` is `process.env.NEXT_PUBLIC_ZEALT_RUN_ID!`. Provide an `initialStorage` that contains an empty `LiveList` of todos.
+- Read the todos using `useStorage((root) => root.todos)` and mutate them with `useMutation`. Inside `useMutation`, get the `LiveList` via `storage.get("todos")` and call `.push`, `.set`, or `.delete` (find the target index using the todo `id`).
+- Liveblocks Storage hooks require client-only rendering. Wrap them in `<ClientSideSuspense fallback={...}>` (from `@liveblocks/react/suspense`) and add a `"use client"` directive at the top of any file that uses Liveblocks hooks.
+- Each todo `id` should be unique and stable for the lifetime of the item (e.g. `crypto.randomUUID()`). Do **NOT** use the array index as the id.
+- Read `ZEALT_RUN_ID` from the environment at runtime; do not hard-code a room id.
+- Before finishing the task, **kill any background `next dev` process you may have started** — the verifier starts its own dev server.
+
+## Acceptance Criteria
+- Project path: `/home/user/project`
+- Start command: `npm run dev` (must serve the app on port 3000 within ~60 seconds of starting)
+- Port: 3000
+- Route: `GET /` renders the shared todo list page.
+- Room id: equal to `process.env.NEXT_PUBLIC_ZEALT_RUN_ID` (which is set from `$ZEALT_RUN_ID`).
+- Storage shape: the room's Storage root must have a `todos` field that is a `LiveList`. After verification interactions, fetching `https://api.liveblocks.io/v2/rooms/{ZEALT_RUN_ID}/storage?format=json` (with `Authorization: Bearer ${LIVEBLOCKS_SECRET_KEY}`) must return a JSON document of the shape:
+
+  ```json
+  {
+    "todos": [
+      { "id": "<string>", "text": "<string>", "completed": <boolean> }
+      // … zero or more items
+    ]
+  }
+  ```
+
+- UI selectors (used by the automated verifier):
+  - A text input with `data-testid="new-todo-input"` (or DOM id `new-todo-input`).
+  - An add button with `data-testid="add-todo-btn"` that, when clicked, appends the current input value as a new todo and clears the input.
+  - Each todo row must include `data-testid="todo-item"` and an attribute `data-todo-text` containing the todo's text. The row must contain:
+    - A toggle control with `data-testid="toggle-btn"` (clicking it flips `completed`).
+    - A delete control with `data-testid="delete-btn"` (clicking it removes the todo from the list).
+  - Completed todos must additionally carry `data-completed="true"` on the row; non-completed todos must carry `data-completed="false"`.
+- Real-time sync: opening the page in a second browser context targeting the same room must reflect all add/toggle/delete operations performed in the first context within a few seconds, without a page reload.
+- The dev server must NOT be left running by the agent; the verifier will start and stop its own dev server.
+
+
+EOF
+Skipping image OS validation for hb__liveblocks-room-list-rest-api: docker inspect returned 1
+Running command: apt-get update && apt-get install -y curl ripgrep
+Command outputs captured
+Running command: set -euo pipefail; curl -fsSL https://getpochi.com/install.sh | bash -x -s -- pochi-v0.6.12 && mkdir -p /logs/agent/pochi && ~/.pochi/bin/pochi --version
+Command outputs captured
+Running command: ln -sf ~/.pochi/bin/pochi /usr/local/bin/pochi
+Command outputs captured
+Running command: echo zr-8mag6g3 > /logs/artifacts/run-id && echo liveblocks-room-list-rest-api__8mAG6G3 > /logs/artifacts/trial_id
+Command outputs captured
+Running command: mkdir -p ~/.pochi && cat << 'EOF' | sed -e "s/OPENAI_API_KEY/${OPENAI_API_KEY}/g" -e "s/DEEPINFRA_API_KEY/${DEEPINFRA_API_KEY}/g" > ~/.pochi/config.jsonc
+{
+  "providers": {
+    "deepinfra": {
+      "kind": "openai",
+      "baseURL": "https://api.deepinfra.com/v1/openai",
+      "apiKey": "DEEPINFRA_API_KEY",
+      "models": {
+        "zai-org/GLM-4.7-Flash": {
+          "name": "glm-4.7-flash"
+        },
+        "moonshotai/Kimi-K2.6": {
+          "name": "kimi-K2.6"
+        },
+        "deepseek-ai/DeepSeek-V4-Pro": {
+          "name": "DeepSeek-V4-Pro"
+        }
+      }
+    },
+    "openai": {
+      "kind": "openai",
+      "baseURL": "https://api.openai.com/v1",
+      "apiKey": "OPENAI_API_KEY",
+      "models": {
+        "gpt-5.4": {
+          "name": "gpt-5.4"
+        }
+      }
+    }
+  }
+}
+EOF
+Command outputs captured
+Running command: if [ -f /bootstrap/test_initial_state.py ]; then pytest -s --log-cli-level=DEBUG /bootstrap/test_initial_state.py > >(tee /logs/agent/pochi/initial-test-stdout.txt) 2> >(tee /logs/agent/pochi/initial-test-stderr.txt >&2); fi
+Command outputs captured
+Running command: pochi --model google/gemini-3.5-flash --max-steps 200 --max-retries 10 --blobs-dir /logs/agent/pochi/blobs --experimental-stream-trajectory /logs/agent/pochi/trajectory.jsonl > >(tee /logs/agent/pochi/stdout.txt) 2> >(tee /logs/agent/pochi/stderr.txt >&2) <<'EOF'
+# Liveblocks Room List with REST API
+
+## Background
+A scaffolded Next.js (App Router) project is available at `/home/user/myproject`. The project will use the Liveblocks v2 REST API (server-side only) to manage rooms. No Liveblocks client SDK is needed; you only call the REST API from Next.js route handlers using the project's `LIVEBLOCKS_SECRET_KEY`.
+
+Your job is to implement a page that lists all rooms in the Liveblocks project and lets the user create a new room with a single button click. All Liveblocks REST API calls must happen server-side via a Next.js API route, never from the browser.
+
+## Requirements
+- Implement a Next.js API route at `/api/rooms` that:
+  - On `GET`, calls Liveblocks `GET https://api.liveblocks.io/v2/rooms` and returns the list of rooms as JSON to the client.
+  - On `POST`, calls Liveblocks `POST https://api.liveblocks.io/v2/rooms` to create a new room. The new room's `id` MUST be `harbor-created-${NEXT_PUBLIC_ZEALT_RUN_ID}-<timestamp>`, where `<timestamp>` is a unix millisecond timestamp generated at request time. Use `defaultAccesses: ["room:write"]`.
+- Implement a page at `/` (the index route) that:
+  - Fetches `/api/rooms` on mount and renders each room as a row. Each row MUST have attribute `data-testid="room-row"` and its visible text MUST include the room id.
+  - Renders a button with the visible text `Create Room`. Clicking the button must POST to `/api/rooms` and, on success, refresh the list so the newly created room appears as a new `data-testid="room-row"` row.
+- All Liveblocks REST calls MUST be authenticated with the `LIVEBLOCKS_SECRET_KEY` environment variable (`Authorization: Bearer <key>`). The secret key MUST NOT be exposed to the browser.
+- The room id naming MUST use `NEXT_PUBLIC_ZEALT_RUN_ID` (which mirrors the runtime `ZEALT_RUN_ID`) so that newly created rooms can be uniquely identified per evaluation run.
+
+## Implementation Hints
+- The project is already set up with Next.js, TypeScript, and Tailwind (or plain CSS). Run `npm install` if needed and use `npm run dev` to start the development server on port 3000.
+- Read `process.env.LIVEBLOCKS_SECRET_KEY` inside route handlers only; never import it into client components.
+- For the room id, you can read `process.env.NEXT_PUBLIC_ZEALT_RUN_ID` in the API route (server-side) since `NEXT_PUBLIC_` variables are also available on the server.
+- The Liveblocks v2 `GET /v2/rooms` response has the shape `{ "nextCursor": string|null, "data": [{ "type": "room", "id": string, ... }] }`. Use `data` for the list.
+- The Liveblocks v2 `POST /v2/rooms` request body must include at least `{ "id": string, "defaultAccesses": ["room:write"] }`.
+- After implementation finishes, you MUST kill the dev server before reporting the task as done (the verifier will start its own dev server).
+
+## Acceptance Criteria
+- Project path: `/home/user/myproject`
+- Start command: `npm run dev`
+- Port: 3000
+- API Endpoints:
+  - `GET /api/rooms`: Returns status 200 and a JSON body shaped like `{ "data": [{ "id": string, ... }] }` (a forwarded subset of the Liveblocks v2 list response is acceptable as long as `data` is an array of room objects with an `id` field).
+  - `POST /api/rooms`: Returns status 200 or 201 with a JSON body containing the created room's `id`, where `id` matches the pattern `harbor-created-${NEXT_PUBLIC_ZEALT_RUN_ID}-<digits>`.
+- Web routes:
+  - `GET /`: Renders a page that, after client-side hydration, shows one element per room with attribute `data-testid="room-row"`. Each row's text content includes the room's id.
+  - The page contains a clickable element with the visible text `Create Room`. Clicking it triggers a `POST /api/rooms` and refreshes the room list so the new row appears.
+- The newly created room id format MUST be `harbor-created-${NEXT_PUBLIC_ZEALT_RUN_ID}-<timestamp>` (where `<timestamp>` is one or more digits and `NEXT_PUBLIC_ZEALT_RUN_ID` mirrors `ZEALT_RUN_ID`).
+- The Liveblocks `LIVEBLOCKS_SECRET_KEY` must never appear in the rendered HTML or in any JS bundle served to the browser.
+
+
+EOF
+Command outputs captured
+Running command: rm -f ~/.pochi/config.jsonc
+Command outputs captured
+Command outputs captured
+Running command: rm -f ~/.pochi/config.jsonc
+Command outputs captured
+Command outputs captured
+Running command: rm -f ~/.pochi/config.jsonc
+Command outputs captured
+Command outputs captured
+Running command: rm -f ~/.pochi/config.jsonc
+Command outputs captured
+Skipping image OS validation for hb__liveblocks-shared-chat-broadcast: docker inspect returned 1
+Running command: apt-get update && apt-get install -y curl ripgrep
+Command outputs captured
+Running command: set -euo pipefail; curl -fsSL https://getpochi.com/install.sh | bash -x -s -- pochi-v0.6.12 && mkdir -p /logs/agent/pochi && ~/.pochi/bin/pochi --version
+Skipping image OS validation for hb__liveblocks-collaborative-poll: docker inspect returned 1
+Command outputs captured
+Running command: ln -sf ~/.pochi/bin/pochi /usr/local/bin/pochi
+Command outputs captured
+Running command: apt-get update && apt-get install -y curl ripgrep
+Running command: echo zr-gddjdjx > /logs/artifacts/run-id && echo liveblocks-shared-chat-broadcast__gDdJdjx > /logs/artifacts/trial_id
+Command outputs captured
+Running command: mkdir -p ~/.pochi && cat << 'EOF' | sed -e "s/OPENAI_API_KEY/${OPENAI_API_KEY}/g" -e "s/DEEPINFRA_API_KEY/${DEEPINFRA_API_KEY}/g" > ~/.pochi/config.jsonc
+{
+  "providers": {
+    "deepinfra": {
+      "kind": "openai",
+      "baseURL": "https://api.deepinfra.com/v1/openai",
+      "apiKey": "DEEPINFRA_API_KEY",
+      "models": {
+        "zai-org/GLM-4.7-Flash": {
+          "name": "glm-4.7-flash"
+        },
+        "moonshotai/Kimi-K2.6": {
+          "name": "kimi-K2.6"
+        },
+        "deepseek-ai/DeepSeek-V4-Pro": {
+          "name": "DeepSeek-V4-Pro"
+        }
+      }
+    },
+    "openai": {
+      "kind": "openai",
+      "baseURL": "https://api.openai.com/v1",
+      "apiKey": "OPENAI_API_KEY",
+      "models": {
+        "gpt-5.4": {
+          "name": "gpt-5.4"
+        }
+      }
+    }
+  }
+}
+EOF
+Command outputs captured
+Running command: if [ -f /bootstrap/test_initial_state.py ]; then pytest -s --log-cli-level=DEBUG /bootstrap/test_initial_state.py > >(tee /logs/agent/pochi/initial-test-stdout.txt) 2> >(tee /logs/agent/pochi/initial-test-stderr.txt >&2); fi
+Command outputs captured
+Running command: pochi --model google/gemini-3.5-flash --max-steps 200 --max-retries 10 --blobs-dir /logs/agent/pochi/blobs --experimental-stream-trajectory /logs/agent/pochi/trajectory.jsonl > >(tee /logs/agent/pochi/stdout.txt) 2> >(tee /logs/agent/pochi/stderr.txt >&2) <<'EOF'
+# Liveblocks Shared Chat Broadcast
+
+## Background
+Build a Next.js page that implements a simple ephemeral chat room powered by Liveblocks v2 broadcast events. Users in the same Liveblocks room type a short message into a textbox and hit a send button. Each sent message is broadcast to every other connected client as a Liveblocks event of shape `{ type: "CHAT", text, from }` using `useBroadcastEvent`. Every client maintains its own local list of received messages (a rolling buffer capped at 50 entries) and renders those messages on screen. This evaluates your ability to use `useBroadcastEvent` and `useEventListener` for ephemeral, non-persisted realtime messaging between clients.
+
+## Requirements
+- Implement a single-page Next.js app at `/` that joins a fixed Liveblocks room derived from `ZEALT_RUN_ID`.
+- Render a text input where the user can type a message, plus a clickable send button.
+- When the send button is clicked (or the user submits the form), broadcast a custom event of shape `{ type: "CHAT", text: "<text>", from: "<sender>" }` to all other users in the room and clear the input.
+- On every client, maintain a local list of received chat messages, capped at the 50 most recent entries (older entries must be dropped when the cap is exceeded).
+- Render each received message as an element with the attribute `data-testid="chat-message"`. The element's text content must include the broadcast `text` value.
+- Use real Liveblocks credentials read from environment variables. No mocking of Liveblocks.
+
+## Implementation Hints
+- Use Liveblocks v2 React bindings: import from `@liveblocks/react` and `@liveblocks/client`.
+- Wrap the page in a `LiveblocksProvider` (configured with the public API key) and a `RoomProvider`. The public key must come from the env var with the `NEXT_PUBLIC_` prefix so it is available to client components.
+- Use `useBroadcastEvent()` to send chat events from the sending client.
+- Use `useEventListener()` to receive events on other clients. The callback receives `{ event, user, connectionId }`; filter on `event.type === "CHAT"` and read `event.text` and `event.from`.
+- Store incoming chat messages in local React state. When appending a new message, trim the list to the most recent 50 entries.
+- Mark the page with `"use client"` since it relies on browser hooks and state.
+- Read the `run-id` from `ZEALT_RUN_ID` at runtime and use it to derive the Liveblocks room ID (for example, `harbor-chat-broadcast-${ZEALT_RUN_ID}`). Re-export it as `NEXT_PUBLIC_ZEALT_RUN_ID` so the client can read it (for example via `next.config.js` `env` or by reading `process.env.NEXT_PUBLIC_ZEALT_RUN_ID` in a client component).
+- When you are finished implementing and have verified the dev server runs, KILL the dev server. The verifier will start its own server.
+
+## Acceptance Criteria
+- Project path: /home/user/myproject
+- Start command: npm run dev
+- Port: 3000
+- Routes:
+  - `GET /`: Renders an interactive chat page that connects to a Liveblocks room derived from `ZEALT_RUN_ID`. The page must include a visible text input and a send button (or form submit control).
+- DOM contract:
+  - The page must contain a single text input element suitable for typing a chat message (any `<input type="text">`, `<input>` without an explicit type, or `<textarea>` is acceptable).
+  - The page must contain a clickable send control whose accessible/text content includes the word "Send" (case-insensitive).
+  - Every received chat message rendered on the page must be in a DOM element with the attribute `data-testid="chat-message"`. The element's text content must include the broadcast `text` value.
+  - The list of rendered `data-testid="chat-message"` elements must contain at most 50 entries at any time.
+- Broadcast contract:
+  - Sent broadcast events must have shape `{ type: "CHAT", text: <string>, from: <string> }`.
+  - Only events with `type === "CHAT"` are required to appear in the rendered message list.
+- Environment variables:
+  - The Liveblocks public API key must be exposed to the client via a `NEXT_PUBLIC_`-prefixed environment variable.
+  - The room ID must incorporate `ZEALT_RUN_ID` so concurrent runs do not collide.
+
+
+EOF
+Command outputs captured
+Running command: set -euo pipefail; curl -fsSL https://getpochi.com/install.sh | bash -x -s -- pochi-v0.6.12 && mkdir -p /logs/agent/pochi && ~/.pochi/bin/pochi --version
+Command outputs captured
+Running command: ln -sf ~/.pochi/bin/pochi /usr/local/bin/pochi
+Command outputs captured
+Running command: echo zr-resu9ck > /logs/artifacts/run-id && echo liveblocks-collaborative-poll__rEsu9ck > /logs/artifacts/trial_id
+Command outputs captured
+Running command: mkdir -p ~/.pochi && cat << 'EOF' | sed -e "s/OPENAI_API_KEY/${OPENAI_API_KEY}/g" -e "s/DEEPINFRA_API_KEY/${DEEPINFRA_API_KEY}/g" > ~/.pochi/config.jsonc
+{
+  "providers": {
+    "deepinfra": {
+      "kind": "openai",
+      "baseURL": "https://api.deepinfra.com/v1/openai",
+      "apiKey": "DEEPINFRA_API_KEY",
+      "models": {
+        "zai-org/GLM-4.7-Flash": {
+          "name": "glm-4.7-flash"
+        },
+        "moonshotai/Kimi-K2.6": {
+          "name": "kimi-K2.6"
+        },
+        "deepseek-ai/DeepSeek-V4-Pro": {
+          "name": "DeepSeek-V4-Pro"
+        }
+      }
+    },
+    "openai": {
+      "kind": "openai",
+      "baseURL": "https://api.openai.com/v1",
+      "apiKey": "OPENAI_API_KEY",
+      "models": {
+        "gpt-5.4": {
+          "name": "gpt-5.4"
+        }
+      }
+    }
+  }
+}
+EOF
+Command outputs captured
+Running command: if [ -f /bootstrap/test_initial_state.py ]; then pytest -s --log-cli-level=DEBUG /bootstrap/test_initial_state.py > >(tee /logs/agent/pochi/initial-test-stdout.txt) 2> >(tee /logs/agent/pochi/initial-test-stderr.txt >&2); fi
+Command outputs captured
+Running command: pochi --model google/gemini-3.5-flash --max-steps 200 --max-retries 10 --blobs-dir /logs/agent/pochi/blobs --experimental-stream-trajectory /logs/agent/pochi/trajectory.jsonl > >(tee /logs/agent/pochi/stdout.txt) 2> >(tee /logs/agent/pochi/stderr.txt >&2) <<'EOF'
+# Collaborative Poll with Liveblocks LiveMap
+
+## Background
+You are building a single-page real-time poll for a Next.js application using [Liveblocks](https://liveblocks.io/). The poll asks **"What is your favorite frontend framework?"** and offers four answers: `react`, `vue`, `svelte`, and `solid`. Each visitor sees the four options together with the current vote count and a progress bar reflecting that option's share of the total votes. Clicking an option records a vote into shared Liveblocks Storage, and every other connected browser must immediately see the new counts.
+
+A Next.js (App Router) scaffold has been prepared for you at `/home/user/myproject`. Your job is to wire up Liveblocks v2 on the home page so the poll becomes truly collaborative.
+
+## Requirements
+- Use the Liveblocks v2 React SDK (`@liveblocks/client`, `@liveblocks/react`).
+- Connect to Liveblocks using the **public** API key, exposed to the frontend via `NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY`.
+- The Liveblocks room id used by the page must be read at runtime from the `NEXT_PUBLIC_ZEALT_RUN_ID` environment variable. Before launching the dev server, export it from `ZEALT_RUN_ID`, e.g. `export NEXT_PUBLIC_ZEALT_RUN_ID=$ZEALT_RUN_ID`.
+- The poll question is hard-coded in the page: **"What is your favorite frontend framework?"**.
+- The shared vote counts must live in Liveblocks Storage inside a single `LiveMap` stored on the root `LiveObject` under the key `votes` (i.e. `storage.root.votes`).
+  - The `LiveMap` is keyed by option id (`string`) and holds the vote count for that option (`number`).
+  - When the room storage is first created, the map must be initialized with all four options (`react`, `vue`, `svelte`, `solid`), each mapped to `0`.
+- The home page (`/`) must render, for each of the four options (`react`, `vue`, `svelte`, `solid`):
+  - A clickable element whose accessible name is `Vote react`, `Vote vue`, `Vote svelte`, and `Vote solid` respectively (e.g. `<button>Vote react</button>` or `<button aria-label="Vote react">…`).
+  - A visible element whose text contains the current vote count for that option as a plain integer.
+  - A progress bar for that option (`<progress>` or `<div role="progressbar">`) whose `max` is the total number of votes across all options and whose `value` is the current count for that option. When there are no votes yet, the progress bar may show an empty / zero state.
+- Clicking the `Vote <option>` control must call a Liveblocks `useMutation` that reads the `LiveMap` from `storage.root.votes` and increments the entry for that option by 1. The mutation must use `LiveMap.set` (or equivalent) so the change synchronizes through Liveblocks Storage.
+- Reads of the vote counts shown on the page must go through `useStorage` so the UI updates reactively when storage changes.
+- The page must render entirely on the client. Wrap any client tree with `RoomProvider` and `LiveblocksProvider` as required by v2.
+- Before reporting completion, **kill any dev/build processes you started** (e.g. `npm run dev`) so that the verifier can start its own server on port 3000.
+
+## Implementation Hints
+- Install Liveblocks v2 packages with `npm install @liveblocks/client @liveblocks/react` inside `/home/user/myproject`.
+- Create a `liveblocks.config.ts` (or equivalent) that declares the `Storage` type as `{ votes: LiveMap<string, number> }` and re-exports the typed hooks (`useStorage`, `useMutation`).
+- Use `<LiveblocksProvider publicApiKey={...}>` and `<RoomProvider id={...} initialStorage={{ votes: new LiveMap([...]) }}>` to set up the room. Read the public key from `process.env.NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY` and the room id from `process.env.NEXT_PUBLIC_ZEALT_RUN_ID`.
+- Use `useStorage((root) => root.votes)` to read the map; the returned value is an immutable `ReadonlyMap`-like structure you can iterate to render counts and totals.
+- Use `useMutation(({ storage }, optionId) => { const votes = storage.get("votes"); votes.set(optionId, (votes.get(optionId) ?? 0) + 1); }, [])` to record a vote.
+- Mark any component using Liveblocks hooks with `"use client"`.
+- Make sure the dev server can build and serve the page without runtime errors before considering the task done.
+
+## Acceptance Criteria
+- Project path: `/home/user/myproject`
+- Start command: `npm run dev`
+- Port: `3000`
+- Routes:
+  - `GET /` — Renders an HTML page that includes:
+    - The poll question text `What is your favorite frontend framework?`.
+    - One control per option (`react`, `vue`, `svelte`, `solid`) with accessible name `Vote <option>`.
+    - A visible numeric count for each option.
+    - A progress bar per option (`<progress>` or `role="progressbar"`) whose `value`/`max` reflect that option's share of the total votes.
+- Liveblocks state shape (verified via the Liveblocks REST API `GET https://api.liveblocks.io/v2/rooms/{roomId}/storage?format=json`):
+  ```json
+  {
+    "votes": {
+      "react": <integer>,
+      "vue": <integer>,
+      "svelte": <integer>,
+      "solid": <integer>
+    }
+  }
+  ```
+- Behavior: clicking each option's vote control once must increment the matching entry in `storage.root.votes` by exactly 1 (eventually consistent within a few seconds), and the displayed count for that option must update accordingly.
+- The Liveblocks room id used by the page must equal the value of the `NEXT_PUBLIC_ZEALT_RUN_ID` environment variable at runtime.
+- No dev server may be left running by the agent when reporting completion.
+
+
+EOF
+Skipping image OS validation for hb__liveblocks-cursor-positions: docker inspect returned 1
+Running command: apt-get update && apt-get install -y curl ripgrep
+Command outputs captured
+Running command: set -euo pipefail; curl -fsSL https://getpochi.com/install.sh | bash -x -s -- pochi-v0.6.12 && mkdir -p /logs/agent/pochi && ~/.pochi/bin/pochi --version
+Command outputs captured
+Running command: ln -sf ~/.pochi/bin/pochi /usr/local/bin/pochi
+Command outputs captured
+Running command: echo zr-ly8npzh > /logs/artifacts/run-id && echo liveblocks-cursor-positions__LY8npzh > /logs/artifacts/trial_id
+Command outputs captured
+Running command: mkdir -p ~/.pochi && cat << 'EOF' | sed -e "s/OPENAI_API_KEY/${OPENAI_API_KEY}/g" -e "s/DEEPINFRA_API_KEY/${DEEPINFRA_API_KEY}/g" > ~/.pochi/config.jsonc
+{
+  "providers": {
+    "deepinfra": {
+      "kind": "openai",
+      "baseURL": "https://api.deepinfra.com/v1/openai",
+      "apiKey": "DEEPINFRA_API_KEY",
+      "models": {
+        "zai-org/GLM-4.7-Flash": {
+          "name": "glm-4.7-flash"
+        },
+        "moonshotai/Kimi-K2.6": {
+          "name": "kimi-K2.6"
+        },
+        "deepseek-ai/DeepSeek-V4-Pro": {
+          "name": "DeepSeek-V4-Pro"
+        }
+      }
+    },
+    "openai": {
+      "kind": "openai",
+      "baseURL": "https://api.openai.com/v1",
+      "apiKey": "OPENAI_API_KEY",
+      "models": {
+        "gpt-5.4": {
+          "name": "gpt-5.4"
+        }
+      }
+    }
+  }
+}
+EOF
+Command outputs captured
+Running command: if [ -f /bootstrap/test_initial_state.py ]; then pytest -s --log-cli-level=DEBUG /bootstrap/test_initial_state.py > >(tee /logs/agent/pochi/initial-test-stdout.txt) 2> >(tee /logs/agent/pochi/initial-test-stderr.txt >&2); fi
+Command outputs captured
+Running command: pochi --model google/gemini-3.5-flash --max-steps 200 --max-retries 10 --blobs-dir /logs/agent/pochi/blobs --experimental-stream-trajectory /logs/agent/pochi/trajectory.jsonl > >(tee /logs/agent/pochi/stdout.txt) 2> >(tee /logs/agent/pochi/stderr.txt >&2) <<'EOF'
+# Liveblocks Live Cursor Positions (Next.js)
+
+## Background
+Build a small Next.js page that uses Liveblocks Presence to broadcast the current user's pointer position to everyone else in the same room, and render the cursors of all other connected users in realtime. This task exercises the core Liveblocks Presence primitives (`useMyPresence` / `useUpdateMyPresence` / `useOthers`) using the v2 React API.
+
+## Requirements
+- Implement a single Next.js page at the route `/` that:
+  - Wraps the page in a `LiveblocksProvider` (configured with the public API key from the environment) and a `RoomProvider` connected to the room whose id equals the value of `NEXT_PUBLIC_ZEALT_RUN_ID`.
+  - Sets an initial Presence of `{ cursor: null }`.
+  - On every `pointermove` over the page area, updates the local user's Presence with the cursor coordinates `{ x, y }` using `useUpdateMyPresence` (or `useMyPresence`).
+  - On `pointerleave`, clears the local cursor by setting Presence to `{ cursor: null }`.
+  - Renders one cursor element for every other connected user using `useOthers`. Each cursor element MUST:
+    - Be absolutely positioned at the other user's `{ x, y }` Presence coordinates.
+    - Have an HTML attribute `data-cursor` set to the user's connection id (e.g. `data-cursor="3"`).
+    - Have a CSS class containing `cursor` (e.g. `class="cursor ..."`) so the verifier can locate it.
+    - Be a colored marker (SVG or a colored div) — the color may be derived from the connection id.
+- The page MUST be visible at `http://localhost:3000/`.
+- Read the runtime room id from `process.env.NEXT_PUBLIC_ZEALT_RUN_ID` so the test harness can isolate concurrent runs.
+
+## Implementation Hints
+- Use the v2 React API (`@liveblocks/client` + `@liveblocks/react`). Import hooks from `@liveblocks/react` and configure types in a `liveblocks.config.ts` file (use `type Presence = { cursor: { x: number, y: number } | null }`).
+- Authenticate from the browser using the public API key. With `LiveblocksProvider`, pass `publicApiKey={process.env.NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY!}`.
+- Frontend env vars in Next.js MUST be prefixed with `NEXT_PUBLIC_` so they are exposed to the browser.
+- Before starting the dev server, export the run id so the client picks it up: `export NEXT_PUBLIC_ZEALT_RUN_ID=$ZEALT_RUN_ID`.
+- Use a Next.js client component (`"use client"`) for the cursor page, since Liveblocks hooks run in the browser.
+- Use `useOthers((others) => others)` (or a mapped variant) to get the list of other users and render one cursor element per user.
+- After you have verified locally that the dev server starts and the page loads, **kill the dev server** before completing the task. The verifier will start the server itself.
+
+## Acceptance Criteria
+- Project path: /home/user/myproject
+- Start command: `cd /home/user/myproject && NEXT_PUBLIC_ZEALT_RUN_ID=$ZEALT_RUN_ID NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY=$NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY npm run dev -- -p 3000`
+- Port: 3000
+- The page at `http://localhost:3000/` loads without runtime errors and connects to the Liveblocks room whose id is the value of `$ZEALT_RUN_ID`.
+- When two browser sessions open the page simultaneously and one of them moves the pointer:
+  - The other session sees at least one DOM element with class containing `cursor` and attribute `data-cursor` set to a connection id.
+  - That element is positioned (via inline `style.left` / `style.top` or `transform`) at coordinates derived from the moved pointer.
+- The Liveblocks Active Users REST endpoint `GET https://api.liveblocks.io/v2/rooms/{roomId}/active_users` reports at least one active user while a browser is connected to the room (using `$ZEALT_RUN_ID` as room id).
+- The dev server MUST NOT be running when the task is marked complete (verifier starts its own instance).
+
+
+EOF
+Skipping image OS validation for hb__liveblocks-color-picker-presence: docker inspect returned 1
+Running command: apt-get update && apt-get install -y curl ripgrep
+Command outputs captured
+Running command: set -euo pipefail; curl -fsSL https://getpochi.com/install.sh | bash -x -s -- pochi-v0.6.12 && mkdir -p /logs/agent/pochi && ~/.pochi/bin/pochi --version
+Command outputs captured
+Running command: ln -sf ~/.pochi/bin/pochi /usr/local/bin/pochi
+Command outputs captured
+Running command: echo zr-8q7sdtj > /logs/artifacts/run-id && echo liveblocks-color-picker-presence__8Q7sdTj > /logs/artifacts/trial_id
+Command outputs captured
+Running command: mkdir -p ~/.pochi && cat << 'EOF' | sed -e "s/OPENAI_API_KEY/${OPENAI_API_KEY}/g" -e "s/DEEPINFRA_API_KEY/${DEEPINFRA_API_KEY}/g" > ~/.pochi/config.jsonc
+{
+  "providers": {
+    "deepinfra": {
+      "kind": "openai",
+      "baseURL": "https://api.deepinfra.com/v1/openai",
+      "apiKey": "DEEPINFRA_API_KEY",
+      "models": {
+        "zai-org/GLM-4.7-Flash": {
+          "name": "glm-4.7-flash"
+        },
+        "moonshotai/Kimi-K2.6": {
+          "name": "kimi-K2.6"
+        },
+        "deepseek-ai/DeepSeek-V4-Pro": {
+          "name": "DeepSeek-V4-Pro"
+        }
+      }
+    },
+    "openai": {
+      "kind": "openai",
+      "baseURL": "https://api.openai.com/v1",
+      "apiKey": "OPENAI_API_KEY",
+      "models": {
+        "gpt-5.4": {
+          "name": "gpt-5.4"
+        }
+      }
+    }
+  }
+}
+EOF
+Command outputs captured
+Running command: if [ -f /bootstrap/test_initial_state.py ]; then pytest -s --log-cli-level=DEBUG /bootstrap/test_initial_state.py > >(tee /logs/agent/pochi/initial-test-stdout.txt) 2> >(tee /logs/agent/pochi/initial-test-stderr.txt >&2); fi
+Command outputs captured
+Running command: pochi --model google/gemini-3.5-flash --max-steps 200 --max-retries 10 --blobs-dir /logs/agent/pochi/blobs --experimental-stream-trajectory /logs/agent/pochi/trajectory.jsonl > >(tee /logs/agent/pochi/stdout.txt) 2> >(tee /logs/agent/pochi/stderr.txt >&2) <<'EOF'
+# Liveblocks Color Picker Presence (Next.js + React)
+
+## Background
+Build a small multiplayer Next.js page using the Liveblocks v2 React SDK. Each connected user picks one color from a fixed 5-color palette; the selected color is stored in their Presence and is visible to every other connected user in real time. The page also renders an avatars row showing each connected user with a background reflecting their currently selected color.
+
+## Requirements
+- A single Next.js page at route `/` that joins a Liveblocks room scoped by the current `run-id`.
+- A 5-color palette grid containing exactly these colors (in this order): `red`, `blue`, `green`, `yellow`, `purple`.
+- Clicking a swatch updates the current user's Presence so the choice is broadcast to other users in the room.
+- An avatars row that shows one avatar per connected user (self + others), with each avatar visually reflecting that user's chosen color.
+- Each connected user has a stable `userId` taken from the `?userId=...` URL query parameter (e.g. `?userId=A`).
+- Real Liveblocks connectivity using the official Liveblocks REST/WebSocket service (no mocks, no in-memory fake provider).
+
+## Implementation Hints
+- Use the Liveblocks v2 React SDK: `@liveblocks/client`, `@liveblocks/react`.
+- Use the `useUpdateMyPresence` hook to publish the locally chosen color, and `useOthers` (plus `useSelf` if needed) to render avatars for all connected users.
+- For client-side authentication, use the public Liveblocks key directly via `LiveblocksProvider` (`publicApiKey={...}`) — no auth endpoint is required for this task.
+- The Liveblocks public key must be exposed to the browser via a `NEXT_PUBLIC_`-prefixed environment variable.
+- The `run-id` is provided at runtime via the `ZEALT_RUN_ID` environment variable. Re-export it as `NEXT_PUBLIC_ZEALT_RUN_ID` (for example in `next.config.js` via the `env` field, or by reading `process.env.ZEALT_RUN_ID` at build/start time) so the browser can compute the same room id.
+- The room id used by `RoomProvider` MUST be exactly `color-picker-${run-id}`.
+- The user id read from `?userId=...` must be passed into `RoomProvider` as the room session via the `initialPresence` (store `userId` and `color` in Presence). The `userId` query parameter is required; if it is missing, the page may render an error or empty state.
+- Use plain client-side rendering (`"use client"`) for the page so query parameters and Liveblocks hooks work in the browser.
+
+## Acceptance Criteria
+- Project path: /home/user/myproject
+- Start command: `npm run dev` (Next.js dev server)
+- Port: 3000
+- Route: `/` (must accept a `?userId=<id>` query parameter)
+- Liveblocks room id: `color-picker-${run-id}` where `run-id` is read from the `ZEALT_RUN_ID` environment variable (re-exported as `NEXT_PUBLIC_ZEALT_RUN_ID` for the browser).
+- A `LIVEBLOCKS_PUBLIC_KEY` and a `NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY` (with the same value) must be readable from the environment; the frontend MUST authenticate using the `NEXT_PUBLIC_` variant via `LiveblocksProvider`'s `publicApiKey` prop.
+- Color palette: the page MUST render exactly 5 color swatches in this order: `red`, `blue`, `green`, `yellow`, `purple`. Each swatch is a clickable element with attribute `data-testid="swatch-<color>"` (e.g. `data-testid="swatch-red"`).
+- Clicking a swatch MUST update the current user's Liveblocks Presence so that `presence.color` becomes that color string.
+- Avatars row: for every connected user in the room (including self), the page MUST render one element with attribute `data-testid="avatar-<userId>"` (where `<userId>` is the user's `userId` from Presence). Each such element MUST also expose a `data-color="<color>"` attribute equal to the user's currently selected color string, AND its `background-color` CSS must match the hex for that color from this fixed mapping: `red=#ef4444`, `blue=#3b82f6`, `green=#22c55e`, `yellow=#eab308`, `purple=#a855f7`.
+- When a user has not yet picked a color, the avatar's `data-color` MUST be the empty string or the literal string `none`, and the background MUST NOT match any palette hex.
+- After the dev server is started, the agent MUST kill the dev server process before completing the task (the verifier starts its own server).
+
+
+EOF
+Command outputs captured
+Running command: rm -f ~/.pochi/config.jsonc
+Command outputs captured
+Command outputs captured
+Running command: rm -f ~/.pochi/config.jsonc
+Command outputs captured
+Skipping image OS validation for hb__liveblocks-shared-timer-storage: docker inspect returned 1
+Running command: apt-get update && apt-get install -y curl ripgrep
+Command outputs captured
+Running command: set -euo pipefail; curl -fsSL https://getpochi.com/install.sh | bash -x -s -- pochi-v0.6.12 && mkdir -p /logs/agent/pochi && ~/.pochi/bin/pochi --version
+Command outputs captured
+Running command: rm -f ~/.pochi/config.jsonc
+Command outputs captured
+Command outputs captured
+Running command: ln -sf ~/.pochi/bin/pochi /usr/local/bin/pochi
+Command outputs captured
+Skipping image OS validation for hb__liveblocks-comments-thread-basic: docker inspect returned 1
+Running command: echo zr-caddego > /logs/artifacts/run-id && echo liveblocks-shared-timer-storage__CADdEGo > /logs/artifacts/trial_id
+Command outputs captured
+Running command: mkdir -p ~/.pochi && cat << 'EOF' | sed -e "s/OPENAI_API_KEY/${OPENAI_API_KEY}/g" -e "s/DEEPINFRA_API_KEY/${DEEPINFRA_API_KEY}/g" > ~/.pochi/config.jsonc
+{
+  "providers": {
+    "deepinfra": {
+      "kind": "openai",
+      "baseURL": "https://api.deepinfra.com/v1/openai",
+      "apiKey": "DEEPINFRA_API_KEY",
+      "models": {
+        "zai-org/GLM-4.7-Flash": {
+          "name": "glm-4.7-flash"
+        },
+        "moonshotai/Kimi-K2.6": {
+          "name": "kimi-K2.6"
+        },
+        "deepseek-ai/DeepSeek-V4-Pro": {
+          "name": "DeepSeek-V4-Pro"
+        }
+      }
+    },
+    "openai": {
+      "kind": "openai",
+      "baseURL": "https://api.openai.com/v1",
+      "apiKey": "OPENAI_API_KEY",
+      "models": {
+        "gpt-5.4": {
+          "name": "gpt-5.4"
+        }
+      }
+    }
+  }
+}
+EOF
+Command outputs captured
+Running command: if [ -f /bootstrap/test_initial_state.py ]; then pytest -s --log-cli-level=DEBUG /bootstrap/test_initial_state.py > >(tee /logs/agent/pochi/initial-test-stdout.txt) 2> >(tee /logs/agent/pochi/initial-test-stderr.txt >&2); fi
+Command outputs captured
+Running command: pochi --model google/gemini-3.5-flash --max-steps 200 --max-retries 10 --blobs-dir /logs/agent/pochi/blobs --experimental-stream-trajectory /logs/agent/pochi/trajectory.jsonl > >(tee /logs/agent/pochi/stdout.txt) 2> >(tee /logs/agent/pochi/stderr.txt >&2) <<'EOF'
+# Liveblocks Shared Countdown Timer (Storage)
+
+## Background
+Build a real-time collaborative countdown timer using Liveblocks Storage. All connected clients share a single source of truth for when the timer started, how long it should run for, and whether it is currently running. Each client computes the remaining time locally so that the displayed countdown stays smooth and in sync.
+
+The project is a Next.js app located at `/home/user/myproject`. A minimal scaffold is already prepared with Liveblocks dependencies installed and the Next.js `auth` route configured to use the server-side `LIVEBLOCKS_SECRET_KEY`. Your job is to implement the UI page and the Liveblocks client configuration so that the shared timer behaves correctly across multiple browser sessions.
+
+## Requirements
+- Use the Liveblocks v2 SDK (`@liveblocks/client`, `@liveblocks/react`).
+- The Storage root must contain a single `LiveObject` named `timer` with the following fields:
+  - `startEpoch`: `number | null` — wall-clock millisecond timestamp (`Date.now()`) of when the running phase began, or `null` when the timer is not running.
+  - `durationMs`: `number` — the configured countdown duration in milliseconds. Default to `60000` (60 seconds) on first room creation.
+  - `running`: `boolean` — whether the timer is currently counting down.
+- The page must render at the route `/` and join a Liveblocks room whose ID is `harbor-timer-${ZEALT_RUN_ID}` (read at build/runtime from `NEXT_PUBLIC_ZEALT_RUN_ID`).
+- The page must expose the following user interactions:
+  - A numeric input (or similar control) bound to `durationMs` (expressed in seconds in the UI) that updates the shared Storage value via `useMutation`.
+  - A `Start` button: sets `startEpoch = Date.now()` and `running = true`.
+  - A `Pause` button: sets `running = false` and clears `startEpoch` to `null` (so resuming is not required).
+  - A `Reset` button: sets `running = false`, `startEpoch = null`, and leaves `durationMs` unchanged.
+- Each client must compute the remaining time locally using `Date.now() - startEpoch` and re-render at least a few times per second while running.
+- The remaining-time display must be rendered inside an element with `data-testid="timer-display"`. When the timer has expired (`running && remaining <= 0`), the element's text must equal `DONE`. Otherwise it must show the remaining time as a non-negative integer number of seconds (formatted however you like, but the digits must be readable as plain text).
+- Buttons must use the following testids:
+  - Start button: `data-testid="start-btn"`
+  - Pause button: `data-testid="pause-btn"`
+  - Reset button: `data-testid="reset-btn"`
+  - Duration input (seconds): `data-testid="duration-input"`
+- Real Liveblocks credentials are provided via environment variables (no mocks).
+
+## Implementation Hints
+- Configure the Liveblocks client with `authEndpoint: "/api/liveblocks-auth"`. The auth route is already wired to call `liveblocks.prepareSession()`.
+- Use `LiveblocksProvider`, `RoomProvider` with `initialStorage`, `ClientSideSuspense`, `useStorage`, and `useMutation` from `@liveblocks/react/suspense`.
+- Initialize `timer` in `initialStorage` as `new LiveObject({ startEpoch: null, durationMs: 60000, running: false })`.
+- Use a `setInterval` (e.g. every 200 ms) plus a local React state tick to recompute the remaining time while running.
+- Read `NEXT_PUBLIC_ZEALT_RUN_ID` for the room name; the app does **not** need to read the secret key on the client.
+- When you run the dev server locally for testing, re-export the run id so Next.js exposes it to the browser bundle: `export NEXT_PUBLIC_ZEALT_RUN_ID="$ZEALT_RUN_ID"` before `npm run dev`.
+- **IMPORTANT**: When you are done, **KILL the dev server** before finishing the task. The verifier will start its own dev server on port 3000, and a leftover server will cause verification to fail.
+
+## Acceptance Criteria
+- Project path: /home/user/myproject
+- Start command: `npm run dev` (Next.js, listening on port 3000)
+- Port: 3000
+- Routes:
+  - `GET /` — renders the timer UI inside a Liveblocks room. The room ID must be `harbor-timer-${NEXT_PUBLIC_ZEALT_RUN_ID}`.
+  - `POST /api/liveblocks-auth` — already provided; must remain functional.
+- The page must expose elements with the following stable `data-testid` attributes: `timer-display`, `start-btn`, `pause-btn`, `reset-btn`, `duration-input`.
+- Storage shape (Liveblocks REST `GET /v2/rooms/{roomId}/storage?format=json`):
+  ```json
+  {
+    "timer": {
+      "startEpoch": null | number,
+      "durationMs": number,
+      "running": boolean
+    }
+  }
+  ```
+- Behavioral rules:
+  - Clicking `Start` must set `running=true` and `startEpoch=Date.now()` in shared Storage.
+  - Clicking `Pause` must set `running=false` and `startEpoch=null`.
+  - Clicking `Reset` must set `running=false`, `startEpoch=null`, and preserve `durationMs`.
+  - When the timer is running and the remaining time has reached zero or below, `timer-display` text must equal `DONE`.
+  - All connected clients in the same room must observe the same Storage state and converge to the `DONE` state at roughly the same wall-clock moment.
+- The dev server must be stopped before the task is considered complete; the verifier starts the server itself.
+
+
+EOF
+Running command: apt-get update && apt-get install -y curl ripgrep
+Command outputs captured
+Running command: set -euo pipefail; curl -fsSL https://getpochi.com/install.sh | bash -x -s -- pochi-v0.6.12 && mkdir -p /logs/agent/pochi && ~/.pochi/bin/pochi --version
+Command outputs captured
+Running command: ln -sf ~/.pochi/bin/pochi /usr/local/bin/pochi
+Command outputs captured
+Running command: echo zr-ubkbub9 > /logs/artifacts/run-id && echo liveblocks-comments-thread-basic__UBkBUb9 > /logs/artifacts/trial_id
+Command outputs captured
+Running command: mkdir -p ~/.pochi && cat << 'EOF' | sed -e "s/OPENAI_API_KEY/${OPENAI_API_KEY}/g" -e "s/DEEPINFRA_API_KEY/${DEEPINFRA_API_KEY}/g" > ~/.pochi/config.jsonc
+{
+  "providers": {
+    "deepinfra": {
+      "kind": "openai",
+      "baseURL": "https://api.deepinfra.com/v1/openai",
+      "apiKey": "DEEPINFRA_API_KEY",
+      "models": {
+        "zai-org/GLM-4.7-Flash": {
+          "name": "glm-4.7-flash"
+        },
+        "moonshotai/Kimi-K2.6": {
+          "name": "kimi-K2.6"
+        },
+        "deepseek-ai/DeepSeek-V4-Pro": {
+          "name": "DeepSeek-V4-Pro"
+        }
+      }
+    },
+    "openai": {
+      "kind": "openai",
+      "baseURL": "https://api.openai.com/v1",
+      "apiKey": "OPENAI_API_KEY",
+      "models": {
+        "gpt-5.4": {
+          "name": "gpt-5.4"
+        }
+      }
+    }
+  }
+}
+EOF
+Command outputs captured
+Running command: if [ -f /bootstrap/test_initial_state.py ]; then pytest -s --log-cli-level=DEBUG /bootstrap/test_initial_state.py > >(tee /logs/agent/pochi/initial-test-stdout.txt) 2> >(tee /logs/agent/pochi/initial-test-stderr.txt >&2); fi
+Command failed
+Trial liveblocks-comments-thread-basic__UBkBUb9 failed: Initial state test failed
+Skipping image OS validation for hb__liveblocks-undo-redo-counter: docker inspect returned 1
+Running command: apt-get update && apt-get install -y curl ripgrep
+Command outputs captured
+Running command: set -euo pipefail; curl -fsSL https://getpochi.com/install.sh | bash -x -s -- pochi-v0.6.12 && mkdir -p /logs/agent/pochi && ~/.pochi/bin/pochi --version
+Command outputs captured
+Running command: ln -sf ~/.pochi/bin/pochi /usr/local/bin/pochi
+Command outputs captured
+Running command: echo zr-wyayq9f > /logs/artifacts/run-id && echo liveblocks-undo-redo-counter__wYAyq9f > /logs/artifacts/trial_id
+Command outputs captured
+Running command: mkdir -p ~/.pochi && cat << 'EOF' | sed -e "s/OPENAI_API_KEY/${OPENAI_API_KEY}/g" -e "s/DEEPINFRA_API_KEY/${DEEPINFRA_API_KEY}/g" > ~/.pochi/config.jsonc
+{
+  "providers": {
+    "deepinfra": {
+      "kind": "openai",
+      "baseURL": "https://api.deepinfra.com/v1/openai",
+      "apiKey": "DEEPINFRA_API_KEY",
+      "models": {
+        "zai-org/GLM-4.7-Flash": {
+          "name": "glm-4.7-flash"
+        },
+        "moonshotai/Kimi-K2.6": {
+          "name": "kimi-K2.6"
+        },
+        "deepseek-ai/DeepSeek-V4-Pro": {
+          "name": "DeepSeek-V4-Pro"
+        }
+      }
+    },
+    "openai": {
+      "kind": "openai",
+      "baseURL": "https://api.openai.com/v1",
+      "apiKey": "OPENAI_API_KEY",
+      "models": {
+        "gpt-5.4": {
+          "name": "gpt-5.4"
+        }
+      }
+    }
+  }
+}
+EOF
+Command outputs captured
+Running command: if [ -f /bootstrap/test_initial_state.py ]; then pytest -s --log-cli-level=DEBUG /bootstrap/test_initial_state.py > >(tee /logs/agent/pochi/initial-test-stdout.txt) 2> >(tee /logs/agent/pochi/initial-test-stderr.txt >&2); fi
+Command outputs captured
+Running command: pochi --model google/gemini-3.5-flash --max-steps 200 --max-retries 10 --blobs-dir /logs/agent/pochi/blobs --experimental-stream-trajectory /logs/agent/pochi/trajectory.jsonl > >(tee /logs/agent/pochi/stdout.txt) 2> >(tee /logs/agent/pochi/stderr.txt >&2) <<'EOF'
+# Liveblocks Undo/Redo Counter (Next.js)
+
+## Background
+Build a small Next.js page that demonstrates Liveblocks' built-in undo/redo history for collaborative Storage. The page renders a single numeric counter persisted in a Liveblocks room's Storage (`LiveObject { count: number }`), along with four buttons: **Increment**, **Decrement**, **Undo**, and **Redo**. Every increment or decrement must be a distinct entry on the Liveblocks history stack so that pressing **Undo** reverses one step at a time.
+
+This task uses **Liveblocks SDK v2** (`@liveblocks/client@^2`, `@liveblocks/react@^2`) and the **Liveblocks v2 REST API** (`https://api.liveblocks.io/v2/...`) for verification.
+
+## Requirements
+- Implement a Next.js (App Router) page at `/` that joins a single Liveblocks room.
+- The room name **MUST** be derived from the `ZEALT_RUN_ID` environment variable so concurrent runs do not collide.
+- Storage root is a `LiveObject` containing a numeric `count` field. Initialize storage on the client when missing so that `count` starts at `0`.
+- The page must show:
+  - The current value of `count` from Storage, inside an element with `data-testid="count"`.
+  - A button with `data-testid="increment"` (labelled `Increment`).
+  - A button with `data-testid="decrement"` (labelled `Decrement`).
+  - A button with `data-testid="undo"` (labelled `Undo`).
+  - A button with `data-testid="redo"` (labelled `Redo`).
+- Increment / decrement must mutate `count` via a Liveblocks mutation. Each click must produce a **separate** history entry so that one Undo call reverses exactly one click.
+- Undo / Redo must be wired to the `useUndo` and `useRedo` hooks from `@liveblocks/react`.
+- Use a public Liveblocks key (read from `NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY`) with `createClient({ publicApiKey })`; no custom auth endpoint is required.
+- Re-export the run id to the browser as `NEXT_PUBLIC_ZEALT_RUN_ID` so that the page can build the room name client-side.
+
+## Implementation Hints
+- Liveblocks v2 React: wrap the page in `LiveblocksProvider` and a `RoomProvider`. Use `ClientSideSuspense` (or `useStorage`/`useMutation`) to read and mutate Storage.
+- Use `initialStorage={{ count: new LiveObject({ count: 0 }) }}` on `RoomProvider` (or initialize via mutation if `count` is missing).
+- For separate history entries, simply call `useMutation` once per click; do NOT batch multiple increments together.
+- Use `useUndo()` and `useRedo()` from `@liveblocks/react` to obtain the undo / redo functions.
+- Read `NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY` and `NEXT_PUBLIC_ZEALT_RUN_ID` from `process.env` in client components.
+- The room id pattern **MUST** be: `zealt-undo-redo-counter-${NEXT_PUBLIC_ZEALT_RUN_ID}`.
+
+## Acceptance Criteria
+- Project path: /home/user/myproject
+- Start command: `npm run dev` (Next.js dev server)
+- Port: 3000
+- Route: `GET /` renders the counter UI.
+- DOM contract:
+  - `[data-testid="count"]` contains the current count (rendered as the integer text).
+  - `[data-testid="increment"]`, `[data-testid="decrement"]`, `[data-testid="undo"]`, `[data-testid="redo"]` are clickable buttons.
+- Each click on Increment / Decrement creates exactly one Liveblocks history entry, so a single Undo reverses exactly one click.
+- Storage is persisted in the Liveblocks room `zealt-undo-redo-counter-${ZEALT_RUN_ID}` as a `LiveObject` whose `count` field reflects the UI value, verifiable via the Liveblocks v2 REST API `GET https://api.liveblocks.io/v2/rooms/{roomId}/storage`.
+- Required environment variables at runtime:
+  - `NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY` (public key, `pk_...`)
+  - `LIVEBLOCKS_SECRET_KEY` (secret key, `sk_...`, used only by verification, not required by the app at runtime but must be available in the environment)
+  - `ZEALT_RUN_ID` (provided at runtime; the app must also see it as `NEXT_PUBLIC_ZEALT_RUN_ID`)
+- The dev server must be terminated by the agent before signalling task completion; the verifier starts its own server.
+
+
+EOF
+Not retrying trial because the maximum number of retries has been reached
+Command outputs captured
+Running command: rm -f ~/.pochi/config.jsonc
+Command outputs captured
+Skipping image OS validation for hb__liveblocks-shared-shopping-cart: docker inspect returned 1
+Command outputs captured
+Running command: rm -f ~/.pochi/config.jsonc
+Command outputs captured
+Running command: apt-get update && apt-get install -y curl ripgrep
+Command outputs captured
+Running command: set -euo pipefail; curl -fsSL https://getpochi.com/install.sh | bash -x -s -- pochi-v0.6.12 && mkdir -p /logs/agent/pochi && ~/.pochi/bin/pochi --version
+Command outputs captured
+Running command: ln -sf ~/.pochi/bin/pochi /usr/local/bin/pochi
+Command outputs captured
+Running command: echo zr-yht6nnj > /logs/artifacts/run-id && echo liveblocks-shared-shopping-cart__YhT6nNJ > /logs/artifacts/trial_id
+Command outputs captured
+Running command: mkdir -p ~/.pochi && cat << 'EOF' | sed -e "s/OPENAI_API_KEY/${OPENAI_API_KEY}/g" -e "s/DEEPINFRA_API_KEY/${DEEPINFRA_API_KEY}/g" > ~/.pochi/config.jsonc
+{
+  "providers": {
+    "deepinfra": {
+      "kind": "openai",
+      "baseURL": "https://api.deepinfra.com/v1/openai",
+      "apiKey": "DEEPINFRA_API_KEY",
+      "models": {
+        "zai-org/GLM-4.7-Flash": {
+          "name": "glm-4.7-flash"
+        },
+        "moonshotai/Kimi-K2.6": {
+          "name": "kimi-K2.6"
+        },
+        "deepseek-ai/DeepSeek-V4-Pro": {
+          "name": "DeepSeek-V4-Pro"
+        }
+      }
+    },
+    "openai": {
+      "kind": "openai",
+      "baseURL": "https://api.openai.com/v1",
+      "apiKey": "OPENAI_API_KEY",
+      "models": {
+        "gpt-5.4": {
+          "name": "gpt-5.4"
+        }
+      }
+    }
+  }
+}
+EOF
+Command outputs captured
+Running command: if [ -f /bootstrap/test_initial_state.py ]; then pytest -s --log-cli-level=DEBUG /bootstrap/test_initial_state.py > >(tee /logs/agent/pochi/initial-test-stdout.txt) 2> >(tee /logs/agent/pochi/initial-test-stderr.txt >&2); fi
+Command failed
+Trial liveblocks-shared-shopping-cart__YhT6nNJ failed: Initial state test failed
+Skipping image OS validation for hb__liveblocks-shared-pixel-grid: docker inspect returned 1
+Running command: apt-get update && apt-get install -y curl ripgrep
+Command outputs captured
+Running command: set -euo pipefail; curl -fsSL https://getpochi.com/install.sh | bash -x -s -- pochi-v0.6.12 && mkdir -p /logs/agent/pochi && ~/.pochi/bin/pochi --version
+Command outputs captured
+Running command: ln -sf ~/.pochi/bin/pochi /usr/local/bin/pochi
+Command outputs captured
+Running command: echo zr-3hchdrk > /logs/artifacts/run-id && echo liveblocks-shared-pixel-grid__3hCHdrK > /logs/artifacts/trial_id
+Command outputs captured
+Running command: mkdir -p ~/.pochi && cat << 'EOF' | sed -e "s/OPENAI_API_KEY/${OPENAI_API_KEY}/g" -e "s/DEEPINFRA_API_KEY/${DEEPINFRA_API_KEY}/g" > ~/.pochi/config.jsonc
+{
+  "providers": {
+    "deepinfra": {
+      "kind": "openai",
+      "baseURL": "https://api.deepinfra.com/v1/openai",
+      "apiKey": "DEEPINFRA_API_KEY",
+      "models": {
+        "zai-org/GLM-4.7-Flash": {
+          "name": "glm-4.7-flash"
+        },
+        "moonshotai/Kimi-K2.6": {
+          "name": "kimi-K2.6"
+        },
+        "deepseek-ai/DeepSeek-V4-Pro": {
+          "name": "DeepSeek-V4-Pro"
+        }
+      }
+    },
+    "openai": {
+      "kind": "openai",
+      "baseURL": "https://api.openai.com/v1",
+      "apiKey": "OPENAI_API_KEY",
+      "models": {
+        "gpt-5.4": {
+          "name": "gpt-5.4"
+        }
+      }
+    }
+  }
+}
+EOF
+Command outputs captured
+Running command: if [ -f /bootstrap/test_initial_state.py ]; then pytest -s --log-cli-level=DEBUG /bootstrap/test_initial_state.py > >(tee /logs/agent/pochi/initial-test-stdout.txt) 2> >(tee /logs/agent/pochi/initial-test-stderr.txt >&2); fi
+Command outputs captured
+Running command: pochi --model google/gemini-3.5-flash --max-steps 200 --max-retries 10 --blobs-dir /logs/agent/pochi/blobs --experimental-stream-trajectory /logs/agent/pochi/trajectory.jsonl > >(tee /logs/agent/pochi/stdout.txt) 2> >(tee /logs/agent/pochi/stderr.txt >&2) <<'EOF'
+# Liveblocks Shared Pixel Grid
+
+## Background
+Build a real-time collaborative "pixel grid" in a Next.js app using Liveblocks v2. The grid is a 10x10 board of clickable cells. Clicking a cell cycles its color through a fixed 4-color palette, and the color of each cell is persisted in a shared `LiveMap<string, string>` in Liveblocks Storage so every connected browser sees the same grid.
+
+## Requirements
+- A Next.js page at `/` that renders exactly 100 clickable cells arranged in a 10-row by 10-column grid.
+- Each cell must expose a stable `data-cell` attribute of the form `"<row>-<col>"` where `row` and `col` are integers `0..9` (e.g. `data-cell="0-0"`, `data-cell="9-9"`).
+- Cell color state is stored in Liveblocks Storage under a top-level `LiveMap` named `pixels` whose keys are `"<row>-<col>"` strings and whose values are color names from the palette.
+- The palette is exactly the following four lowercase color names, in this cycle order: `red`, `blue`, `green`, `yellow`.
+- Clicking a cell sets its entry in `pixels` to the next color in the cycle, in this exact order: an unset cell becomes `red` on the first click, then `blue`, then `green`, then `yellow`, then wraps back to `red`.
+- All connected browsers must see updates in real time; do not write color state to any local file or local-only state.
+- The Liveblocks room is shared and isolated per evaluation run; the room ID must be derived from `ZEALT_RUN_ID` at runtime (see Implementation Hints).
+- Use Liveblocks v2 SDK and the Liveblocks v2 REST API. Real Liveblocks credentials are provided via environment variables — do not mock or stub Liveblocks.
+
+## Implementation Hints
+- Use Next.js (App Router or Pages Router is fine) running on port `3000`.
+- Install and use the latest v2 packages: `@liveblocks/client`, `@liveblocks/react`, and `@liveblocks/node`.
+- Authenticate the frontend via a custom Next.js auth endpoint that uses `Liveblocks.prepareSession` (access tokens) from `@liveblocks/node`, granting `room:write` to the current room only. Read the Liveblocks secret key from `LIVEBLOCKS_SECRET_KEY` on the server.
+- Expose the public key and run id to the browser using `NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY` and `NEXT_PUBLIC_ZEALT_RUN_ID`. The run id MUST be re-exported with the `NEXT_PUBLIC_` prefix (e.g., in the start script: `NEXT_PUBLIC_ZEALT_RUN_ID="$ZEALT_RUN_ID" npm run start`).
+- Derive the shared room ID as `pixel-grid-${ZEALT_RUN_ID}` and use this exact room ID on both the frontend and during verification.
+- Use a top-level `LiveMap` named `pixels` for the grid. Initialize it via `initialStorage` so the map exists as soon as the first client connects (an empty `LiveMap` is fine).
+- Use `useMutation` (from `@liveblocks/react`) to read the current value of a cell from storage and write the next palette color, computing the next color from the cycle order.
+- Render the grid as plain DOM elements (e.g., `<button>` or `<div>`); the background color of each cell should visually reflect its current palette value but the verifier reads state from the Liveblocks REST API, not the DOM.
+- The verifier opens the page in headless Chromium, clicks cells using the `data-cell` selector, then calls the Liveblocks v2 REST endpoint `GET https://api.liveblocks.io/v2/rooms/{roomId}/storage?format=json` (with `Authorization: Bearer $LIVEBLOCKS_SECRET_KEY`) to read the final storage as JSON.
+
+## Acceptance Criteria
+- Project path: /home/user/myproject
+- Start command: `cd /home/user/myproject && NEXT_PUBLIC_ZEALT_RUN_ID="$ZEALT_RUN_ID" npm run start`
+- Port: 3000
+- Routes:
+  - `GET /`: Renders the 10x10 pixel grid. The page MUST contain exactly 100 elements with `data-cell` attributes for keys `"0-0"` through `"9-9"`. Clicking an element with `data-cell="r-c"` triggers exactly one palette advancement for that cell in the shared `pixels` LiveMap.
+  - `POST /api/liveblocks-auth`: Liveblocks authentication endpoint backed by `@liveblocks/node` (`Liveblocks.prepareSession`). Returns a token that grants `room:write` on the current room and a 4xx error for other rooms.
+- Storage shape (as returned by `GET /v2/rooms/{roomId}/storage?format=json`):
+  ```json
+  {
+    "pixels": {
+      "<row>-<col>": "red" | "blue" | "green" | "yellow"
+    }
+  }
+  ```
+  Cells that have never been clicked MUST be absent from `pixels` (no entry); cells that have been clicked MUST appear with one of the palette color names.
+- Click semantics: For any cell `(r, c)`, after `n >= 1` clicks the value of `pixels["r-c"]` MUST equal palette index `((n - 1) % 4)` where the palette is `["red", "blue", "green", "yellow"]`.
+- Environment variables: The app MUST read `LIVEBLOCKS_SECRET_KEY` (server-only), `NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY`, and `NEXT_PUBLIC_ZEALT_RUN_ID` from the environment. The room ID used by the frontend MUST be `pixel-grid-${NEXT_PUBLIC_ZEALT_RUN_ID}`.
+- Cleanup: After completing the implementation, you MUST kill the Next.js development/production server before reporting completion. The verifier will start its own server using the start command above.
+
+
+EOF
+Not retrying trial because the maximum number of retries has been reached
+Command outputs captured
+Running command: rm -f ~/.pochi/config.jsonc
+Command outputs captured
+Command outputs captured
+Running command: rm -f ~/.pochi/config.jsonc
+Command outputs captured

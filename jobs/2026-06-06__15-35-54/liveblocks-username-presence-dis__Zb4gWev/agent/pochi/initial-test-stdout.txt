@@ -1,0 +1,35 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0
+rootdir: /bootstrap
+plugins: xprocess-1.0.2, json-ctrf-0.5.0
+collected 10 items
+
+bootstrap/test_initial_state.py::test_node_available PASSED
+bootstrap/test_initial_state.py::test_npm_available PASSED
+bootstrap/test_initial_state.py::test_project_directory_exists PASSED
+bootstrap/test_initial_state.py::test_package_json_exists PASSED
+bootstrap/test_initial_state.py::test_package_json_has_next_and_liveblocks PASSED
+bootstrap/test_initial_state.py::test_node_modules_installed PASSED
+bootstrap/test_initial_state.py::test_app_directory_scaffolded PASSED
+bootstrap/test_initial_state.py::test_liveblocks_public_key_env_present PASSED
+bootstrap/test_initial_state.py::test_zealt_run_id_present PASSED
+bootstrap/test_initial_state.py::test_next_public_zealt_run_id_present FAILED
+
+=================================== FAILURES ===================================
+____________________ test_next_public_zealt_run_id_present _____________________
+
+    def test_next_public_zealt_run_id_present():
+        value = os.environ.get("NEXT_PUBLIC_ZEALT_RUN_ID", "")
+>       assert value.strip() != "", (
+            "NEXT_PUBLIC_ZEALT_RUN_ID environment variable must be re-exported so Next.js can read it client-side."
+        )
+E       AssertionError: NEXT_PUBLIC_ZEALT_RUN_ID environment variable must be re-exported so Next.js can read it client-side.
+E       assert '' != ''
+E        +  where '' = <built-in method strip of str object at 0xb3b3f0>()
+E        +    where <built-in method strip of str object at 0xb3b3f0> = ''.strip
+
+bootstrap/test_initial_state.py:84: AssertionError
+=========================== short test summary info ============================
+FAILED bootstrap/test_initial_state.py::test_next_public_zealt_run_id_present
+========================= 1 failed, 9 passed in 0.06s ==========================
+pytest-xprocess reminder::Be sure to terminate the started process by running 'pytest --xkill' if you have not explicitly done so in your fixture with 'xprocess.getinfo(<process_name>).terminate()'.

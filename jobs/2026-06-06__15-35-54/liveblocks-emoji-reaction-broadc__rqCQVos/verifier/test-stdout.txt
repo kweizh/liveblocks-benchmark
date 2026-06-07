@@ -1,0 +1,117 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0
+rootdir: /tests
+plugins: xprocess-1.0.2, json-ctrf-0.5.0
+collected 2 items
+
+tests/test_final_state.py FF                                             [100%]
+
+=================================== FAILURES ===================================
+_____________________ test_homepage_has_four_emoji_buttons _____________________
+
+start_app = None
+browser = <Browser type=<BrowserType name=chromium executable_path=/root/.cache/ms-playwright/chromium-1223/chrome-linux64/chrome> version=148.0.7778.96>
+
+    def test_homepage_has_four_emoji_buttons(start_app, browser):
+        context = browser.new_context()
+        page = context.new_page()
+        try:
+>           page.goto(APP_URL, wait_until="domcontentloaded", timeout=60_000)
+
+tests/test_final_state.py:67: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+usr/local/lib/python3.12/dist-packages/playwright/sync_api/_generated.py:9612: in goto
+    self._sync(
+usr/local/lib/python3.12/dist-packages/playwright/_impl/_page.py:557: in goto
+    return await self._main_frame.goto(**locals_to_params(locals()))
+usr/local/lib/python3.12/dist-packages/playwright/_impl/_frame.py:156: in goto
+    await self._channel.send(
+usr/local/lib/python3.12/dist-packages/playwright/_impl/_connection.py:69: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <playwright._impl._connection.Connection object at 0x7fe745685100>
+cb = <function Channel.send.<locals>.<lambda> at 0x7fe744d737e0>
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -> Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        st: List[inspect.FrameInfo] = getattr(
+            task, "__pw_stack__", None
+        ) or inspect.stack(0)
+    
+        parsed_st = _extract_stack_trace_information_from_stack(st, is_internal, title)
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+>           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.goto: Timeout 60000ms exceeded.
+E           Call log:
+E             - navigating to "http://localhost:3000/", waiting until "domcontentloaded"
+
+usr/local/lib/python3.12/dist-packages/playwright/_impl/_connection.py:559: TimeoutError
+---------------------------- Captured stdout setup -----------------------------
+/tests/.pytest_cache/d/.xprocess/next_dev$ npm run dev
+process 'next_dev' started pid=1190
+next_dev process startup detected
+______________ test_emoji_reaction_broadcast_between_two_contexts ______________
+
+start_app = None
+browser = <Browser type=<BrowserType name=chromium executable_path=/root/.cache/ms-playwright/chromium-1223/chrome-linux64/chrome> version=148.0.7778.96>
+
+    def test_emoji_reaction_broadcast_between_two_contexts(start_app, browser):
+        """Open two browser contexts; click 🎉 in A; verify B sees a floating reaction."""
+        context_a = browser.new_context()
+        context_b = browser.new_context()
+        try:
+            page_a = context_a.new_page()
+            page_b = context_b.new_page()
+    
+>           page_a.goto(APP_URL, wait_until="domcontentloaded", timeout=60_000)
+
+tests/test_final_state.py:88: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+usr/local/lib/python3.12/dist-packages/playwright/sync_api/_generated.py:9612: in goto
+    self._sync(
+usr/local/lib/python3.12/dist-packages/playwright/_impl/_page.py:557: in goto
+    return await self._main_frame.goto(**locals_to_params(locals()))
+usr/local/lib/python3.12/dist-packages/playwright/_impl/_frame.py:156: in goto
+    await self._channel.send(
+usr/local/lib/python3.12/dist-packages/playwright/_impl/_connection.py:69: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <playwright._impl._connection.Connection object at 0x7fe745685100>
+cb = <function Channel.send.<locals>.<lambda> at 0x7fe744ae5440>
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -> Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        st: List[inspect.FrameInfo] = getattr(
+            task, "__pw_stack__", None
+        ) or inspect.stack(0)
+    
+        parsed_st = _extract_stack_trace_information_from_stack(st, is_internal, title)
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+>           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.goto: Timeout 60000ms exceeded.
+E           Call log:
+E             - navigating to "http://localhost:3000/", waiting until "domcontentloaded"
+
+usr/local/lib/python3.12/dist-packages/playwright/_impl/_connection.py:559: TimeoutError
+=========================== short test summary info ============================
+FAILED tests/test_final_state.py::test_homepage_has_four_emoji_buttons - play...
+FAILED tests/test_final_state.py::test_emoji_reaction_broadcast_between_two_contexts
+======================== 2 failed in 124.18s (0:02:04) =========================

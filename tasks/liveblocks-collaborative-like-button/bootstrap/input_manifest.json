@@ -1,0 +1,7 @@
+{
+  "library_name": "Liveblocks",
+  "task_name": "liveblocks-collaborative-like-button",
+  "complexity_level": "multi-step sequential command set",
+  "research_plan_path": "/Users/kw/code/zealt/liveblocks-benchmark/plan.md",
+  "output_dir": "scratchpad/pending-tasks/"
+}

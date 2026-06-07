@@ -1,0 +1,126 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0
+rootdir: /tests
+plugins: xprocess-1.0.2, json-ctrf-0.5.0
+collected 2 items
+
+tests/test_final_state.py FF                                             [100%]
+
+=================================== FAILURES ===================================
+_______________ test_homepage_renders_color_input_and_user_list ________________
+
+start_app = None
+
+    def test_homepage_renders_color_input_and_user_list(start_app):
+        """The page must contain #color-input and #user-colors elements."""
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            try:
+                ctx = browser.new_context()
+                page = ctx.new_page()
+                page.goto(BASE_URL + "/", wait_until="domcontentloaded")
+>               page.wait_for_selector("#color-input", timeout=30000)
+
+tests/test_final_state.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+usr/local/lib/python3.12/dist-packages/playwright/sync_api/_generated.py:8770: in wait_for_selector
+    self._sync(
+usr/local/lib/python3.12/dist-packages/playwright/_impl/_page.py:424: in wait_for_selector
+    return await self._main_frame.wait_for_selector(**locals_to_params(locals()))
+usr/local/lib/python3.12/dist-packages/playwright/_impl/_frame.py:372: in wait_for_selector
+    await self._channel.send(
+usr/local/lib/python3.12/dist-packages/playwright/_impl/_connection.py:69: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <playwright._impl._connection.Connection object at 0x7f3350040ef0>
+cb = <function Channel.send.<locals>.<lambda> at 0x7f334ec577e0>
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -> Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        st: List[inspect.FrameInfo] = getattr(
+            task, "__pw_stack__", None
+        ) or inspect.stack(0)
+    
+        parsed_st = _extract_stack_trace_information_from_stack(st, is_internal, title)
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+>           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 30000ms exceeded.
+E           Call log:
+E             - waiting for locator("#color-input") to be visible
+
+usr/local/lib/python3.12/dist-packages/playwright/_impl/_connection.py:559: TimeoutError
+---------------------------- Captured stdout setup -----------------------------
+/tests/.pytest_cache/d/.xprocess/next_start$ npm run start
+process 'next_start' started pid=1312
+next_start process startup detected
+___________________ test_two_contexts_share_presence_colors ____________________
+
+start_app = None
+
+    def test_two_contexts_share_presence_colors(start_app):
+        """Two contexts must each see two distinct connections with #ff0000 and #00ff00."""
+        color_a = "#ff0000"
+        color_b = "#00ff00"
+    
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            try:
+                ctx_a = browser.new_context()
+                ctx_b = browser.new_context()
+    
+                page_a = ctx_a.new_page()
+                page_b = ctx_b.new_page()
+    
+                page_a.goto(BASE_URL + "/", wait_until="domcontentloaded")
+>               page_a.wait_for_selector("#color-input", timeout=30000)
+
+tests/test_final_state.py:173: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+usr/local/lib/python3.12/dist-packages/playwright/sync_api/_generated.py:8770: in wait_for_selector
+    self._sync(
+usr/local/lib/python3.12/dist-packages/playwright/_impl/_page.py:424: in wait_for_selector
+    return await self._main_frame.wait_for_selector(**locals_to_params(locals()))
+usr/local/lib/python3.12/dist-packages/playwright/_impl/_frame.py:372: in wait_for_selector
+    await self._channel.send(
+usr/local/lib/python3.12/dist-packages/playwright/_impl/_connection.py:69: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <playwright._impl._connection.Connection object at 0x7f334efe7b90>
+cb = <function Channel.send.<locals>.<lambda> at 0x7f334ec57600>
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -> Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        st: List[inspect.FrameInfo] = getattr(
+            task, "__pw_stack__", None
+        ) or inspect.stack(0)
+    
+        parsed_st = _extract_stack_trace_information_from_stack(st, is_internal, title)
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+>           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 30000ms exceeded.
+E           Call log:
+E             - waiting for locator("#color-input") to be visible
+
+usr/local/lib/python3.12/dist-packages/playwright/_impl/_connection.py:559: TimeoutError
+=========================== short test summary info ============================
+FAILED tests/test_final_state.py::test_homepage_renders_color_input_and_user_list
+FAILED tests/test_final_state.py::test_two_contexts_share_presence_colors - p...
+========================= 2 failed in 80.24s (0:01:20) =========================

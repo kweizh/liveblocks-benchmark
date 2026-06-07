@@ -1,0 +1,52 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0
+rootdir: /tests
+plugins: xprocess-1.0.2, json-ctrf-0.5.0
+collected 1 item
+
+tests/test_final_state.py F                                              [100%]
+
+=================================== FAILURES ===================================
+_______________________ test_collaborative_shopping_cart _______________________
+
+next_dev_server = 'http://localhost:3000'
+playwright_session = <Browser type=<BrowserType name=chromium executable_path=/root/.cache/ms-playwright/chromium-1223/chrome-linux64/chrome> version=148.0.7778.96>
+
+    def test_collaborative_shopping_cart(next_dev_server, playwright_session):
+        base_url = next_dev_server
+        browser = playwright_session
+    
+        context_a = browser.new_context()
+        context_b = browser.new_context()
+        try:
+            page_a = context_a.new_page()
+            page_b = context_b.new_page()
+    
+            page_a.goto(base_url, wait_until="networkidle")
+            page_b.goto(base_url, wait_until="networkidle")
+    
+            # Initial DOM contract: catalog buttons, empty list, total=0.
+            for product in ("apple", "bread", "milk"):
+                expect(page_a.locator(f'button[data-add-product="{product}"]')).to_be_visible(
+                    timeout=30_000
+                )
+                expect(page_b.locator(f'button[data-add-product="{product}"]')).to_be_visible(
+                    timeout=30_000
+                )
+>           expect(page_a.locator("#cart-items")).to_be_visible(timeout=30_000)
+E           AssertionError: Locator expected to be visible
+E           Actual value: hidden 
+E           Call log:
+E             - Expect "to_be_visible" with timeout 30000ms
+E             - waiting for locator("#cart-items")
+E               63 × locator resolved to <ul id="cart-items"></ul>
+E                  - unexpected value "hidden"
+
+tests/test_final_state.py:106: AssertionError
+---------------------------- Captured stdout setup -----------------------------
+/tests/.pytest_cache/d/.xprocess/next_dev_server$ npm run dev -- --port 3000
+process 'next_dev_server' started pid=1897
+next_dev_server process startup detected
+=========================== short test summary info ============================
+FAILED tests/test_final_state.py::test_collaborative_shopping_cart - Assertio...
+============================== 1 failed in 50.57s ==============================

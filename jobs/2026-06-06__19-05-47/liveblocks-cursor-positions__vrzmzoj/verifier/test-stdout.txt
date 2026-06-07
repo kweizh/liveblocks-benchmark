@@ -1,0 +1,122 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0
+rootdir: /tests
+plugins: xprocess-1.0.2, json-ctrf-0.5.0
+collected 3 items
+
+../../../tests/test_final_state.py EEE                                   [100%]
+
+==================================== ERRORS ====================================
+_____________ ERROR at setup of test_no_liveblocks_mocks_or_stubs ______________
+
+    @pytest.fixture(scope="session", autouse=True)
+    def build_app():
+        """Build the Next.js app once with NEXT_PUBLIC_ZEALT_RUN_ID exported."""
+        env = os.environ.copy()
+        env["NEXT_PUBLIC_ZEALT_RUN_ID"] = RUN_ID
+    
+        result = subprocess.run(
+            ["npm", "run", "build"],
+            cwd=PROJECT_DIR,
+            capture_output=True,
+            text=True,
+            env=env,
+            timeout=600,
+        )
+>       assert result.returncode == 0, (
+            f"`npm run build` failed (exit {result.returncode}).\n"
+            f"STDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}"
+        )
+E       AssertionError: `npm run build` failed (exit -9).
+E         STDOUT:
+E         
+E         > liveblocks-cursor-positions@0.1.0 build
+E         > next build
+E         
+E           ▲ Next.js 14.2.15
+E         
+E            Creating an optimized production build ...
+E         
+E         STDERR:
+E         
+E       assert -9 == 0
+E        +  where -9 = CompletedProcess(args=['npm', 'run', 'build'], returncode=-9, stdout='\n> liveblocks-cursor-positions@0.1.0 build\n> next build\n\n  ▲ Next.js 14.2.15\n\n   Creating an optimized production build ...\n', stderr='').returncode
+
+/tests/test_final_state.py:53: AssertionError
+___________ ERROR at setup of test_auth_endpoint_returns_real_token ____________
+
+    @pytest.fixture(scope="session", autouse=True)
+    def build_app():
+        """Build the Next.js app once with NEXT_PUBLIC_ZEALT_RUN_ID exported."""
+        env = os.environ.copy()
+        env["NEXT_PUBLIC_ZEALT_RUN_ID"] = RUN_ID
+    
+        result = subprocess.run(
+            ["npm", "run", "build"],
+            cwd=PROJECT_DIR,
+            capture_output=True,
+            text=True,
+            env=env,
+            timeout=600,
+        )
+>       assert result.returncode == 0, (
+            f"`npm run build` failed (exit {result.returncode}).\n"
+            f"STDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}"
+        )
+E       AssertionError: `npm run build` failed (exit -9).
+E         STDOUT:
+E         
+E         > liveblocks-cursor-positions@0.1.0 build
+E         > next build
+E         
+E           ▲ Next.js 14.2.15
+E         
+E            Creating an optimized production build ...
+E         
+E         STDERR:
+E         
+E       assert -9 == 0
+E        +  where -9 = CompletedProcess(args=['npm', 'run', 'build'], returncode=-9, stdout='\n> liveblocks-cursor-positions@0.1.0 build\n> next build\n\n  ▲ Next.js 14.2.15\n\n   Creating an optimized production build ...\n', stderr='').returncode
+
+/tests/test_final_state.py:53: AssertionError
+________________ ERROR at setup of test_two_client_cursor_sync _________________
+
+    @pytest.fixture(scope="session", autouse=True)
+    def build_app():
+        """Build the Next.js app once with NEXT_PUBLIC_ZEALT_RUN_ID exported."""
+        env = os.environ.copy()
+        env["NEXT_PUBLIC_ZEALT_RUN_ID"] = RUN_ID
+    
+        result = subprocess.run(
+            ["npm", "run", "build"],
+            cwd=PROJECT_DIR,
+            capture_output=True,
+            text=True,
+            env=env,
+            timeout=600,
+        )
+>       assert result.returncode == 0, (
+            f"`npm run build` failed (exit {result.returncode}).\n"
+            f"STDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}"
+        )
+E       AssertionError: `npm run build` failed (exit -9).
+E         STDOUT:
+E         
+E         > liveblocks-cursor-positions@0.1.0 build
+E         > next build
+E         
+E           ▲ Next.js 14.2.15
+E         
+E            Creating an optimized production build ...
+E         
+E         STDERR:
+E         
+E       assert -9 == 0
+E        +  where -9 = CompletedProcess(args=['npm', 'run', 'build'], returncode=-9, stdout='\n> liveblocks-cursor-positions@0.1.0 build\n> next build\n\n  ▲ Next.js 14.2.15\n\n   Creating an optimized production build ...\n', stderr='').returncode
+
+/tests/test_final_state.py:53: AssertionError
+=========================== short test summary info ============================
+ERROR ../../../tests/test_final_state.py::test_no_liveblocks_mocks_or_stubs
+ERROR ../../../tests/test_final_state.py::test_auth_endpoint_returns_real_token
+ERROR ../../../tests/test_final_state.py::test_two_client_cursor_sync - Asser...
+============================== 3 errors in 7.96s ===============================

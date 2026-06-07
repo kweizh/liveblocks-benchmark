@@ -1,0 +1,7 @@
+{
+  "library_name": "Liveblocks",
+  "task_name": "color_picker_presence",
+  "complexity_level": "multi-step sequential command set",
+  "research_plan_path": "plan.md",
+  "output_dir": "scratchpad/pending-tasks/"
+}

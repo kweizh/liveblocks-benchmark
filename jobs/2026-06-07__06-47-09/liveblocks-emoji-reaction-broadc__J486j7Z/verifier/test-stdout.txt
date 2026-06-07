@@ -1,0 +1,77 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0
+rootdir: /tests
+plugins: xprocess-1.0.2, json-ctrf-0.5.0
+collected 4 items
+
+../../../tests/test_final_state.py ...F                                  [100%]
+
+=================================== FAILURES ===================================
+______________________ test_cross_client_emoji_broadcast _______________________
+
+app_server = 'http://localhost:3000'
+
+    def test_cross_client_emoji_broadcast(app_server):
+        from playwright.sync_api import sync_playwright
+    
+        url = f"{BASE_URL}/reactions/{ROOM}"
+    
+        with sync_playwright() as pw:
+            browser = pw.chromium.launch(args=["--no-sandbox"])
+            try:
+                ctx_a = browser.new_context()
+                page_a = ctx_a.new_page()
+                page_a.goto(url, wait_until="domcontentloaded", timeout=60_000)
+                _wait_visible(page_a, 'button[data-emoji="🎉"]')
+    
+                ctx_b = browser.new_context()
+                page_b = ctx_b.new_page()
+                page_b.goto(url, wait_until="domcontentloaded", timeout=60_000)
+                _wait_visible(page_b, '#reactions-feed')
+    
+                # Give Liveblocks time to fully connect both clients to the room.
+                time.sleep(3)
+    
+                # On A: click 🎉, 🎉, 🔥 (in that order).
+                page_a.locator('button[data-emoji="🎉"]').click()
+                time.sleep(0.4)
+                page_a.locator('button[data-emoji="🎉"]').click()
+                time.sleep(0.4)
+                page_a.locator('button[data-emoji="🔥"]').click()
+    
+                # B should receive all 3 via useEventListener.
+>               _wait_toast_count(page_b, 3, timeout_ms=20_000)
+
+/tests/test_final_state.py:274: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+page = <Page url='http://localhost:3000/reactions/emoji-reactions-zr-j486j7z'>
+expected = 3, timeout_ms = 20000
+
+    def _wait_toast_count(page, expected: int, timeout_ms: int = 20_000) -> int:
+        deadline = time.time() + timeout_ms / 1000.0
+        last = 0
+        while time.time() < deadline:
+            last = _toast_count(page)
+            if last >= expected:
+                return last
+            time.sleep(0.25)
+>       raise AssertionError(
+            f"Timed out waiting for #reactions-feed to contain >= {expected} "
+            f"toasts; last={last}."
+        )
+E       AssertionError: Timed out waiting for #reactions-feed to contain >= 3 toasts; last=0.
+
+/tests/test_final_state.py:208: AssertionError
+==================================== PASSES ====================================
+______________________ test_no_liveblocks_mocks_or_stubs _______________________
+---------------------------- Captured stdout setup -----------------------------
+/tests/.pytest_cache/d/.xprocess/liveblocks_emoji_reaction_app$ npm run start -- -p 3000
+process 'liveblocks_emoji_reaction_app' started pid=1100
+liveblocks_emoji_reaction_app process startup detected
+=========================== short test summary info ============================
+PASSED ../../../tests/test_final_state.py::test_no_liveblocks_mocks_or_stubs
+PASSED ../../../tests/test_final_state.py::test_auth_endpoint_returns_real_token
+PASSED ../../../tests/test_final_state.py::test_initial_dom_contract
+FAILED ../../../tests/test_final_state.py::test_cross_client_emoji_broadcast
+==================== 1 failed, 3 passed in 67.37s (0:01:07) ====================

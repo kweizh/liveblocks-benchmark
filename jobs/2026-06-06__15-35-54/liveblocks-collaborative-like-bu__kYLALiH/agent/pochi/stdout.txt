@@ -1,0 +1,57 @@
+- Initializing MCP connections...
+You
+# Collaborative Like Button with Liveblocks Storage ## Background You are working on a Next.js application that needs a simple multiplayer feature: a "Like" button whose count is synchronized in realtime across every connected client using https://liveblocks.io/. The counter must live inside Liveblocks Storage (a `LiveObject`), and clicking the button must mutate that shared state. All connected browsers must immediately reflect the new value. A Next.js (App Router) scaffold has been prepared for you at `/home/user/myproject`. Your job is to wire up Liveblocks on the home page so the like button becomes truly collaborative. ## Requirements * Use the Liveblocks v2 React SDK (`@liveblocks/client`, `@liveblocks/react`). * Connect to Liveblocks using the **public** API key, exposed to the frontend via `NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY`. * The Liveblocks room id used by the page must be read at runtime from the `NEXT_PUBLIC_ZEALT_RUN_ID` environment variable (this is exported into the shell before `npm run dev`). * The shared counter must live in Liveblocks Storage inside a `LiveObject` under the key `count` (i.e. `storage.root.count`). Its initial value when the room storage is first created must be `0`. * The home page (`/`) must render: * A button with accessible name `Like` (e.g. `<button>Like</button>` or `<button aria-label="Like">…`). * A visible element containing the current count value as plain text (so that text content of the page contains the current count number). * Clicking the `Like` button must call a Liveblocks `useMutation` that increments `storage.root.count` by 1. * Reads of the counter shown on the page must go through `useStorage` so the UI updates reactively when storage changes. * The page must render entirely on the client (Liveblocks React hooks are not allowed in server components). Wrap any client tree with `RoomProvider` and `LiveblocksProvider` as required by v2. ## Implementation Hints * Initialize the project at `/home/user/myproject` and install the required Liveblocks v2 packages: `@liveblocks/client` and `@liveblocks/react`. * Create a `liveblocks.config.ts` (or equivalent) that declares the `Storage` type with `count: number` and re-exports the typed hooks (`useStorage`, `useMutation`). * Use `<LiveblocksProvider publicApiKey={...}>` and `<RoomProvider id={...} initialStorage={{ count: 0 }}>` to set up the room. Read the public key from `process.env.NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY` and the room id from `process.env.NEXT_PUBLIC_ZEALT_RUN_ID`. * Mark any component using Liveblocks hooks with `"use client"`. * Make sure the dev server can build and serve the page without runtime errors before considering the task done. * IMPORTANT: Before reporting completion, **kill any dev/build processes you started** (e.g. `npm run dev`) so that the verifier can start its own server on port 3000. ## Acceptance Criteria * Project path: `/home/user/myproject` * Start command: `npm run dev` * Port: `3000` * Routes: * `GET /` — Renders an HTML page that includes: * A `Like` button (accessible name `Like`). * A visible numeric counter showing `storage.root.count`. * Liveblocks state shape (verified via the Liveblocks REST API `GET https://api.liveblocks.io/v2/rooms/{roomId}/storage?format=json`): ```json { "count": <integer> } ``` * Behavior: clicking the `Like` button N times in a single browser session increases `storage.root.count` by exactly N (eventually consistent within a few seconds), and the displayed number on the page updates to match. * The Liveblocks room id used by the page must equal the value of the `NEXT_PUBLIC_ZEALT_RUN_ID` environment variable at runtime. * No dev server may be left running by the agent when reporting completion.   
+
+Pochi
+💭 Thinking for 278 characters   
+📂 Listing files in /home/user/myproject recursively ✔ 
+📖 Reading home/user/myproject/package.json ✔ 
+📖 Reading home/user/myproject/app/page.tsx ✔ 
+📖 Reading home/user/myproject/app/layout.tsx ✔ 
+💭 Thinking for 638 characters   
+📋 Updating todo list (5 items) ✔ 
+💭 Thinking for 356 characters   
+📋 Updating todo list (5 items) ✔ 
+💫 Executing npm install @liveblocks/client @liveblocks/react ✔ 
+📖 Reading home/user/myproject/package.json ✔ 
+💭 Thinking for 332 characters   
+💫 Executing npm install @liveblocks/client@~2.17.0 @liveblocks/react@~2.17.0 ✔ 
+📖 Reading home/user/myproject/package.json ✔ 
+💭 Thinking for 175 characters   
+📋 Updating todo list (5 items) ✔ 
+💭 Thinking for 1278 characters   
+💫 Executing node -e "const pkg = require('@liveblocks/react'); console.log(Object.keys(pkg));" ✔ 
+💭 Thinking for 680 characters   
+💫 Executing node -e "const { createClient } = require('@liveblocks/client'); const { createRoomContext } = require('@liveblocks/react'); const client = createClient({ publicApiKey: 'pk_test' }); const ctx = createRoomContext(client); console.log(Object.keys(ctx));" ✔ 
+💫 Executing node -e "const { createClient } = require('@liveblocks/client'); const { createLiveblocksContext } = require('@liveblocks/react'); const client = createClient({ publicApiKey: 'pk_test' }); const ctx = createLiveblocksContext(client); console.log(Object.keys(ctx));" ✔ 
+💭 Thinking for 530 characters   
+🔍 Searching for interface Liveblocks in /home/user/myproject/node_modules/@liveblocks/react ✔ 
+💭 Thinking for 636 characters   
+✏️  Writing home/user/myproject/liveblocks.config.ts ✔ 
+📋 Updating todo list (5 items) ✔ 
+💭 Thinking for 618 characters   
+🔍 Searching for RoomProviderProps in /home/user/myproject/node_modules/@liveblocks/react ✔ 
+💭 Thinking for 5815 characters   
+✏️  Writing home/user/myproject/app/page.tsx ✔ 
+📋 Updating todo list (5 items) ✔ 
+💫 Executing npm run build ✔ 
+💭 Thinking for 319 characters   
+💫 Executing ss -tulpn | grep 3000 || true ✔ 
+💭 Thinking for 258 characters   
+📋 Updating todo list (5 items) ✔ 
+💭 Thinking for 663 characters   
+📋 Updating todo list (5 items) ✔ 
+💭 Thinking for 214 characters   
+🎉 Task Completed
+I have successfully implemented the multiplayer collaborative Like button feature with Liveblocks Storage for your Next.js application.
+
+Here is a summary of the changes made:
+1. **Installed Liveblocks v2 Packages**: Installed `@liveblocks/client` and `@liveblocks/react` version `~2.17.0` to comply with the Liveblocks v2 React SDK requirements.
+2. **Created Liveblocks Configuration (`liveblocks.config.ts`)**: Established a typed configuration declaring the `Storage` type with a `count: number` field, and re-exported the typed hooks (`RoomProvider`, `useStorage`, `useMutation`).
+3. **Implemented Home Page (`app/page.tsx`)**:
+   - Integrated `"use client"` to ensure client-only rendering of the Liveblocks tree.
+   - Wrapped the client component with `<LiveblocksProvider publicApiKey={...}>` and `<RoomProvider id={...} initialStorage={{ count: 0 }}>`, reading the API key and room ID dynamically at runtime from environment variables (`process.env.NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY` and `process.env.NEXT_PUBLIC_ZEALT_RUN_ID`).
+   - Created a nested `LikeCounter` component that reads the current count with `useStorage` and increments `storage.root.count` using `useMutation`.
+   - Handled server-side rendering (SSR) gracefully by serving a static layout with initial counter value `0` and hydrating to the live-synced Liveblocks counter once mounted on the client, preventing hydration mismatches.
+4. **Verified Build**: Ran a Next.js production build (`npm run build`) which compiled and generated all static pages successfully. No dev servers or background processes are left running.   
+  

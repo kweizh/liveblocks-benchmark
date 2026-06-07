@@ -1,0 +1,88 @@
+Skipping image OS validation for hb__liveblocks-collaborative-form-storage: docker inspect returned 1
+Running command: apt-get update && apt-get install -y curl ripgrep
+Command outputs captured
+Running command: set -euo pipefail; curl -fsSL https://getpochi.com/install.sh | bash -x -s -- pochi-v0.6.12 && mkdir -p /logs/agent/pochi && ~/.pochi/bin/pochi --version
+Command outputs captured
+Running command: ln -sf ~/.pochi/bin/pochi /usr/local/bin/pochi
+Command outputs captured
+Running command: echo zr-m76yjto > /logs/artifacts/run-id && echo liveblocks-collaborative-form-st__M76yjto > /logs/artifacts/trial_id
+Command outputs captured
+Running command: mkdir -p ~/.pochi && cat << 'EOF' | sed -e "s/OPENAI_API_KEY/${OPENAI_API_KEY}/g" -e "s/DEEPINFRA_API_KEY/${DEEPINFRA_API_KEY}/g" > ~/.pochi/config.jsonc
+{
+  "providers": {
+    "deepinfra": {
+      "kind": "openai",
+      "baseURL": "https://api.deepinfra.com/v1/openai",
+      "apiKey": "DEEPINFRA_API_KEY",
+      "models": {
+        "zai-org/GLM-4.7-Flash": {
+          "name": "glm-4.7-flash"
+        },
+        "moonshotai/Kimi-K2.6": {
+          "name": "kimi-K2.6"
+        },
+        "deepseek-ai/DeepSeek-V4-Pro": {
+          "name": "DeepSeek-V4-Pro"
+        }
+      }
+    },
+    "openai": {
+      "kind": "openai",
+      "baseURL": "https://api.openai.com/v1",
+      "apiKey": "OPENAI_API_KEY",
+      "models": {
+        "gpt-5.4": {
+          "name": "gpt-5.4"
+        }
+      }
+    }
+  }
+}
+EOF
+Command outputs captured
+Running command: if [ -f /bootstrap/test_initial_state.py ]; then pytest -s --log-cli-level=DEBUG /bootstrap/test_initial_state.py > >(tee /logs/agent/pochi/initial-test-stdout.txt) 2> >(tee /logs/agent/pochi/initial-test-stderr.txt >&2); fi
+Command outputs captured
+Running command: pochi --model google/gemini-3.5-flash --max-steps 200 --max-retries 10 --blobs-dir /logs/agent/pochi/blobs --experimental-stream-trajectory /logs/agent/pochi/trajectory.jsonl > >(tee /logs/agent/pochi/stdout.txt) 2> >(tee /logs/agent/pochi/stderr.txt >&2) <<'EOF'
+# Liveblocks Collaborative Form (Storage)
+
+## Background
+Build a real-time collaborative multi-field form using Liveblocks Storage on Next.js. As one user types into the form fields, all other users connected to the same room must instantly see the same values. A submit button persists a `submitted` flag in the same shared storage so that every connected client can observe the submission.
+
+The project is a Next.js (App Router) application using the Liveblocks v2 React SDK (`@liveblocks/client`, `@liveblocks/react`). The Liveblocks public API key is provided via the `NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY` environment variable so that the browser client can connect directly using it (no auth endpoint required).
+
+A `run-id` is supplied via the `ZEALT_RUN_ID` environment variable; before running the dev server you MUST re-export it as `NEXT_PUBLIC_ZEALT_RUN_ID` so the browser code can read it and derive a unique Liveblocks room id, isolating concurrent test runs.
+
+## Requirements
+- Implement a single page at the route `/form` that renders three text-style inputs: `name` (text), `email` (email), `message` (textarea).
+- Back the form state with a Liveblocks `LiveObject` stored at `storage.root.form`, containing the fields `name`, `email`, `message`, and `submitted`.
+- Updates to any field in any browser must be reflected in every other connected browser in real time using `useStorage` / `useMutation`.
+- A button labeled `Submit` must, when clicked, set `submitted = true` on the shared `LiveObject`. Once submitted, the page should clearly show a submitted state that is visible to every connected user (e.g. a visible element with the text `Submitted`).
+- The Liveblocks room id must be `harbor-form-${NEXT_PUBLIC_ZEALT_RUN_ID}` so concurrent runs do not collide.
+- All Liveblocks connectivity must use the real Liveblocks service via the public key — do not mock or stub the client.
+
+## Implementation Hints
+- Install `@liveblocks/client` and `@liveblocks/react` (v2.x) alongside Next.js.
+- Use `createClient({ publicApiKey: process.env.NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY! })` in a client component and wrap the page with `RoomProvider` from `@liveblocks/react`, passing `initialStorage` so the `form` LiveObject is seeded with empty strings and `submitted: false` on first connect.
+- Read individual form fields with `useStorage((root) => root.form.name)` (and similar), and write them via `useMutation(({ storage }, key, value) => { storage.get('form').set(key, value); }, [])`.
+- Re-export the run id at dev-server start time, e.g. `NEXT_PUBLIC_ZEALT_RUN_ID=$ZEALT_RUN_ID npm run dev`.
+- Make sure each input has a stable, queryable identifier such as `data-testid="field-name"`, `data-testid="field-email"`, `data-testid="field-message"`, the submit button has `data-testid="submit"`, and the submitted indicator has `data-testid="submitted"`.
+- After verifying things work locally, KILL the dev server before finishing — the verifier will start its own server. Leaving the dev server running will cause the port to be in use and the verifier to fail.
+
+## Acceptance Criteria
+- Project path: /home/user/myproject
+- Start command: `NEXT_PUBLIC_ZEALT_RUN_ID="$ZEALT_RUN_ID" npm run dev`
+- Port: 3000
+- Route: `/form`
+- Required environment variables in `.env.local` (or equivalent) at the project root:
+  - `NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY`
+- The page at `/form` must render three input elements with `data-testid` values `field-name`, `field-email`, `field-message`, and a button with `data-testid` value `submit`.
+- Two browser sessions opened on the same `/form` page must share the values of the three inputs in real time via Liveblocks Storage.
+- Clicking the `submit` button must set `submitted=true` on the shared `LiveObject` so it is visible to every connected client, and the page must surface a visible element with `data-testid="submitted"` once submitted.
+- The Liveblocks room id used by the client must be `harbor-form-${NEXT_PUBLIC_ZEALT_RUN_ID}`.
+- After verifying behavior, the agent MUST stop the dev server before finishing the task.
+
+
+EOF
+Command outputs captured
+Running command: rm -f ~/.pochi/config.jsonc
+Command outputs captured

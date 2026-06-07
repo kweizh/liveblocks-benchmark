@@ -1,0 +1,41 @@
+# Liveblocks Live Cursor Positions
+
+## Background
+You are extending a Next.js (App Router) starter that already wires up a Liveblocks `RoomProvider`. The page must broadcast the current user's pointer position through Liveblocks Presence and render every other connected user's cursor as a colored SVG dot at the correct screen position, updated in real time from `useOthers()`.
+
+The app must remain wired to real Liveblocks cloud — no mocks, no fake WebSocket, no stubbed presence.
+
+## Requirements
+- The cursors page lives at the dynamic route `/cursors/[room]` (App Router). Visiting `/cursors/foo` joins a Liveblocks room named `foo`.
+- The page MUST be a Client Component (or wrap one) because Liveblocks hooks require the client runtime.
+- Presence schema (must match exactly): `Presence.cursor: { x: number; y: number } | null`. The initial value MUST be `null`.
+- On `pointermove` (or `mousemove`) over the cursors container, write the pointer coordinates into the current user's Presence via `useUpdateMyPresence` or `useMyPresence`. The coordinates MUST be in the local coordinate space of the cursors container (e.g. `event.clientX - rect.left`, `event.clientY - rect.top`), not the viewport coordinate space.
+- When the pointer leaves the container, set `cursor` back to `null` so other users stop seeing your cursor.
+- Use `useOthers()` to read every other connected user's `connectionId` and `presence.cursor`, and render a small colored SVG dot at each non-null cursor position.
+- All Liveblocks access goes through the official `@liveblocks/react` provider configured to use a server-side authentication endpoint at `/api/liveblocks-auth` that uses `LIVEBLOCKS_SECRET_KEY` and `@liveblocks/node`. `NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY` may be referenced as a fallback `publicApiKey`, but the auth endpoint route MUST be present and functional.
+- The frontend MUST use the `NEXT_PUBLIC_ZEALT_RUN_ID` environment variable so that the room id can be derived from it. Before building or starting the server, the executor MUST re-export `NEXT_PUBLIC_ZEALT_RUN_ID="$ZEALT_RUN_ID"` so Next.js inlines the value at build time. The room id used during verification is `cursor-positions-${NEXT_PUBLIC_ZEALT_RUN_ID}`.
+
+## Implementation Hints
+- Read the room name from the `[room]` route segment and pass it as the `RoomProvider id`.
+- Use the Liveblocks v2 React API: `@liveblocks/react/suspense` exports `LiveblocksProvider`, `RoomProvider`, `ClientSideSuspense`, `useMyPresence`, `useUpdateMyPresence`, and `useOthers`.
+- Throttle is not required; calling `updateMyPresence` on every pointer move is acceptable — Liveblocks throttles broadcasts internally.
+- Convert pointer coordinates to integer pixels with `Math.round` before writing them to Presence so downstream verification can compare them deterministically.
+- The cursors container should fill a fixed area (for example `width: 800px; height: 600px`) and use `position: relative` so each remote cursor can be positioned absolutely inside it.
+- For each remote cursor element, set the inline style `left: <x>px; top: <y>px` so the visible SVG appears at the correct location. The DOM attributes `data-x` and `data-y` are what the verifier will read; they MUST contain the integer pixel coordinates broadcast by the remote user.
+- The dev server MUST be killed (not left running) before you finish the task. The verifier will start its own production server.
+
+## Acceptance Criteria
+- Project path: `/home/user/project`
+- Start command: `npm run start` (after `npm run build`)
+- Port: `3000`
+- Route: `/cursors/[room]` renders the cursor canvas for the given `room` segment.
+- Auth endpoint: `POST /api/liveblocks-auth` returns HTTP 200 with a JSON body containing a non-empty `token` string. The response MUST be produced by `@liveblocks/node` against the real Liveblocks API.
+- Presence schema observable from any connected client: `presence.cursor` is either `null` or an object `{ x: number, y: number }`.
+- DOM contract (test ids — these are the only stable selectors used by verification):
+  - The cursors container has `id="cursors-container"` and is at least 600px wide and 400px tall.
+  - Each remote cursor is rendered as an element with attribute `data-cursor-user="<connectionId>"` AND `data-x="<integer-x>"` AND `data-y="<integer-y>"`. The integer values MUST equal the pointer coordinates broadcast by the corresponding remote user, measured in the cursors container's local coordinate space.
+  - When the remote user's `presence.cursor` is `null`, no element with `data-cursor-user="<their-connectionId>"` is rendered.
+- Real Liveblocks cloud only — do not stub the Liveblocks client, do not write a fake WebSocket server, do not shadow `@liveblocks/react` or `@liveblocks/client` with mocks.
+- The frontend room id used during verification is derived from `NEXT_PUBLIC_ZEALT_RUN_ID`, which MUST be re-exported from `ZEALT_RUN_ID` before the build (e.g. `export NEXT_PUBLIC_ZEALT_RUN_ID="$ZEALT_RUN_ID" && npm run build && npm run start`).
+- Before finishing the task, the executor MUST stop any dev/build server processes they started (e.g. `pkill -f 'next dev'`).
+

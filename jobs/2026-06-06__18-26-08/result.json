@@ -1,0 +1,59 @@
+{
+    "id": "0571227b-b460-4f5c-9fe1-2af0fe0c7b90",
+    "started_at": "2026-06-06T18:26:12.651109",
+    "updated_at": "2026-06-06T18:41:42.069845",
+    "finished_at": "2026-06-06T18:41:42.069845",
+    "n_total_trials": 10,
+    "stats": {
+        "n_completed_trials": 10,
+        "n_errored_trials": 6,
+        "n_running_trials": 0,
+        "n_pending_trials": 0,
+        "n_cancelled_trials": 0,
+        "n_retries": 0,
+        "evals": {
+            "pochi__gemini-3.5-flash__pending-tasks": {
+                "n_trials": 8,
+                "n_errors": 6,
+                "metrics": [
+                    {
+                        "mean": 0.4
+                    }
+                ],
+                "pass_at_k": {},
+                "reward_stats": {
+                    "reward": {
+                        "0.0": [
+                            "liveblocks-collaborative-form-st__8VLcfLu",
+                            "liveblocks-collaborative-like-bu__YtE9jrW",
+                            "liveblocks-shared-stopwatch__YHHFMDy",
+                            "liveblocks-shared-shopping-cart__A33QPyV"
+                        ],
+                        "1.0": [
+                            "liveblocks-emoji-reaction-broadc__AKSb9Kk",
+                            "liveblocks-cursor-positions__X5Lq8iz",
+                            "liveblocks-color-picker-presence__BM49AtM",
+                            "liveblocks-shared-pixel-grid__HWoDhb5"
+                        ]
+                    }
+                },
+                "exception_stats": {
+                    "NonZeroAgentExitCodeError": [
+                        "liveblocks-collaborative-like-bu__YtE9jrW",
+                        "liveblocks-cursor-positions__X5Lq8iz",
+                        "liveblocks-shared-shopping-cart__A33QPyV",
+                        "liveblocks-shared-pixel-grid__HWoDhb5"
+                    ],
+                    "InitialStateError": [
+                        "liveblocks-follow-user-cursor__EBrFXKy",
+                        "liveblocks-active-users-list__AvWAu9X"
+                    ]
+                }
+            }
+        },
+        "n_input_tokens": 0,
+        "n_cache_tokens": 0,
+        "n_output_tokens": 463140,
+        "cost_usd": null
+    }
+}

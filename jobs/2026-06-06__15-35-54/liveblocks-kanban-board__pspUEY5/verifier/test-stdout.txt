@@ -1,0 +1,65 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0
+rootdir: /tests
+plugins: json-ctrf-0.5.0
+collected 1 item
+
+../../tests/test_final_state.py E                                        [100%]
+
+==================================== ERRORS ====================================
+________________ ERROR at setup of test_kanban_board_end_to_end ________________
+
+room_id = 'zr-pspuey5'
+
+    @pytest.fixture(scope="session")
+    def dev_server(room_id):
+        """Boot the Next.js dev server and yield once it's reachable."""
+        _ensure_room(room_id)
+        _delete_storage(room_id)
+    
+        env = os.environ.copy()
+        env["NEXT_PUBLIC_ZEALT_RUN_ID"] = room_id
+        env["NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY"] = _require_env("NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY")
+        env.setdefault("PORT", str(DEV_PORT))
+        env.setdefault("NODE_ENV", "development")
+    
+        proc = subprocess.Popen(
+            ["npm", "run", "dev"],
+            cwd=PROJECT_DIR,
+            env=env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+        )
+    
+        try:
+            _wait_for_port("127.0.0.1", DEV_PORT, timeout=180)
+>           _wait_for_http_ok(APP_URL, timeout=180)
+
+/tests/test_final_state.py:141: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+url = 'http://localhost:3000', timeout = 180
+
+    def _wait_for_http_ok(url: str, timeout: float) -> None:
+        deadline = time.time() + timeout
+        last = None
+        while time.time() < deadline:
+            try:
+                r = requests.get(url, timeout=5)
+                if r.status_code < 500:
+                    return
+                last = r.status_code
+            except requests.RequestException as e:
+                last = repr(e)
+            time.sleep(1)
+>       raise AssertionError(
+            f"Dev server URL {url} did not return a non-5xx response within {timeout}s "
+            f"(last: {last})."
+        )
+E       AssertionError: Dev server URL http://localhost:3000 did not return a non-5xx response within 180s (last: ReadTimeout(ReadTimeoutError("HTTPConnectionPool(host='localhost', port=3000): Read timed out. (read timeout=5)"))).
+
+/tests/test_final_state.py:107: AssertionError
+=========================== short test summary info ============================
+ERROR ../../tests/test_final_state.py::test_kanban_board_end_to_end - Asserti...
+========================= 1 error in 183.19s (0:03:03) =========================

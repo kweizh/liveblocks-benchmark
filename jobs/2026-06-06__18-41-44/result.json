@@ -1,0 +1,56 @@
+{
+    "id": "65f4b782-495d-4bf5-953f-aaaa88b047c7",
+    "started_at": "2026-06-06T18:41:46.230055",
+    "updated_at": "2026-06-06T18:54:30.948455",
+    "finished_at": "2026-06-06T18:54:30.948455",
+    "n_total_trials": 10,
+    "stats": {
+        "n_completed_trials": 10,
+        "n_errored_trials": 3,
+        "n_running_trials": 0,
+        "n_pending_trials": 0,
+        "n_cancelled_trials": 0,
+        "n_retries": 0,
+        "evals": {
+            "pochi__gemini-3.1-pro__pending-tasks": {
+                "n_trials": 8,
+                "n_errors": 3,
+                "metrics": [
+                    {
+                        "mean": 0.5
+                    }
+                ],
+                "pass_at_k": {},
+                "reward_stats": {
+                    "reward": {
+                        "1.0": [
+                            "liveblocks-collaborative-form-st__ZTEYtez",
+                            "liveblocks-collaborative-like-bu__9cxJP3R",
+                            "liveblocks-emoji-reaction-broadc__soj6Nzg",
+                            "liveblocks-cursor-positions__MHyApah",
+                            "liveblocks-shared-stopwatch__UTsPSt4"
+                        ],
+                        "0.0": [
+                            "liveblocks-color-picker-presence__qW2QgfM",
+                            "liveblocks-shared-shopping-cart__GrN2duC",
+                            "liveblocks-shared-pixel-grid__Vz5iRHS"
+                        ]
+                    }
+                },
+                "exception_stats": {
+                    "InitialStateError": [
+                        "liveblocks-follow-user-cursor__UCQtkUU",
+                        "liveblocks-active-users-list__tKw5kHS"
+                    ],
+                    "NonZeroAgentExitCodeError": [
+                        "liveblocks-shared-shopping-cart__GrN2duC"
+                    ]
+                }
+            }
+        },
+        "n_input_tokens": 0,
+        "n_cache_tokens": 0,
+        "n_output_tokens": 154377,
+        "cost_usd": null
+    }
+}

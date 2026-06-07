@@ -1,0 +1,36 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0
+rootdir: /bootstrap
+plugins: xprocess-1.0.2, json-ctrf-0.5.0
+collected 13 items
+
+bootstrap/test_initial_state.py::test_node_available PASSED
+bootstrap/test_initial_state.py::test_npm_available PASSED
+bootstrap/test_initial_state.py::test_project_dir_exists PASSED
+bootstrap/test_initial_state.py::test_package_json_exists PASSED
+bootstrap/test_initial_state.py::test_package_json_has_liveblocks_deps PASSED
+bootstrap/test_initial_state.py::test_package_json_has_dev_script PASSED
+bootstrap/test_initial_state.py::test_next_config_exists PASSED
+bootstrap/test_initial_state.py::test_tsconfig_exists PASSED
+bootstrap/test_initial_state.py::test_app_dir_exists PASSED
+bootstrap/test_initial_state.py::test_node_modules_installed PASSED
+bootstrap/test_initial_state.py::test_liveblocks_secret_key_present PASSED
+bootstrap/test_initial_state.py::test_zealt_run_id_present PASSED
+bootstrap/test_initial_state.py::test_next_public_zealt_run_id_present FAILED
+
+=================================== FAILURES ===================================
+____________________ test_next_public_zealt_run_id_present _____________________
+
+    def test_next_public_zealt_run_id_present():
+>       assert os.environ.get("NEXT_PUBLIC_ZEALT_RUN_ID"), "NEXT_PUBLIC_ZEALT_RUN_ID env var is not set."
+E       AssertionError: NEXT_PUBLIC_ZEALT_RUN_ID env var is not set.
+E       assert None
+E        +  where None = <bound method Mapping.get of environ({'HOSTNAME': '0c88d151f4ea', 'POCHI_LOG': 'debug', 'PWD': '/', 'HOME': '/root', 'LIVEBLOCKS_SECRET_KEY': 'REDACTED', 'SHLVL': '1', 'POCHI_API_KEY': 'REDACTED', 'ZEALT_RUN_ID': 'zr-ubkbub9', 'PATH': '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin', '_': '/usr/bin/pytest', 'LC_CTYPE': 'C.UTF-8', 'PYTEST_CURRENT_TEST': 'test_initial_state.py::test_next_public_zealt_run_id_present (call)'})>('NEXT_PUBLIC_ZEALT_RUN_ID')
+E        +    where <bound method Mapping.get of environ({'HOSTNAME': '0c88d151f4ea', 'POCHI_LOG': 'debug', 'PWD': '/', 'HOME': '/root', 'LIVEBLOCKS_SECRET_KEY': 'REDACTED', 'SHLVL': '1', 'POCHI_API_KEY': 'REDACTED', 'ZEALT_RUN_ID': 'zr-ubkbub9', 'PATH': '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin', '_': '/usr/bin/pytest', 'LC_CTYPE': 'C.UTF-8', 'PYTEST_CURRENT_TEST': 'test_initial_state.py::test_next_public_zealt_run_id_present (call)'})> = environ({'HOSTNAME': '0c88d151f4ea', 'POCHI_LOG': 'debug', 'PWD': '/', 'HOME': '/root', 'LIVEBLOCKS_SECRET_KEY': 'REDACTED', 'SHLVL': '1', 'POCHI_API_KEY': 'REDACTED', 'ZEALT_RUN_ID': 'zr-ubkbub9', 'PATH': '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin', '_': '/usr/bin/pytest', 'LC_CTYPE': 'C.UTF-8', 'PYTEST_CURRENT_TEST': 'test_initial_state.py::test_next_public_zealt_run_id_present (call)'}).get
+E        +      where environ({'HOSTNAME': '0c88d151f4ea', 'POCHI_LOG': 'debug', 'PWD': '/', 'HOME': '/root', 'LIVEBLOCKS_SECRET_KEY': 'REDACTED', 'SHLVL': '1', 'POCHI_API_KEY': 'REDACTED', 'ZEALT_RUN_ID': 'zr-ubkbub9', 'PATH': '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin', '_': '/usr/bin/pytest', 'LC_CTYPE': 'C.UTF-8', 'PYTEST_CURRENT_TEST': 'test_initial_state.py::test_next_public_zealt_run_id_present (call)'}) = os.environ
+
+bootstrap/test_initial_state.py:96: AssertionError
+=========================== short test summary info ============================
+FAILED bootstrap/test_initial_state.py::test_next_public_zealt_run_id_present
+========================= 1 failed, 12 passed in 0.12s =========================
+pytest-xprocess reminder::Be sure to terminate the started process by running 'pytest --xkill' if you have not explicitly done so in your fixture with 'xprocess.getinfo(<process_name>).terminate()'.

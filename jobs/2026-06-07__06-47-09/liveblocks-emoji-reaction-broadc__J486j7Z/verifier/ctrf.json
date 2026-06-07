@@ -1,0 +1,64 @@
+{
+    "results": {
+        "tool": {
+            "name": "pytest",
+            "version": "7.4.4"
+        },
+        "summary": {
+            "tests": 4,
+            "passed": 3,
+            "failed": 1,
+            "skipped": 0,
+            "pending": 0,
+            "other": 0,
+            "start": 1780815014075,
+            "stop": 1780815081455
+        },
+        "environment": {
+            "buildName": "Pytest JSON CTRF Report",
+            "buildNumber": "000",
+            "buildUrl": "https://ctrf.io"
+        },
+        "tests": [
+            {
+                "name": "test_final_state.py::test_no_liveblocks_mocks_or_stubs",
+                "status": "passed",
+                "duration": 38160,
+                "start": 1780815014529,
+                "stop": 1780815052689,
+                "retries": 0,
+                "file_path": "test_final_state.py"
+            },
+            {
+                "name": "test_final_state.py::test_auth_endpoint_returns_real_token",
+                "status": "passed",
+                "duration": 398,
+                "start": 1780815052689,
+                "stop": 1780815053087,
+                "retries": 0,
+                "file_path": "test_final_state.py"
+            },
+            {
+                "name": "test_final_state.py::test_initial_dom_contract",
+                "status": "passed",
+                "duration": 2988,
+                "start": 1780815053088,
+                "stop": 1780815056076,
+                "retries": 0,
+                "file_path": "test_final_state.py"
+            },
+            {
+                "name": "test_final_state.py::test_cross_client_emoji_broadcast",
+                "status": "failed",
+                "raw_status": "call_failed",
+                "duration": 25377,
+                "start": 1780815056077,
+                "stop": 1780815081454,
+                "retries": 0,
+                "file_path": "test_final_state.py",
+                "trace": "app_server = 'http://localhost:3000'\n\n    def test_cross_client_emoji_broadcast(app_server):\n        from playwright.sync_api import sync_playwright\n    \n        url = f\"{BASE_URL}/reactions/{ROOM}\"\n    \n        with sync_playwright() as pw:\n            browser = pw.chromium.launch(args=[\"--no-sandbox\"])\n            try:\n                ctx_a = browser.new_context()\n                page_a = ctx_a.new_page()\n                page_a.goto(url, wait_until=\"domcontentloaded\", timeout=60_000)\n                _wait_visible(page_a, 'button[data-emoji=\"\ud83c\udf89\"]')\n    \n                ctx_b = browser.new_context()\n                page_b = ctx_b.new_page()\n                page_b.goto(url, wait_until=\"domcontentloaded\", timeout=60_000)\n                _wait_visible(page_b, '#reactions-feed')\n    \n                # Give Liveblocks time to fully connect both clients to the room.\n                time.sleep(3)\n    \n                # On A: click \ud83c\udf89, \ud83c\udf89, \ud83d\udd25 (in that order).\n                page_a.locator('button[data-emoji=\"\ud83c\udf89\"]').click()\n                time.sleep(0.4)\n                page_a.locator('button[data-emoji=\"\ud83c\udf89\"]').click()\n                time.sleep(0.4)\n                page_a.locator('button[data-emoji=\"\ud83d\udd25\"]').click()\n    \n                # B should receive all 3 via useEventListener.\n>               _wait_toast_count(page_b, 3, timeout_ms=20_000)\n\n/tests/test_final_state.py:274: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\npage = <Page url='http://localhost:3000/reactions/emoji-reactions-zr-j486j7z'>\nexpected = 3, timeout_ms = 20000\n\n    def _wait_toast_count(page, expected: int, timeout_ms: int = 20_000) -> int:\n        deadline = time.time() + timeout_ms / 1000.0\n        last = 0\n        while time.time() < deadline:\n            last = _toast_count(page)\n            if last >= expected:\n                return last\n            time.sleep(0.25)\n>       raise AssertionError(\n            f\"Timed out waiting for #reactions-feed to contain >= {expected} \"\n            f\"toasts; last={last}.\"\n        )\nE       AssertionError: Timed out waiting for #reactions-feed to contain >= 3 toasts; last=0.\n\n/tests/test_final_state.py:208: AssertionError",
+                "message": "The test failed in the call phase due to an assertion error"
+            }
+        ]
+    }
+}

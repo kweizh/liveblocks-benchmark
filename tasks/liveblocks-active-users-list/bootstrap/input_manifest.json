@@ -1,0 +1,7 @@
+{
+  "library_name": "liveblocks",
+  "task_name": "active_users_list",
+  "complexity_level": "multi-step sequential command set",
+  "research_plan_path": "plan.md",
+  "output_dir": "scratchpad/pending-tasks/"
+}

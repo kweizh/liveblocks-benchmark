@@ -1,0 +1,53 @@
+{
+    "id": "0d915a19-c1de-4948-8571-0a743a7a23ba",
+    "started_at": "2026-06-07T06:47:12.401526",
+    "updated_at": "2026-06-07T07:01:01.616627",
+    "finished_at": "2026-06-07T07:01:01.616627",
+    "n_total_trials": 10,
+    "stats": {
+        "n_completed_trials": 10,
+        "n_errored_trials": 2,
+        "n_running_trials": 0,
+        "n_pending_trials": 0,
+        "n_cancelled_trials": 0,
+        "n_retries": 0,
+        "evals": {
+            "pochi__gemini-3-flash__pending-tasks": {
+                "n_trials": 8,
+                "n_errors": 2,
+                "metrics": [
+                    {
+                        "mean": 0.5
+                    }
+                ],
+                "pass_at_k": {},
+                "reward_stats": {
+                    "reward": {
+                        "1.0": [
+                            "liveblocks-collaborative-form-st__K4QiUkq",
+                            "liveblocks-collaborative-like-bu__GGFG4eP",
+                            "liveblocks-cursor-positions__BzxHeEU",
+                            "liveblocks-color-picker-presence__qcvDT6U",
+                            "liveblocks-shared-stopwatch__3WBehYR"
+                        ],
+                        "0.0": [
+                            "liveblocks-emoji-reaction-broadc__J486j7Z",
+                            "liveblocks-shared-shopping-cart__aKM9Fne",
+                            "liveblocks-shared-pixel-grid__X6uspBm"
+                        ]
+                    }
+                },
+                "exception_stats": {
+                    "InitialStateError": [
+                        "liveblocks-follow-user-cursor__PMtEnJ5",
+                        "liveblocks-active-users-list__izVPhDJ"
+                    ]
+                }
+            }
+        },
+        "n_input_tokens": 0,
+        "n_cache_tokens": 0,
+        "n_output_tokens": 246920,
+        "cost_usd": null
+    }
+}

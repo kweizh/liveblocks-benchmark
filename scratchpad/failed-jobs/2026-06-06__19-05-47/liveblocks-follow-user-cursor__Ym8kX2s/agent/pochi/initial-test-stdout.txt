@@ -1,0 +1,86 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0
+rootdir: /bootstrap
+plugins: xprocess-1.0.2, json-ctrf-0.5.0
+collected 11 items
+
+../../../bootstrap/test_initial_state.py::test_node_binary_available PASSED
+../../../bootstrap/test_initial_state.py::test_npm_binary_available PASSED
+../../../bootstrap/test_initial_state.py::test_project_directory_exists PASSED
+../../../bootstrap/test_initial_state.py::test_package_json_exists PASSED
+../../../bootstrap/test_initial_state.py::test_package_json_declares_liveblocks_dependencies PASSED
+../../../bootstrap/test_initial_state.py::test_node_modules_installed PASSED
+../../../bootstrap/test_initial_state.py::test_follow_route_skeleton_exists PASSED
+../../../bootstrap/test_initial_state.py::test_liveblocks_auth_route_exists PASSED
+../../../bootstrap/test_initial_state.py::test_liveblocks_config_skeleton_exists PASSED
+../../../bootstrap/test_initial_state.py::test_follow_logic_not_yet_implemented FAILED
+../../../bootstrap/test_initial_state.py::test_initial_state_does_not_create_follow_dom_contracts FAILED
+
+=================================== FAILURES ===================================
+____________________ test_follow_logic_not_yet_implemented _____________________
+
+    def test_follow_logic_not_yet_implemented():
+        """The executor must add presence + follow logic.
+    
+        The starter follow page must NOT yet reference Liveblocks presence hooks
+        or the avatar/viewport DOM contract.
+        """
+        page_path = os.path.join(FOLLOW_DIR, "page.tsx")
+        with open(page_path) as f:
+            source = f.read()
+        forbidden_markers = (
+            "useMyPresence",
+            "useUpdateMyPresence",
+            "useOthers",
+            "data-follow-user",
+            'id="avatars"',
+            'id="viewport"',
+            'id="following-name"',
+        )
+        for marker in forbidden_markers:
+>           assert marker not in source, (
+                f"Initial follow skeleton already contains '{marker}'. "
+                "Presence + follow logic must be implemented by the executor."
+            )
+E           AssertionError: Initial follow skeleton already contains 'data-follow-user'. Presence + follow logic must be implemented by the executor.
+E           assert 'data-follow-user' not in '"use client...>\n  );\n}\n'
+E             'data-follow-user' is contained here:
+E               "use client";
+E               
+E               import { useParams } from "next/navigation";
+E               import { Room } from "./Room";
+E               
+E               // TODO: implement the follow-user-cursor page here....
+E             
+E             ...Full output truncated (39 lines hidden), use '-vv' to show
+
+/bootstrap/test_initial_state.py:118: AssertionError
+___________ test_initial_state_does_not_create_follow_dom_contracts ____________
+
+    def test_initial_state_does_not_create_follow_dom_contracts():
+        """The DOM testids and ids for the follow UI must be added by the executor."""
+        page_path = os.path.join(FOLLOW_DIR, "page.tsx")
+        with open(page_path) as f:
+            source = f.read()
+        for testid in ("identity-input",):
+>           assert f'data-testid="{testid}"' not in source, (
+                f"Initial skeleton must not pre-render the {testid} testid."
+            )
+E           AssertionError: Initial skeleton must not pre-render the identity-input testid.
+E           assert 'data-testid...ntity-input"' not in '"use client...>\n  );\n}\n'
+E             'data-testid="identity-input"' is contained here:
+E               "use client";
+E               
+E               import { useParams } from "next/navigation";
+E               import { Room } from "./Room";
+E               
+E               // TODO: implement the follow-user-cursor page here....
+E             
+E             ...Full output truncated (39 lines hidden), use '-vv' to show
+
+/bootstrap/test_initial_state.py:134: AssertionError
+=========================== short test summary info ============================
+FAILED ../../../bootstrap/test_initial_state.py::test_follow_logic_not_yet_implemented
+FAILED ../../../bootstrap/test_initial_state.py::test_initial_state_does_not_create_follow_dom_contracts
+========================= 2 failed, 9 passed in 0.07s ==========================
+pytest-xprocess reminder::Be sure to terminate the started process by running 'pytest --xkill' if you have not explicitly done so in your fixture with 'xprocess.getinfo(<process_name>).terminate()'.

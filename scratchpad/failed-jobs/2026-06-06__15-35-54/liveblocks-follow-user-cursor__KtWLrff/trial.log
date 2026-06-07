@@ -1,0 +1,93 @@
+Skipping image OS validation for hb__liveblocks-follow-user-cursor: docker inspect returned 1
+Running command: apt-get update && apt-get install -y curl ripgrep
+Command outputs captured
+Running command: set -euo pipefail; curl -fsSL https://getpochi.com/install.sh | bash -x -s -- pochi-v0.6.12 && mkdir -p /logs/agent/pochi && ~/.pochi/bin/pochi --version
+Command outputs captured
+Running command: ln -sf ~/.pochi/bin/pochi /usr/local/bin/pochi
+Command outputs captured
+Running command: echo zr-ktwlrff > /logs/artifacts/run-id && echo liveblocks-follow-user-cursor__KtWLrff > /logs/artifacts/trial_id
+Command outputs captured
+Running command: mkdir -p ~/.pochi && cat << 'EOF' | sed -e "s/OPENAI_API_KEY/${OPENAI_API_KEY}/g" -e "s/DEEPINFRA_API_KEY/${DEEPINFRA_API_KEY}/g" > ~/.pochi/config.jsonc
+{
+  "providers": {
+    "deepinfra": {
+      "kind": "openai",
+      "baseURL": "https://api.deepinfra.com/v1/openai",
+      "apiKey": "DEEPINFRA_API_KEY",
+      "models": {
+        "zai-org/GLM-4.7-Flash": {
+          "name": "glm-4.7-flash"
+        },
+        "moonshotai/Kimi-K2.6": {
+          "name": "kimi-K2.6"
+        },
+        "deepseek-ai/DeepSeek-V4-Pro": {
+          "name": "DeepSeek-V4-Pro"
+        }
+      }
+    },
+    "openai": {
+      "kind": "openai",
+      "baseURL": "https://api.openai.com/v1",
+      "apiKey": "OPENAI_API_KEY",
+      "models": {
+        "gpt-5.4": {
+          "name": "gpt-5.4"
+        }
+      }
+    }
+  }
+}
+EOF
+Command outputs captured
+Running command: if [ -f /bootstrap/test_initial_state.py ]; then pytest -s --log-cli-level=DEBUG /bootstrap/test_initial_state.py > >(tee /logs/agent/pochi/initial-test-stdout.txt) 2> >(tee /logs/agent/pochi/initial-test-stderr.txt >&2); fi
+Command outputs captured
+Running command: pochi --model google/gemini-3.5-flash --max-steps 200 --max-retries 10 --blobs-dir /logs/agent/pochi/blobs --experimental-stream-trajectory /logs/agent/pochi/trajectory.jsonl > >(tee /logs/agent/pochi/stdout.txt) 2> >(tee /logs/agent/pochi/stderr.txt >&2) <<'EOF'
+# Liveblocks Multiplayer Whiteboard with Follow-User-Cursor Mode
+
+## Background
+You are building a collaborative whiteboard page using Next.js and Liveblocks v2. Users connecting to the page see each other's live cursors and can "follow" another user — when follow mode is active, the canvas pans via a CSS `transform` so that the followed user's cursor is visually centered in the viewport. The followed user's avatar in the sidebar must visually toggle via a `data-following="true"` attribute so styles can react to it.
+
+A Liveblocks project has been provisioned. The page uses Liveblocks Presence (not Storage) for cursor coordinates, and plain local React state for tracking the followed connection. A starter Next.js scaffold exists at `/home/user/myproject` with the Liveblocks v2 SDK already installed.
+
+## Requirements
+- Implement a single Next.js page at route `/` that connects to a Liveblocks v2 room and:
+  - Broadcasts the current user's pointer position over the whiteboard area as a `Presence` field named `cursor` (an `{ x, y }` object, or `null` when the pointer leaves).
+  - Subscribes to other users' cursors and renders a cursor indicator at each other user's reported coordinates.
+  - Renders a sidebar listing every other connected user as an avatar button.
+  - Lets the user toggle "follow mode" by clicking an avatar. Following is single-target: clicking an avatar follows that user; clicking the currently-followed avatar (or any other avatar) updates the follow target.
+  - When follow mode is active, applies a CSS `transform: translate(...)` on the canvas wrapper so the followed user's cursor position appears centered in the viewport. When follow mode is off, the canvas wrapper applies no translation (e.g. `transform: none` or `translate(0px, 0px)`).
+  - Uses Liveblocks v2 hooks (`@liveblocks/react`): `LiveblocksProvider`, `RoomProvider`, `useUpdateMyPresence`, and `useOthers`.
+
+## Implementation Hints
+- The Liveblocks v2 React SDK (`@liveblocks/react`, `@liveblocks/client`) is already installed. Wrap the page in a `LiveblocksProvider` configured with the public API key, then a `RoomProvider`.
+- The whiteboard must be scoped per evaluation run. Before `npm run dev`, re-export the runtime environment variable `ZEALT_RUN_ID` as `NEXT_PUBLIC_ZEALT_RUN_ID` so the value is available client-side (for example: `export NEXT_PUBLIC_ZEALT_RUN_ID="$ZEALT_RUN_ID"`). The room id must be `whiteboard-${NEXT_PUBLIC_ZEALT_RUN_ID}`.
+- Frontend Liveblocks credentials must be read from `process.env.NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY`.
+- Use a `onPointerMove` handler on the whiteboard area to call the setter returned by `useUpdateMyPresence` with the new `cursor` value. Use `useOthers` (with a selector) to read the other users and their cursors. Liveblocks Presence is ephemeral — that is exactly what we want.
+- Track the followed `connectionId` in plain React state with `useState`. Derive the CSS transform from the followed user's current cursor and the viewport dimensions (`window.innerWidth`, `window.innerHeight`) so the cursor is centered.
+- Provide stable, test-friendly selectors on the DOM (see Acceptance Criteria). Do not gate them behind hover or animation states.
+- This is a client component — Liveblocks hooks cannot run on the server. Use the Next.js App Router `"use client"` directive on the page (and on any component using Liveblocks hooks).
+- Use real Liveblocks credentials supplied via environment variables. Do not mock or stub the Liveblocks client.
+- **Important**: After you have started the dev server and confirmed the page loads, **kill the dev server before finishing the task**. The verifier will start its own dev server. Leaving a process bound to port 3000 will cause verification to fail.
+
+## Acceptance Criteria
+- Project path: `/home/user/myproject`
+- Start command: `npm run dev` (must be run after `export NEXT_PUBLIC_ZEALT_RUN_ID="$ZEALT_RUN_ID"`)
+- Port: `3000`
+- Route `/` renders the whiteboard UI.
+- The DOM exposes the following stable hooks for automated verification:
+  - A whiteboard surface element with attribute `data-testid="whiteboard-area"`. Pointer events fired on this element must trigger Presence cursor updates.
+  - A canvas wrapper element with attribute `data-testid="canvas-pan"`. Its inline `style.transform` must be the empty string, `none`, or `translate(0px, 0px)` when no follow target is active, and must contain a non-identity `translate(...)` (with non-zero pixel values reflecting the followed cursor's position) when a follow target is active.
+  - One sidebar button per other connected user, each with:
+    - `data-testid="follow-avatar"`
+    - `data-connection-id="<connectionId-as-string>"` matching the Liveblocks `connectionId` of the represented user
+    - `data-following="true"` when that user is currently being followed, `data-following="false"` otherwise
+  - Clicking a `follow-avatar` button toggles its `data-following` to `"true"` and flips any previously-followed avatar back to `"false"`.
+- The page must connect to the Liveblocks room `whiteboard-${NEXT_PUBLIC_ZEALT_RUN_ID}` using `NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY`.
+- Use Liveblocks v2 API (`@liveblocks/react` and `@liveblocks/client`).
+
+
+EOF
+Command outputs captured
+Running command: rm -f ~/.pochi/config.jsonc
+Command outputs captured

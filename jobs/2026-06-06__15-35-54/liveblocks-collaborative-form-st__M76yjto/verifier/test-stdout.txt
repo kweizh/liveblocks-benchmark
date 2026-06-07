@@ -1,0 +1,66 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0
+rootdir: /tests
+plugins: xprocess-1.0.2, json-ctrf-0.5.0
+collected 2 items
+
+tests/test_final_state.py .F                                             [100%]
+
+=================================== FAILURES ===================================
+_______________ test_liveblocks_rest_storage_reflects_submission _______________
+
+start_app = None
+
+    def test_liveblocks_rest_storage_reflects_submission(start_app):
+        secret = os.environ["LIVEBLOCKS_SECRET_KEY"]
+    
+        # Allow some time for the storage write to be flushed to Liveblocks servers.
+        url = f"https://api.liveblocks.io/v2/rooms/{ROOM_ID}/storage?format=json"
+        deadline = time.time() + 60
+        last_body = None
+        last_status = None
+        while time.time() < deadline:
+            resp = requests.get(
+                url,
+                headers={"Authorization": f"Bearer {secret}"},
+                timeout=15,
+            )
+            last_status = resp.status_code
+            if resp.status_code == 200:
+                try:
+                    body = resp.json()
+                except ValueError:
+                    body = None
+                last_body = body
+                form_node = (body or {}).get("data", {}).get("form")
+                if form_node and form_node.get("data"):
+                    data = form_node["data"]
+                    if (
+                        data.get("name") == NAME_VALUE
+                        and data.get("email") == EMAIL_VALUE
+                        and data.get("message") == MESSAGE_VALUE
+                        and data.get("submitted") is True
+                    ):
+                        assert form_node.get("liveType") == "LiveObject", (
+                            f"Expected storage.form to be a LiveObject, got: {form_node.get('liveType')}"
+                        )
+                        return
+            time.sleep(2)
+    
+>       raise AssertionError(
+            "Liveblocks v2 REST storage did not reflect the expected submitted form data within the timeout. "
+            f"Last HTTP status: {last_status}; last body: {json.dumps(last_body)[:2000] if last_body else last_body!r}"
+        )
+E       AssertionError: Liveblocks v2 REST storage did not reflect the expected submitted form data within the timeout. Last HTTP status: 200; last body: '{"form": {"name": "Alice Example", "email": "alice+zr-m76yjto@example.com", "message": "Hello from run zr-m76yjto", "submitted": true}}'
+
+tests/test_final_state.py:151: AssertionError
+==================================== PASSES ====================================
+________________ test_realtime_field_sync_between_two_contexts _________________
+---------------------------- Captured stdout setup -----------------------------
+/tests/.pytest_cache/d/.xprocess/harbor_form_dev$ npm run dev
+process 'harbor_form_dev' started pid=1760
+harbor_form_dev process startup detected
+=========================== short test summary info ============================
+PASSED tests/test_final_state.py::test_realtime_field_sync_between_two_contexts
+FAILED tests/test_final_state.py::test_liveblocks_rest_storage_reflects_submission
+==================== 1 failed, 1 passed in 78.27s (0:01:18) ====================

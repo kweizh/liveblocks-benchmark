@@ -1,0 +1,129 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0
+rootdir: /tests
+plugins: xprocess-1.0.2, json-ctrf-0.5.0
+collected 4 items
+
+../../../tests/test_final_state.py ..FF                                  [100%]
+
+=================================== FAILURES ===================================
+___________________ test_collaborative_form_storage_workflow ___________________
+
+app_server = 'http://localhost:3000'
+
+    def test_collaborative_form_storage_workflow(app_server):
+        from playwright.sync_api import sync_playwright
+    
+        url = f"{BASE_URL}/"
+    
+        with sync_playwright() as pw:
+            browser = pw.chromium.launch(args=["--no-sandbox"])
+            try:
+                ctx_a = browser.new_context()
+                page_a = ctx_a.new_page()
+                page_a.goto(url, wait_until="domcontentloaded", timeout=60_000)
+    
+                ctx_b = browser.new_context()
+                page_b = ctx_b.new_page()
+                page_b.goto(url, wait_until="domcontentloaded", timeout=60_000)
+    
+                for page in (page_a, page_b):
+                    for sel in ("#form-name", "#form-email", "#form-message",
+                                "#form-last-update"):
+                        page.locator(sel).wait_for(state="attached",
+                                                   timeout=30_000)
+    
+                # ---- A -> B: A fills all three fields ----
+                _fill_input(page_a, "#form-name", "Ada Lovelace")
+                _fill_input(page_a, "#form-email", "ada@example.com")
+                _fill_input(page_a, "#form-message", "Hello from A")
+    
+>               _wait_input_value(page_b, "#form-name", "Ada Lovelace")
+
+/tests/test_final_state.py:294: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+page = <Page url='http://localhost:3000/'>, selector = '#form-name'
+expected = 'Ada Lovelace', timeout_ms = 20000
+
+    def _wait_input_value(page, selector: str, expected: str,
+                          timeout_ms: int = 20_000) -> None:
+        deadline = time.time() + timeout_ms / 1000.0
+        last = None
+        while time.time() < deadline:
+            try:
+                last = page.eval_on_selector(
+                    selector, "(el) => el.value"
+                )
+            except Exception:
+                last = None
+            if last == expected:
+                return
+            time.sleep(0.25)
+>       raise AssertionError(
+            f"Timed out waiting for `{selector}` to equal {expected!r}; "
+            f"last={last!r}."
+        )
+E       AssertionError: Timed out waiting for `#form-name` to equal 'Ada Lovelace'; last=''.
+
+/tests/test_final_state.py:237: AssertionError
+___________________ test_storage_schema_via_liveblocks_rest ____________________
+
+app_server = 'http://localhost:3000'
+
+    def test_storage_schema_via_liveblocks_rest(app_server):
+        if not LIVEBLOCKS_SECRET:
+            pytest.skip("LIVEBLOCKS_SECRET_KEY not provided; skipping REST check.")
+    
+        headers = {"Authorization": f"Bearer {LIVEBLOCKS_SECRET}"}
+        deadline = time.time() + 60
+        last_body = None
+        while time.time() < deadline:
+            resp = requests.get(
+                f"https://api.liveblocks.io/v2/rooms/{ROOM}/storage",
+                headers=headers,
+                timeout=20,
+            )
+            if resp.status_code == 200:
+                last_body = resp.json()
+                data = last_body.get("data") if isinstance(last_body, dict) else None
+                form = (data or {}).get("form")
+                if isinstance(form, dict) and form.get("liveblocksType") == "LiveObject":
+                    fields = form.get("data") or {}
+                    if (
+                        "name" in fields
+                        and "email" in fields
+                        and "message" in fields
+                        and "lastUpdate" in fields
+                    ):
+                        # Sanity-check the latest values written by the browser
+                        # test. Tolerate ScalarOrLiveObject wrapping.
+                        def _unwrap(value):
+                            if isinstance(value, dict):
+                                return value.get("data", value)
+                            return value
+    
+                        name = _unwrap(fields.get("name"))
+                        email = _unwrap(fields.get("email"))
+                        message = _unwrap(fields.get("message"))
+                        last_update = _unwrap(fields.get("lastUpdate"))
+>                       assert name == "Ada Lovelace", (
+                            f"Expected name='Ada Lovelace' in storage, got {name!r}"
+                        )
+E                       AssertionError: Expected name='Ada Lovelace' in storage, got ''
+E                       assert '' == 'Ada Lovelace'
+E                         - Ada Lovelace
+
+/tests/test_final_state.py:366: AssertionError
+==================================== PASSES ====================================
+______________________ test_no_liveblocks_mocks_or_stubs _______________________
+---------------------------- Captured stdout setup -----------------------------
+/tests/.pytest_cache/d/.xprocess/liveblocks_form_app$ npm run start -- -p 3000
+process 'liveblocks_form_app' started pid=1755
+liveblocks_form_app process startup detected
+=========================== short test summary info ============================
+PASSED ../../../tests/test_final_state.py::test_no_liveblocks_mocks_or_stubs
+PASSED ../../../tests/test_final_state.py::test_auth_endpoint_returns_real_token
+FAILED ../../../tests/test_final_state.py::test_collaborative_form_storage_workflow
+FAILED ../../../tests/test_final_state.py::test_storage_schema_via_liveblocks_rest
+========================= 2 failed, 2 passed in 45.65s =========================

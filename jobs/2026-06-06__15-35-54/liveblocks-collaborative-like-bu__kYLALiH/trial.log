@@ -1,0 +1,95 @@
+Skipping image OS validation for hb__liveblocks-collaborative-like-button: docker inspect returned 1
+Running command: apt-get update && apt-get install -y curl ripgrep
+Command outputs captured
+Running command: set -euo pipefail; curl -fsSL https://getpochi.com/install.sh | bash -x -s -- pochi-v0.6.12 && mkdir -p /logs/agent/pochi && ~/.pochi/bin/pochi --version
+Command outputs captured
+Running command: ln -sf ~/.pochi/bin/pochi /usr/local/bin/pochi
+Command outputs captured
+Running command: echo zr-kylalih > /logs/artifacts/run-id && echo liveblocks-collaborative-like-bu__kYLALiH > /logs/artifacts/trial_id
+Command outputs captured
+Running command: mkdir -p ~/.pochi && cat << 'EOF' | sed -e "s/OPENAI_API_KEY/${OPENAI_API_KEY}/g" -e "s/DEEPINFRA_API_KEY/${DEEPINFRA_API_KEY}/g" > ~/.pochi/config.jsonc
+{
+  "providers": {
+    "deepinfra": {
+      "kind": "openai",
+      "baseURL": "https://api.deepinfra.com/v1/openai",
+      "apiKey": "DEEPINFRA_API_KEY",
+      "models": {
+        "zai-org/GLM-4.7-Flash": {
+          "name": "glm-4.7-flash"
+        },
+        "moonshotai/Kimi-K2.6": {
+          "name": "kimi-K2.6"
+        },
+        "deepseek-ai/DeepSeek-V4-Pro": {
+          "name": "DeepSeek-V4-Pro"
+        }
+      }
+    },
+    "openai": {
+      "kind": "openai",
+      "baseURL": "https://api.openai.com/v1",
+      "apiKey": "OPENAI_API_KEY",
+      "models": {
+        "gpt-5.4": {
+          "name": "gpt-5.4"
+        }
+      }
+    }
+  }
+}
+EOF
+Command outputs captured
+Running command: if [ -f /bootstrap/test_initial_state.py ]; then pytest -s --log-cli-level=DEBUG /bootstrap/test_initial_state.py > >(tee /logs/agent/pochi/initial-test-stdout.txt) 2> >(tee /logs/agent/pochi/initial-test-stderr.txt >&2); fi
+Command outputs captured
+Running command: pochi --model google/gemini-3.5-flash --max-steps 200 --max-retries 10 --blobs-dir /logs/agent/pochi/blobs --experimental-stream-trajectory /logs/agent/pochi/trajectory.jsonl > >(tee /logs/agent/pochi/stdout.txt) 2> >(tee /logs/agent/pochi/stderr.txt >&2) <<'EOF'
+# Collaborative Like Button with Liveblocks Storage
+
+## Background
+You are working on a Next.js application that needs a simple multiplayer feature: a "Like" button whose count is synchronized in realtime across every connected client using [Liveblocks](https://liveblocks.io/). The counter must live inside Liveblocks Storage (a `LiveObject`), and clicking the button must mutate that shared state. All connected browsers must immediately reflect the new value.
+
+A Next.js (App Router) scaffold has been prepared for you at `/home/user/myproject`. Your job is to wire up Liveblocks on the home page so the like button becomes truly collaborative.
+
+## Requirements
+- Use the Liveblocks v2 React SDK (`@liveblocks/client`, `@liveblocks/react`).
+- Connect to Liveblocks using the **public** API key, exposed to the frontend via `NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY`.
+- The Liveblocks room id used by the page must be read at runtime from the `NEXT_PUBLIC_ZEALT_RUN_ID` environment variable (this is exported into the shell before `npm run dev`).
+- The shared counter must live in Liveblocks Storage inside a `LiveObject` under the key `count` (i.e. `storage.root.count`). Its initial value when the room storage is first created must be `0`.
+- The home page (`/`) must render:
+  - A button with accessible name `Like` (e.g. `<button>Like</button>` or `<button aria-label="Like">…`).
+  - A visible element containing the current count value as plain text (so that text content of the page contains the current count number).
+- Clicking the `Like` button must call a Liveblocks `useMutation` that increments `storage.root.count` by 1.
+- Reads of the counter shown on the page must go through `useStorage` so the UI updates reactively when storage changes.
+- The page must render entirely on the client (Liveblocks React hooks are not allowed in server components). Wrap any client tree with `RoomProvider` and `LiveblocksProvider` as required by v2.
+
+## Implementation Hints
+- Initialize the project at `/home/user/myproject` and install the required Liveblocks v2 packages: `@liveblocks/client` and `@liveblocks/react`.
+- Create a `liveblocks.config.ts` (or equivalent) that declares the `Storage` type with `count: number` and re-exports the typed hooks (`useStorage`, `useMutation`).
+- Use `<LiveblocksProvider publicApiKey={...}>` and `<RoomProvider id={...} initialStorage={{ count: 0 }}>` to set up the room. Read the public key from `process.env.NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY` and the room id from `process.env.NEXT_PUBLIC_ZEALT_RUN_ID`.
+- Mark any component using Liveblocks hooks with `"use client"`.
+- Make sure the dev server can build and serve the page without runtime errors before considering the task done.
+- IMPORTANT: Before reporting completion, **kill any dev/build processes you started** (e.g. `npm run dev`) so that the verifier can start its own server on port 3000.
+
+## Acceptance Criteria
+- Project path: `/home/user/myproject`
+- Start command: `npm run dev`
+- Port: `3000`
+- Routes:
+  - `GET /` — Renders an HTML page that includes:
+    - A `Like` button (accessible name `Like`).
+    - A visible numeric counter showing `storage.root.count`.
+- Liveblocks state shape (verified via the Liveblocks REST API `GET https://api.liveblocks.io/v2/rooms/{roomId}/storage?format=json`):
+  ```json
+  {
+    "count": <integer>
+  }
+  ```
+- Behavior: clicking the `Like` button N times in a single browser session increases `storage.root.count` by exactly N (eventually consistent within a few seconds), and the displayed number on the page updates to match.
+- The Liveblocks room id used by the page must equal the value of the `NEXT_PUBLIC_ZEALT_RUN_ID` environment variable at runtime.
+- No dev server may be left running by the agent when reporting completion.
+
+
+EOF
+Command outputs captured
+Running command: rm -f ~/.pochi/config.jsonc
+Command outputs captured
