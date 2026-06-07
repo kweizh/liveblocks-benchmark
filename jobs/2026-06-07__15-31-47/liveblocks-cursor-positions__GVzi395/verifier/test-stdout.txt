@@ -1,0 +1,99 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0
+rootdir: /tests
+plugins: xprocess-1.0.2, json-ctrf-0.5.0
+collected 3 items
+
+../../../tests/test_final_state.py ..F                                   [100%]
+
+=================================== FAILURES ===================================
+_________________________ test_two_client_cursor_sync __________________________
+
+app_server = 'http://localhost:3000'
+
+    def test_two_client_cursor_sync(app_server):
+        from playwright.sync_api import sync_playwright
+    
+        url = f"{BASE_URL}/cursors/{ROOM}"
+    
+        with sync_playwright() as pw:
+            browser = pw.chromium.launch(args=["--no-sandbox"])
+            try:
+                ctx_a = browser.new_context(
+                    viewport={"width": 1280, "height": 800}
+                )
+                ctx_b = browser.new_context(
+                    viewport={"width": 1280, "height": 800}
+                )
+                page_a = ctx_a.new_page()
+                page_b = ctx_b.new_page()
+    
+                page_a.goto(url, wait_until="domcontentloaded", timeout=60_000)
+                page_b.goto(url, wait_until="domcontentloaded", timeout=60_000)
+    
+                _wait_for_container(page_a)
+                _wait_for_container(page_b)
+    
+                # Give Liveblocks a moment to establish both WebSocket sessions.
+                time.sleep(3)
+    
+                # 1. A moves to (120, 180); B should observe a remote cursor near
+                #    that position with A's connection id.
+                target_a_x, target_a_y = 120, 180
+                _move_pointer_to_local(page_a, target_a_x, target_a_y)
+>               user_a_id, ax, ay = _wait_for_remote_cursor(
+                    page_b, target_a_x, target_a_y
+                )
+
+/tests/test_final_state.py:257: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+page = <Page url='http://localhost:3000/cursors/cursor-positions-zr-gvzi395'>
+expected_x = 120, expected_y = 180, tolerance = 5, timeout_ms = 20000
+
+    def _wait_for_remote_cursor(
+        page, expected_x: int, expected_y: int, tolerance: int = 5,
+        timeout_ms: int = 20_000,
+    ):
+        """Wait until any element with data-cursor-user has x,y near expected."""
+        deadline = time.time() + timeout_ms / 1000.0
+        last_seen = None
+        while time.time() < deadline:
+            elements = page.locator("[data-cursor-user]")
+            count = elements.count()
+            for i in range(count):
+                el = elements.nth(i)
+                try:
+                    user = el.get_attribute("data-cursor-user")
+                    dx = el.get_attribute("data-x")
+                    dy = el.get_attribute("data-y")
+                except Exception:
+                    continue
+                if dx is None or dy is None:
+                    continue
+                try:
+                    xi, yi = int(dx), int(dy)
+                except ValueError:
+                    continue
+                last_seen = (user, xi, yi)
+                if abs(xi - expected_x) <= tolerance and abs(yi - expected_y) <= tolerance:
+                    return user, xi, yi
+            time.sleep(0.25)
+>       raise AssertionError(
+            f"Timed out waiting for a remote cursor near ({expected_x},{expected_y}). "
+            f"Last seen: {last_seen!r}"
+        )
+E       AssertionError: Timed out waiting for a remote cursor near (120,180). Last seen: None
+
+/tests/test_final_state.py:209: AssertionError
+==================================== PASSES ====================================
+______________________ test_no_liveblocks_mocks_or_stubs _______________________
+---------------------------- Captured stdout setup -----------------------------
+/tests/.pytest_cache/d/.xprocess/liveblocks_cursors_app$ npm run start -- -p 3000
+process 'liveblocks_cursors_app' started pid=607
+liveblocks_cursors_app process startup detected
+=========================== short test summary info ============================
+PASSED ../../../tests/test_final_state.py::test_no_liveblocks_mocks_or_stubs
+PASSED ../../../tests/test_final_state.py::test_auth_endpoint_returns_real_token
+FAILED ../../../tests/test_final_state.py::test_two_client_cursor_sync - Asse...
+========================= 1 failed, 2 passed in 57.91s =========================

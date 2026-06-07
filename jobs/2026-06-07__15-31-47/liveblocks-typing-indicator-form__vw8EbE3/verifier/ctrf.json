@@ -1,0 +1,115 @@
+{
+    "results": {
+        "tool": {
+            "name": "pytest",
+            "version": "7.4.4"
+        },
+        "summary": {
+            "tests": 9,
+            "passed": 9,
+            "failed": 0,
+            "skipped": 0,
+            "pending": 0,
+            "other": 0,
+            "start": 1780846769940,
+            "stop": 1780846832219
+        },
+        "environment": {
+            "buildName": "Pytest JSON CTRF Report",
+            "buildNumber": "000",
+            "buildUrl": "https://ctrf.io"
+        },
+        "tests": [
+            {
+                "name": "test_final_state.py::test_form_skeleton_renders",
+                "status": "passed",
+                "duration": 28058,
+                "start": 1780846770329,
+                "stop": 1780846798387,
+                "retries": 0,
+                "file_path": "test_final_state.py"
+            },
+            {
+                "name": "test_final_state.py::test_liveblocks_auth_endpoint_returns_token",
+                "status": "passed",
+                "duration": 43,
+                "start": 1780846798388,
+                "stop": 1780846798431,
+                "retries": 0,
+                "file_path": "test_final_state.py"
+            },
+            {
+                "name": "test_final_state.py::test_storage_sync_between_contexts",
+                "status": "passed",
+                "duration": 6208,
+                "start": 1780846798431,
+                "stop": 1780846804639,
+                "retries": 0,
+                "file_path": "test_final_state.py"
+            },
+            {
+                "name": "test_final_state.py::test_typing_indicator_appears_and_clears",
+                "status": "passed",
+                "duration": 5149,
+                "start": 1780846804640,
+                "stop": 1780846809789,
+                "retries": 0,
+                "file_path": "test_final_state.py",
+                "tags": [
+                    "parametrize::field,label::[('name', 'Name'), ('email', 'Email'), ('bio', 'Bio')]"
+                ]
+            },
+            {
+                "name": "test_final_state.py::test_typing_indicator_appears_and_clears",
+                "status": "passed",
+                "duration": 4612,
+                "start": 1780846809790,
+                "stop": 1780846814402,
+                "retries": 0,
+                "file_path": "test_final_state.py",
+                "tags": [
+                    "parametrize::field,label::[('name', 'Name'), ('email', 'Email'), ('bio', 'Bio')]"
+                ]
+            },
+            {
+                "name": "test_final_state.py::test_typing_indicator_appears_and_clears",
+                "status": "passed",
+                "duration": 7169,
+                "start": 1780846814402,
+                "stop": 1780846821571,
+                "retries": 0,
+                "file_path": "test_final_state.py",
+                "tags": [
+                    "parametrize::field,label::[('name', 'Name'), ('email', 'Email'), ('bio', 'Bio')]"
+                ]
+            },
+            {
+                "name": "test_final_state.py::test_lock_overlay_appears_and_clears",
+                "status": "passed",
+                "duration": 4599,
+                "start": 1780846821572,
+                "stop": 1780846826171,
+                "retries": 0,
+                "file_path": "test_final_state.py"
+            },
+            {
+                "name": "test_final_state.py::test_soft_lock_allows_takeover",
+                "status": "passed",
+                "duration": 5939,
+                "start": 1780846826171,
+                "stop": 1780846832110,
+                "retries": 0,
+                "file_path": "test_final_state.py"
+            },
+            {
+                "name": "test_final_state.py::test_codebase_uses_real_liveblocks_packages",
+                "status": "passed",
+                "duration": 107,
+                "start": 1780846832111,
+                "stop": 1780846832218,
+                "retries": 0,
+                "file_path": "test_final_state.py"
+            }
+        ]
+    }
+}

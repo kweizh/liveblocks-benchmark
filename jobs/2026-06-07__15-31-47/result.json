@@ -1,0 +1,57 @@
+{
+    "id": "05233643-7e08-48e1-bb20-e99636eb5bb9",
+    "started_at": "2026-06-07T15:31:51.145917",
+    "updated_at": "2026-06-07T15:50:21.220444",
+    "finished_at": "2026-06-07T15:50:21.220444",
+    "n_total_trials": 11,
+    "stats": {
+        "n_completed_trials": 11,
+        "n_errored_trials": 3,
+        "n_running_trials": 0,
+        "n_pending_trials": 0,
+        "n_cancelled_trials": 0,
+        "n_retries": 0,
+        "evals": {
+            "pochi__claude-4-6-sonnet__tasks": {
+                "n_trials": 11,
+                "n_errors": 3,
+                "metrics": [
+                    {
+                        "mean": 0.5454545454545454
+                    }
+                ],
+                "pass_at_k": {},
+                "reward_stats": {
+                    "reward": {
+                        "0.0": [
+                            "liveblocks-whiteboard-selection__oynwQmi",
+                            "liveblocks-cursor-positions__GVzi395",
+                            "liveblocks-collaborative-drawing__jyd9vnu",
+                            "liveblocks-collaborative-counter__JTvAGpY",
+                            "liveblocks-shared-pixel-grid__T67TU4g"
+                        ],
+                        "1.0": [
+                            "liveblocks-collaborative-form-st__gPNVhqc",
+                            "liveblocks-collaborative-like-bu__CpYWsSN",
+                            "liveblocks-typing-indicator-form__vw8EbE3",
+                            "liveblocks-emoji-reaction-broadc__tGAKCPV",
+                            "liveblocks-color-picker-presence__FpsMGGs",
+                            "liveblocks-shared-stopwatch__bWhg63S"
+                        ]
+                    }
+                },
+                "exception_stats": {
+                    "NonZeroAgentExitCodeError": [
+                        "liveblocks-collaborative-form-st__gPNVhqc",
+                        "liveblocks-cursor-positions__GVzi395",
+                        "liveblocks-shared-pixel-grid__T67TU4g"
+                    ]
+                }
+            }
+        },
+        "n_input_tokens": 0,
+        "n_cache_tokens": 0,
+        "n_output_tokens": 440590,
+        "cost_usd": null
+    }
+}
